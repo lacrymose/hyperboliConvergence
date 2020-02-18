@@ -79,8 +79,8 @@
         {
             IdealGas2D::ausm( gas, n, q[j],q[j+1], f,l );
             lmax = fmax( lmax, l );
-            r[j]-= f;
-            r[j]+= f;
+            r[j]  -= f;
+            r[j+1]+= f;
         }
 
          // right boundary
@@ -93,9 +93,15 @@
          for( j=0; j<nc; j++ )
         {
             qc = IdealGas2D::conservedVariables( gas, q[j] );
+
+            f = r[k];
             for( k=0; k<4; k++ ){ qc[k]+=dt*f[k]; }
+
             qv = IdealGas2D::viscousVariables( gas, qc );
             q[j] = qv;
+
+            for( k=0; k<4; k++ ){ f[k]=0.; }
+            r[j]=f;
         }
      }
 
