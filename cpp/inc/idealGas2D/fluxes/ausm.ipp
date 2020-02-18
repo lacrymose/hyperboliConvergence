@@ -1,14 +1,15 @@
+
 # include <math.h>
 
 namespace IdealGas2D
 {
-      inline void ausm( Species& gas, float n[3], ViscousVariables& ql, ViscousVariables& qr, ConservedVariables& f, float lmax )
+      inline void ausm( Species& gas, float n[3], State& sl, State& sr, ConservedVariables& f, float& lmax )
   {
    // left/right states
       double ul,vl;
       double ur,vr;
-      double unl, rl,pl,tl, al,hl,kl;
-      double unr, rr,pr,tr, ar,hr,kr;
+      double unl, rl,pl, al,hl;
+      double unr, rr,pr, ar,hr;
 
    // left/right numerical states/splittings
       double als,ml,mlp,plp;
@@ -38,23 +39,12 @@ namespace IdealGas2D
 
    // left state
 
-      // thermodynamic quantities
-      ul = ql[0];
-      vl = ql[1];
-      tl = ql[2];
-      pl = ql[3];
-
-      rl = gas.Rgas*tl;
-      al = rl*gas.gamma;
-      rl = pl/rl;
-      hl = al*gam1;
-      al = sqrt(al);
-
-      // kinetic energy
-      kl = ul*ul;
-      kl+= vl*vl;
-      kl*= 0.5;
-      hl+= kl;
+      ul = sl.velocityX();
+      vl = sl.velocityY();
+      pl = sl.pressure();
+      rl = sl.density();
+      hl = sl.specificTotalEnthalpy();
+      al = sqrt( sl.speedOfSound2() );
 
       // velocities
       unl = n[0]*ul;
@@ -65,23 +55,12 @@ namespace IdealGas2D
 
    // right state
 
-      // thermodynamic quantities
-      ur = qr[0];
-      vr = qr[1];
-      tr = qr[2];
-      pr = qr[3];
-
-      rr = gas.Rgas*tr;
-      ar = rr*gas.gamma;
-      rr = pr/rr;
-      hr = ar*gam1;
-      ar = sqrt(ar);
-
-   // kinetic energy
-      kr = ur*ur;
-      kr+= vr*vr;
-      kr*= 0.5;
-      hr+= kr;
+      ur = sr.velocityX();
+      vr = sr.velocityY();
+      pr = sr.pressure();
+      rr = sr.density();
+      hr = sr.specificTotalEnthalpy();
+      ar = sqrt( sr.speedOfSound2() );
 
       // velocities
       unr = n[0]*ur;
@@ -100,7 +79,7 @@ namespace IdealGas2D
       m0 = fmin( 1., fmax( m2, gas.minf*gas.minf ) );
       m0 = sqrt( m0 );
       fa = 1.;
-      if( m0<1. ){ fa = m0*( 2. - m0 ); }
+//    if( m0<1. ){ fa = m0*( 2. - m0 ); }
 
       alpha = alpha0*( 5.*fa*fa - 4. );
 

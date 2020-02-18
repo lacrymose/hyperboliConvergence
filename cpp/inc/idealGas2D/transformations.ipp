@@ -45,6 +45,31 @@ namespace IdealGas2D
       return qc;
   }
 
+   inline ConservedVariables conservedVariables( Species& gas, State& s )
+  {
+      ConservedVariables qc;
+      float r,ru,rv,re;
+      float u,v,p,h;
+
+      r = s.density();
+      u = s.velocityX();
+      v = s.velocityY();
+      p = s.pressure();
+      h = s.specificTotalEnthalpy();
+
+      ru = r*u;
+      rv = r*v;
+      re = r*h - p;
+
+      qc[0]=r;
+      qc[1]=ru;
+      qc[2]=rv;
+      qc[3]=re;
+
+      return qc;
+  }
+
+
    inline ViscousVariables viscousVariables( Species& gas, ConservedVariables& qc )
   {
       ViscousVariables qv;
@@ -90,6 +115,19 @@ namespace IdealGas2D
       ViscousVariables qv1(qv);
       return qv1;
   }
+
+   inline ViscousVariables viscousVariables( Species& gas, State& s )
+  {
+      ViscousVariables qv;
+
+      qv[0]=s.velocityX();
+      qv[1]=s.velocityY();
+      qv[2]=s.temperature();
+      qv[3]=s.pressure();
+
+      return qv;
+  }
+
 
    inline ViscousVariables dViscousVariables( Species& gas, State& state, ConservedVariables& dqc )
   {

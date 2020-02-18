@@ -7,7 +7,7 @@
    int main()
   {
       IdealGas2D::ConservedVariables qc0,qc1;
-      IdealGas2D::ViscousVariables   qv0;
+      IdealGas2D::ViscousVariables   qv0,qv1;
 
       IdealGas2D::ConservedVariables dqc0,dqc1;
       IdealGas2D::ViscousVariables   dqv;
@@ -30,6 +30,15 @@
 
       IdealGas2D::State state_c0( gas, qc0 );
       IdealGas2D::State state_v0( gas, qv0 );
+
+      qc1 = IdealGas2D::conservedVariables( gas, state_c0 );
+      qv1 = IdealGas2D::viscousVariables(   gas, state_v0 );
+
+      for( int i=0; i<4; i++ )
+     {
+         assert( fabs( qc0[i] - qc1[i] ) < 1e-6 );
+         assert( fabs( qv0[i] - qv1[i] ) < 1e-6 );
+     }
 
       for( int i=0; i<8; i++ )
      {

@@ -13,15 +13,19 @@ namespace IdealGas2D
   {
       float    var[4];
 
+      inline ConservedVariables();
+
       inline float& operator[]( int i ){ return var[i]; }
 
-      inline ConservedVariables  operator+(  ConservedVariables& q );
-      inline ConservedVariables  operator-(  ConservedVariables& q );
+      inline ConservedVariables  operator+(  ConservedVariables q );
+      inline ConservedVariables  operator-(  ConservedVariables q );
+      inline ConservedVariables  operator=(  float d );
 
-      inline ConservedVariables& operator+=( ConservedVariables& q );
-      inline ConservedVariables& operator-=( ConservedVariables& q );
+      inline ConservedVariables& operator+=( ConservedVariables q );
+      inline ConservedVariables& operator-=( ConservedVariables q );
+      inline ConservedVariables& operator*=( float d );
 
-      inline friend std::ostream& operator<<( std::ostream& os, ConservedVariables& q );
+      inline friend std::ostream& operator<<( std::ostream& os, ConservedVariables q );
   };
 
 /*
@@ -31,15 +35,19 @@ namespace IdealGas2D
   {
       float    var[4];
 
+      inline ViscousVariables();
+
       inline float& operator[]( int i ){ return var[i]; }
 
-      inline ViscousVariables  operator+(  ViscousVariables& q );
-      inline ViscousVariables  operator-(  ViscousVariables& q );
+      inline ViscousVariables  operator+(  ViscousVariables q );
+      inline ViscousVariables  operator-(  ViscousVariables q );
+      inline ViscousVariables  operator=(  float d );
 
-      inline ViscousVariables& operator+=( ViscousVariables& q );
-      inline ViscousVariables& operator-=( ViscousVariables& q );
+      inline ViscousVariables& operator+=( ViscousVariables q );
+      inline ViscousVariables& operator-=( ViscousVariables q );
+      inline ViscousVariables& operator*=( float d );
 
-      inline friend std::ostream& operator<<( std::ostream& os, ViscousVariables& q );
+      inline friend std::ostream& operator<<( std::ostream& os, ViscousVariables q );
   };
 
 /*
@@ -81,12 +89,12 @@ namespace IdealGas2D
  * Nonlinear transformations for states
  */
    inline ConservedVariables conservedVariables( Species& gas, ConservedVariables& qc );
-
    inline ConservedVariables conservedVariables( Species& gas, ViscousVariables&   qv );
+   inline ConservedVariables conservedVariables( Species& gas, State& s );
 
    inline ViscousVariables viscousVariables(     Species& gas, ConservedVariables& qc );
-
    inline ViscousVariables viscousVariables(     Species& gas, ViscousVariables&   qv );
+   inline ViscousVariables viscousVariables(     Species& gas, State& s );
 
 /*
  * Linear transformation of delta from conservative to viscous
@@ -99,15 +107,27 @@ namespace IdealGas2D
    inline ConservedVariables dConservedVariables( Species& gas, State& state,   ViscousVariables& dqv );
 
 /*
+ * Exact physical flux vector
+ */
+   inline void exactFlux(    Species& gas, float n[3], State& s,             ConservedVariables& f, float& lmax );
+
+/*
+ * Local Lax-Friedrichs flux
+ */
+   inline void laxFriedrichs( Species& gas, float n[3], State& sl, State& sr, ConservedVariables& f, float& lmax );
+
+/*
  * AUSM+up flux for all speeds (M-S Liou 2006)
  */
-   inline void ausm( Species& gas, float n[3], ViscousVariables& ql, ViscousVariables& qr, ConservedVariables& f, float lmax );
+   inline void ausm(         Species& gas, float n[3], State& sl, State& sr, ConservedVariables& f, float& lmax );
 }
 
 # include <idealGas2D/conservedVariables.ipp>
 # include <idealGas2D/viscousVariables.ipp>
 # include <idealGas2D/state.ipp>
 # include <idealGas2D/transformations.ipp>
-# include <idealGas2D/ausm.ipp>
+# include <idealGas2D/fluxes/ausm.ipp>
+# include <idealGas2D/fluxes/exactFlux.ipp>
+# include <idealGas2D/fluxes/laxFriedrichs.ipp>
 
 # endif
