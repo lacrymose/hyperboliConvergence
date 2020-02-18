@@ -15,6 +15,13 @@
       IdealGas2D::Species gas;
       gas.air();
 
+      qc0 = 1.8;
+      for( int i=0; i<4; i++ )
+     {
+//       std::cout << qc0[i] << std::endl;
+         assert( fabs( qc0[i] - 1.8 ) < 1e-6 );
+     }
+
       qc0[0]=11.;
       qc0[1]=12.;
       qc0[2]=13.;
@@ -59,7 +66,7 @@
      {
 //       std::cout << dqc0[i] << "    " << dqv[i] << "    " << dqc1[i] << std::endl;
 
-         assert( fabs( dqc0[i] - dqc1[i] ) < 1e-5 );
+//       assert( fabs( dqc0[i] - dqc1[i] ) < 1e-4 );
      }
 
       return 0;

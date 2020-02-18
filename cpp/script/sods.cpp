@@ -5,6 +5,7 @@
 # include <assert.h>
 # include <math.h>
 
+//auto& flux = IdealGas2D::laxFriedrichs;
 auto& flux = IdealGas2D::ausm;
 
    int main()
@@ -102,11 +103,16 @@ auto& flux = IdealGas2D::ausm;
 
    // save solution
       std::ofstream solutionFile( "sods.dat" );
+      IdealGas2D::State s;
       if( solutionFile.is_open() )
      {
          for( i=0; i<nc; i++ )
         {
-            solutionFile << q[i];
+            s = IdealGas2D::State( gas, q[i] );
+            solutionFile << s.density()     << " "
+                         << s.velocityX()   << " "
+                         << s.pressure()    << " "
+                         << s.temperature() << std::endl;
         }
      }
       else
