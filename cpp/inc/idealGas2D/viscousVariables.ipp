@@ -30,14 +30,13 @@ namespace IdealGas2D
       return q1;
   }
 
-   inline ViscousVariables ViscousVariables::operator=( float d )
+   inline ViscousVariables& ViscousVariables::operator=( float d )
   {
-      ViscousVariables q1;
-      q1[0]=d;
-      q1[1]=d;
-      q1[2]=d;
-      q1[3]=d;
-      return q1;
+      var[0]=d;
+      var[1]=d;
+      var[2]=d;
+      var[3]=d;
+      return *this;
   }
 
    inline ViscousVariables& ViscousVariables::operator+=( ViscousVariables q )
@@ -67,6 +66,16 @@ namespace IdealGas2D
       return *this;
   }
 
+   inline ViscousVariables& ViscousVariables::operator/=( float d )
+  {
+      float d1=1./d;
+      var[0]*=d1;
+      var[1]*=d1;
+      var[2]*=d1;
+      var[3]*=d1;
+      return *this;
+  }
+
    inline ViscousVariables operator*( ViscousVariables q0, float d )
   {
       ViscousVariables q1;
@@ -92,7 +101,7 @@ namespace IdealGas2D
       os << q[0] << " "
          << q[1] << " "
          << q[2] << " "
-         << q[3] << std::endl;
+         << q[3];
       return os;
   }
 }

@@ -21,15 +21,15 @@ set ylabel 'Density'
   plot file1 u 1 with points pt pointtype ps pointsize
 
 # velocity
-set ylabel 'MomentumX'
+set ylabel 'Velocity'
   plot file1 u 2 with points pt pointtype ps pointsize
 
 # pressure
-set ylabel 'MomentumY'
+set ylabel 'Pressure'
   plot file1 u 3 with points pt pointtype ps pointsize
 
 # entropy
-set ylabel 'TotalEnergy'
+set ylabel 'Temperature'
   plot file1 u 4 with points pt pointtype ps pointsize
 
 unset multiplot

@@ -19,11 +19,12 @@ namespace IdealGas2D
 
       inline ConservedVariables  operator+(  ConservedVariables q );
       inline ConservedVariables  operator-(  ConservedVariables q );
-      inline ConservedVariables  operator=(  float d );
 
       inline ConservedVariables& operator+=( ConservedVariables q );
       inline ConservedVariables& operator-=( ConservedVariables q );
       inline ConservedVariables& operator*=( float d );
+      inline ConservedVariables& operator/=( float d );
+      inline ConservedVariables& operator =( float d );
 
       inline friend std::ostream& operator<<( std::ostream& os, ConservedVariables q );
   };
@@ -41,11 +42,12 @@ namespace IdealGas2D
 
       inline ViscousVariables  operator+(  ViscousVariables q );
       inline ViscousVariables  operator-(  ViscousVariables q );
-      inline ViscousVariables  operator=(  float d );
 
       inline ViscousVariables& operator+=( ViscousVariables q );
       inline ViscousVariables& operator-=( ViscousVariables q );
       inline ViscousVariables& operator*=( float d );
+      inline ViscousVariables& operator/=( float d );
+      inline ViscousVariables& operator =( float d );
 
       inline friend std::ostream& operator<<( std::ostream& os, ViscousVariables q );
   };
