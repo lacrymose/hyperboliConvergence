@@ -13,7 +13,7 @@ namespace IdealGas2D
       state[7]=0.;
   }
 
-   template< char C >
+   template<char C>
    inline State::State( const Species& gas, const VariableSet<C>& q )
   {
       std::cout << std::endl;

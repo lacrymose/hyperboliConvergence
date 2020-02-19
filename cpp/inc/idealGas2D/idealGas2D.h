@@ -12,7 +12,7 @@ namespace IdealGas2D
    struct Species;
    struct State;
 
-   template< char C >
+   template<char C>
    struct VariableSet;
 
    void exactFlux(     const Species& gas, const float n[3], const State& s,                   VariableSet<'c'>& f, float& lmax );
@@ -46,8 +46,8 @@ namespace IdealGas2D
 
       inline State();
 
-      template< char C >
-      inline State( const Species& gas, const VariableSet<C>& q );
+      template<char C>
+      explicit inline State( const Species& gas, const VariableSet<C>& q );
 
       inline const float& velocityX()             const { return state[0]; }
       inline const float& velocityY()             const { return state[1]; }
@@ -64,21 +64,21 @@ namespace IdealGas2D
  * Conservative <'c'>: ( density,  momentum,    total energy )
  * Viscous      <'v'>: ( velocity, temperature, pressure     )
  */
-   template< char C >
+   template<char C>
    struct VariableSet
   {
       float var[4];
 
       inline VariableSet<C>();
 
-      inline VariableSet<C>(                     const VariableSet<C>& q0 );
+               inline VariableSet<C>(                     const VariableSet<C>& q0 );
 
-      inline VariableSet<C>( const Species& gas, const VariableSet<C>& q0 );
+      explicit inline VariableSet<C>( const Species& gas, const VariableSet<C>& q0 );
 
-      template< char D >
-      inline VariableSet<C>( const Species& gas, const VariableSet<D>& q0 );
+      template<char D>
+      explicit inline VariableSet<C>( const Species& gas, const VariableSet<D>& q0 );
 
-      inline VariableSet<C>( const Species& gas, const State& s0 );
+      explicit inline VariableSet<C>( const Species& gas, const State& s0 );
 
       inline       float& operator[]( const int i )       { return var[i]; }
       inline const float& operator[]( const int i ) const { return var[i]; }
@@ -92,17 +92,17 @@ namespace IdealGas2D
   };
 
 // friend functions for VariableSet
-   template< char C >
+   template<char C>
    inline VariableSet<C> operator+( const VariableSet<C>& q0, const VariableSet<C>& q1 );
-   template< char C >
+   template<char C>
    inline VariableSet<C> operator-( const VariableSet<C>& q0, const VariableSet<C>& q1 );
 
-   template< char C >
+   template<char C>
    inline VariableSet<C> operator*( const VariableSet<C>& q0,                  float   d );
-   template< char C >
+   template<char C>
    inline VariableSet<C> operator*(                float   d  , const VariableSet<C>& q1 );
 
-   template< char C >
+   template<char C>
    inline VariableSet<C> operator/( const VariableSet<C>& q0,                  float   d );
 
 /*
@@ -122,9 +122,9 @@ namespace IdealGas2D
 }
 
 # include <idealGas2D/state.ipp>
-# include <idealGas2D/variableSet.ipp>
-# include <idealGas2D/conservedSet.ipp>
-# include <idealGas2D/viscousSet.ipp>
+# include <idealGas2D/variables/variableSet.ipp>
+# include <idealGas2D/variables/conservedVariables.ipp>
+# include <idealGas2D/variables/viscousVariables.ipp>
 # include <idealGas2D/fluxes/ausm.ipp>
 # include <idealGas2D/fluxes/exactFlux.ipp>
 # include <idealGas2D/fluxes/laxFriedrichs.ipp>

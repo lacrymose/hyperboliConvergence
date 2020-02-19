@@ -1,7 +1,7 @@
 
 namespace IdealGas2D
 {
-   template< char C >
+   template<char C>
    inline VariableSet<C>::VariableSet()
   {
       var[0]=0.;
@@ -11,7 +11,7 @@ namespace IdealGas2D
       return;
   }
 
-   template< char C >
+   template<char C>
    inline VariableSet<C>::VariableSet( const Species& gas, const VariableSet<C>& q0 )
   {
       var[0]=q0[0];
@@ -21,7 +21,7 @@ namespace IdealGas2D
       return;
   }
 
-   template< char C >
+   template<char C>
    inline VariableSet<C>::VariableSet(                     const VariableSet<C>& q0 )
   {
       var[0]=q0[0];
@@ -31,8 +31,8 @@ namespace IdealGas2D
       return;
   }
 
-   template< char C >
-   template< char D >
+   template<char C>
+   template<char D>
    inline VariableSet<C>::VariableSet( const Species& gas, const VariableSet<D>& q0 )
   {
       std::cout << std::endl;
@@ -45,7 +45,7 @@ namespace IdealGas2D
       assert( false );
   }
 
-   template< char C >
+   template<char C>
    inline VariableSet<C>::VariableSet( const Species& gas, const State& s0 )
   {
       std::cout << std::endl;
@@ -57,7 +57,7 @@ namespace IdealGas2D
       assert( false );
   }
 
-   template< char C >
+   template<char C>
    inline VariableSet<C>& VariableSet<C>::operator=( float d )
   {
       var[0]=d;
@@ -67,7 +67,7 @@ namespace IdealGas2D
       return *this;
   }
 
-   template< char C >
+   template<char C>
    inline VariableSet<C>& VariableSet<C>::operator+=( const VariableSet<C>& q )
   {
       var[0]+=q[0];
@@ -77,7 +77,7 @@ namespace IdealGas2D
       return *this;
   }
 
-   template< char C >
+   template<char C>
    inline VariableSet<C>& VariableSet<C>::operator-=( const VariableSet<C>& q )
   {
       var[0]-=q[0];
@@ -87,7 +87,7 @@ namespace IdealGas2D
       return *this;
   }
 
-   template< char C >
+   template<char C>
    inline VariableSet<C>& VariableSet<C>::operator*=( float d )
   {
       var[0]*=d;
@@ -97,7 +97,7 @@ namespace IdealGas2D
       return *this;
   }
 
-   template< char C >
+   template<char C>
    inline VariableSet<C>& VariableSet<C>::operator/=( float d )
   {
       float d1=1./d;
@@ -108,7 +108,7 @@ namespace IdealGas2D
       return *this;
   }
 
-   template< char C >
+   template<char C>
    inline VariableSet<C> operator+( const VariableSet<C>& q0, const VariableSet<C>& q1 )
   {
       VariableSet<C> q2;
@@ -119,7 +119,7 @@ namespace IdealGas2D
       return q2;
   }
 
-   template< char C >
+   template<char C>
    inline VariableSet<C> operator-( const VariableSet<C>& q0, const VariableSet<C>& q1 )
   {
       VariableSet<C> q2;
@@ -130,7 +130,7 @@ namespace IdealGas2D
       return q2;
   }
 
-   template< char C >
+   template<char C>
    inline VariableSet<C> operator*( const VariableSet<C>& q0, float d )
   {
       VariableSet<C> q1;
@@ -141,7 +141,7 @@ namespace IdealGas2D
       return q1;
   }
 
-   template< char C >
+   template<char C>
    inline VariableSet<C> operator*( float d, const VariableSet<C>& q0 )
   {
       VariableSet<C> q1;
@@ -152,7 +152,7 @@ namespace IdealGas2D
       return q1;
   }
 
-   template< char C >
+   template<char C>
    inline VariableSet<C> operator/( const VariableSet<C>& q0, float d )
   {
       VariableSet<C> q1;
@@ -164,7 +164,7 @@ namespace IdealGas2D
       return q1;
   }
 
-   template< char C >
+   template<char C>
    inline std::ostream& operator<<( std::ostream& os, VariableSet<C> q )
   {
       os << q[0] << " "
