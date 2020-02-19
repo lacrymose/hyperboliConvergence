@@ -1,5 +1,6 @@
 
 # include <idealGas2D/idealGas2D.h>
+# include <array/array1D.h>
 
 # include <iostream>
 
@@ -50,6 +51,46 @@
       qv0=10.;
       IdealGas2D::VariableSet<'c'> qc4(gas,qv0);
       std::cout << qc4 << std::endl;
+
+      int n=3;
+      Array1D<IdealGas2D::ConservedVariables> arrayCV(n);
+      Array1D<IdealGas2D::ConservedVariables> arrayCW(n);
+
+      arrayCV = 6.7;
+      for( int i=0; i<n; i++ )
+     {
+         std::cout << arrayCV[i] << std::endl;
+     }
+
+      arrayCV*= 0.5;
+      for( int i=0; i<n; i++ )
+     {
+         std::cout << arrayCV[i] << std::endl;
+     }
+
+      arrayCW = 10.5;
+      for( int i=0; i<n; i++ )
+     {
+         std::cout << arrayCW[i] << std::endl;
+     }
+
+      arrayCV+= arrayCW;
+      for( int i=0; i<n; i++ )
+     {
+         std::cout << arrayCV[i] << std::endl;
+     }
+
+      arrayCW = arrayCW*0.1;
+      for( int i=0; i<n; i++ )
+     {
+         std::cout << arrayCW[i] << std::endl;
+     }
+
+      arrayCW = arrayCW-arrayCV;
+      for( int i=0; i<n; i++ )
+     {
+         std::cout << arrayCW[i] << std::endl;
+     }
 
       return 0;
   }

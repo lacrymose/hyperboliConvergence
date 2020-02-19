@@ -8,7 +8,8 @@ SCRIPTDIR = script/#		main() function source files
 PROGRMDIR = progrm/#		executables
 
 # Class / function definition source files
-CSOURCE = idealGas2D/species.cpp
+CSOURCE = idealGas2D/species.cpp \
+	idealGas2D/ausm.cpp
 
 
 # main() function files

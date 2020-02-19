@@ -1,7 +1,7 @@
 
 namespace IdealGas2D
 {
-   inline void laxFriedrichs( const Species& gas, const float n[3], const State& sl, const State& sr, VariableSet<'c'>& f, float& lmax )
+   inline void LaxFriedrichs::operator()( const Species& gas, const float n[3], const State& sl, const State& sr, VariableSet<'c'>& f, float& lmax ) const
   {
       VariableSet<'c'>   fl,fr,fd,fc;
       VariableSet<'c'>   ql,qr;

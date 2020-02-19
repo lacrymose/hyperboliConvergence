@@ -1,37 +1,31 @@
 
 namespace IdealGas2D
 {
-   inline void ausm( const Species& gas, const float n[3], const State& sl, const State& sr, VariableSet<'c'>& f, float& lmax )
+   inline void Ausm::operator()( const Species& gas, const float n[3], const State& sl, const State& sr, VariableSet<'c'>& f, float& lmax ) const
   {
    // left/right states
-      double ul,vl;
-      double ur,vr;
-      double unl, rl,pl, al,hl;
-      double unr, rr,pr, ar,hr;
+      float ul,vl;
+      float ur,vr;
+      float unl, rl,pl, al,hl;
+      float unr, rr,pr, ar,hr;
 
    // left/right numerical states/splittings
-      double als,ml,mlp,plp;
-      double ars,mr,mrm,prm;
-      double m2m,m2p;
+      float als,ml,mlp,plp;
+      float ars,mr,mrm,prm;
+      float m2m,m2p;
 
    // interface values
-      double as,m2,m0,fa, ra,ma,pa;
-      double psi[5];
-      double pu,mp, delu,delp;
+      float as,m2,m0,fa, ra,ma,pa;
+      float psi[5];
+      float pu,mp, delu,delp;
+      float alpha;
 
    // parameters/constants
-      double alpha0,alpha,beta, Ku,Kp, sigma;
-      double ascoeff;
+      float ascoeff;
       float  gam1;
 
       gam1=gas.gamma-1;
       gam1=1./gam1;
-
-      alpha0=0.1875;
-      beta  =0.125;
-      Ku    =0.75;
-      Kp    =0.25;
-      sigma =1.0;
 
       ascoeff = 2.*(gas.gamma-1.)/(gas.gamma+1.);
 
@@ -173,7 +167,7 @@ namespace IdealGas2D
          psi[3] = hr;
      }
 
-      double mdot = as*psi[0]*ma;
+      float mdot = as*psi[0]*ma;
       mdot*=n[2];
       pa  *=n[2];
 

@@ -4,15 +4,16 @@
 # include <assert.h>
 # include <math.h>
 
-using namespace IdealGas2D;
+
    int main()
   {
-      ConservedVariables qc0,qc1;
-      ViscousVariables   qv0,qv1;
 
-      ViscousVariables   dqv;
+      IdealGas2D::ConservedVariables qc0,qc1;
+      IdealGas2D::ViscousVariables   qv0,qv1;
 
-      Species gas;
+      IdealGas2D::ViscousVariables   dqv;
+
+      IdealGas2D::Species gas;
       gas.air();
 
       qc0 = 1.8;
@@ -27,8 +28,8 @@ using namespace IdealGas2D;
       qc0[2]=13.;
       qc0[3]=14.;
 
-      qv0 = ViscousVariables(   gas, qc0 );
-      qc1 = ConservedVariables( gas, qv0 );
+      qv0 = IdealGas2D::ViscousVariables(   gas, qc0 );
+      qc1 = IdealGas2D::ConservedVariables( gas, qv0 );
 
       for( int i=0; i<4; i++ )
      {
@@ -38,8 +39,8 @@ using namespace IdealGas2D;
       IdealGas2D::State state_c0( gas, qc0 );
       IdealGas2D::State state_v0( gas, qv0 );
 
-      qc1 = ConservedVariables( gas, state_c0 );
-      qv1 = ViscousVariables(   gas, state_v0 );
+      qc1 = IdealGas2D::ConservedVariables( gas, state_c0 );
+      qv1 = IdealGas2D::ViscousVariables(   gas, state_v0 );
 
       for( int i=0; i<4; i++ )
      {

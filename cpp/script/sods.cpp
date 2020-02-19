@@ -1,20 +1,21 @@
+
+# include <array1D/array1D.h>
 # include <idealGas2D/idealGas2D.h>
+# include <fieldOperations/fieldOperations.h>
+
 
 # include <iostream>
 # include <fstream>
 # include <assert.h>
 # include <math.h>
 
-//auto& flux = IdealGas2D::laxFriedrichs;
-auto& flux = IdealGas2D::ausm;
-
-typedef IdealGas2D::ConservedVariables SolutionVariables;
-//typedef IdealGas2D::ViscousVariables SolutionVariables;
+//typedef IdealGas2D::ConservedVariables SolutionVariables;
+typedef IdealGas2D::ViscousVariables SolutionVariables;
 
    int main()
   {
-      std::ifstream initialStatesFile( "initial.dat" );
-      std::ifstream parametersFile( "parameters.dat" );
+      std::ifstream initialStatesFile( "data/sods/initial.dat" );
+      std::ifstream parametersFile( "data/sods/parameters.dat" );
 
    // initial conditions
       IdealGas2D::ViscousVariables    qvl,qvr;
@@ -23,19 +24,18 @@ typedef IdealGas2D::ConservedVariables SolutionVariables;
    // flux / conserved state;
       IdealGas2D::ConservedVariables    f,qc;
 
-   // solution and residual vectors
-      SolutionVariables                *q;
-      IdealGas2D::ConservedVariables   *r;
+   // initialise arrays
+      Array1D<             SolutionVariables> q0;
+      Array1D<             SolutionVariables> q1;
+      Array1D<IdealGas2D::ConservedVariables> r;
 
       IdealGas2D::Species  gas;
-      IdealGas2D::State    sl,sr;
 
       int      nc,nt;
-      int        i,j;
+      int          i;
 
-      float          cfl;
-      float    l,lmax,dt;
-      float n[3]={1,0,1};
+      float      cfl;
+      float  lmax,dt;
 
       gas.air();
 
@@ -67,61 +67,42 @@ typedef IdealGas2D::ConservedVariables SolutionVariables;
 
    // ensure domain is symmetric and waves will not reach boundaries
       assert( nc%2==0 );
-      assert( nt*cfl<0.5*nc );
+//    assert( nt*cfl<0.5*nc );
 
-   // initialise
-      q = new SolutionVariables[nc];
-      r = new IdealGas2D::ConservedVariables[nc];
+      q0.resize(nc);
+      q1.resize(nc);
+      r.resize(nc);
 
       ql = SolutionVariables( gas, qvl );
       qr = SolutionVariables( gas, qvr );
-      for( i=0;    i<nc/2; i++ ){ q[i] = ql; }
-      for( i=nc/2; i<nc;   i++ ){ q[i] = qr; }
+      for( i=0;    i<nc/4; i++ ){ q0[i] = ql; }
+      for( i=nc/4; i<nc;   i++ ){ q0[i] = qr; }
 
    // timesteps
+      r=0.;
+      q1=0.;
       for( i=0; i<nt; i++ )
      {
          lmax=-1;
 
       // flux residual
-         for( j=0; j<nc-1; j++ )
-        {
-            sl = IdealGas2D::State( gas, q[j]   );
-            sr = IdealGas2D::State( gas, q[j+1] );
+         fluxResidual( gas, 'a', q0,r, lmax );
 
-//          flux( gas, n, sl,sr, f,l );
-            flux( gas, n,
-                  IdealGas2D::State( gas, q[j]   ),
-                  IdealGas2D::State( gas, q[j+1] ),
-                  f,l );
-
-            lmax = fmax( lmax, l );
-
-            r[j]  -= f;
-            r[j+1]+= f;
-        }
-         r[0]=0.;
-         r[nc-1]=0.;
+         dt = cfl/lmax;
 
       // update
-         dt = cfl/lmax;
-         for( j=0; j<nc; j++ )
-        {
-            qc = IdealGas2D::ConservedVariables( gas, q[j] );
-            qc+= dt*r[j];
-            q[j] = SolutionVariables( gas, qc );
-            r[j] = 0.;
-        }
+         eulerForwardUpdate( gas, dt, q0,q1, r );
+         q0=q1;
      }
 
    // save solution
-      std::ofstream solutionFile( "sods.dat" );
+      std::ofstream solutionFile( "data/sods/sods.dat" );
       IdealGas2D::State s;
       if( solutionFile.is_open() )
      {
          for( i=0; i<nc; i++ )
         {
-            s = IdealGas2D::State( gas, q[i] );
+            s = IdealGas2D::State( gas, q0[i] );
             solutionFile << s.density()     << " "
                          << s.velocityX()   << " "
                          << s.pressure()    << " "
@@ -134,9 +115,6 @@ typedef IdealGas2D::ConservedVariables SolutionVariables;
          return 1;
      }
       solutionFile.close();
-
-      delete[] q;
-      delete[] r;
 
       return 0;
   }

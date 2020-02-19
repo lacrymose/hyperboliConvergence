@@ -15,10 +15,6 @@ namespace IdealGas2D
    template<char C>
    struct VariableSet;
 
-   void exactFlux(     const Species& gas, const float n[3], const State& s,                   VariableSet<'c'>& f, float& lmax );
-   void laxFriedrichs( const Species& gas, const float n[3], const State& sl, const State& sr, VariableSet<'c'>& f, float& lmax );
-   void ausm(          const Species& gas, const float n[3], const State& sl, const State& sr, VariableSet<'c'>& f, float& lmax );
-
 // typedefs
    typedef VariableSet<'c'> ConservedVariables;
    typedef VariableSet<'v'> ViscousVariables;
@@ -113,20 +109,34 @@ namespace IdealGas2D
 /*
  * Local Lax-Friedrichs flux
  */
-   inline void laxFriedrichs( const Species& gas, const float n[3], const State& sl, const State& sr, VariableSet<'c'>& f, float& lmax );
+   struct LaxFriedrichs
+  {
+    inline void operator()( const Species& gas, const float n[3], const State& sl, const State& sr, VariableSet<'c'>& f, float& lmax ) const;
+  };
 
 /*
  * AUSM+up flux for all speeds (M-S Liou 2006)
  */
-   inline void ausm(          const Species& gas, const float n[3], const State& sl, const State& sr, VariableSet<'c'>& f, float& lmax );
+   struct Ausm
+  {
+      float alpha0;
+      float  sigma;
+      float   beta;
+      float     Ku;
+      float     Kp;
+
+      Ausm();
+      inline void operator()( const Species& gas, const float n[3], const State& sl, const State& sr, VariableSet<'c'>& f, float& lmax ) const;
+  };
+
 }
 
 # include <idealGas2D/state.ipp>
 # include <idealGas2D/variables/variableSet.ipp>
 # include <idealGas2D/variables/conservedVariables.ipp>
 # include <idealGas2D/variables/viscousVariables.ipp>
-# include <idealGas2D/fluxes/ausm.ipp>
 # include <idealGas2D/fluxes/exactFlux.ipp>
+# include <idealGas2D/fluxes/ausm.ipp>
 # include <idealGas2D/fluxes/laxFriedrichs.ipp>
 
 # endif
