@@ -1,55 +1,27 @@
 # ifndef IDEAL_GAS_2D_H
 # define IDEAL_GAS_2D_H
 
-# include <ostream>
+# include <iostream>
+# include <assert.h>
+# include <math.h>
+
 
 namespace IdealGas2D
 {
+// forward declarations
+   struct Species;
+   struct State;
 
-/*
- * Vector of conserved variables: density, momentum (x,y) and total energy
- */
-   struct ConservedVariables
-  {
-      float    var[4];
+   template< char C >
+   struct VariableSet;
 
-      inline ConservedVariables();
+   void exactFlux(     const Species& gas, const float n[3], const State& s,                   VariableSet<'c'>& f, float& lmax );
+   void laxFriedrichs( const Species& gas, const float n[3], const State& sl, const State& sr, VariableSet<'c'>& f, float& lmax );
+   void ausm(          const Species& gas, const float n[3], const State& sl, const State& sr, VariableSet<'c'>& f, float& lmax );
 
-      inline float& operator[]( int i ){ return var[i]; }
-
-      inline ConservedVariables  operator+(  ConservedVariables q );
-      inline ConservedVariables  operator-(  ConservedVariables q );
-
-      inline ConservedVariables& operator+=( ConservedVariables q );
-      inline ConservedVariables& operator-=( ConservedVariables q );
-      inline ConservedVariables& operator*=( float d );
-      inline ConservedVariables& operator/=( float d );
-      inline ConservedVariables& operator =( float d );
-
-  };
-
-/*
- * Vector of viscous variables: velocity(x,y), temperature and pressure
- */
-   struct ViscousVariables
-  {
-      float    var[4];
-
-      inline ViscousVariables();
-
-      inline float& operator[]( int i ){ return var[i]; }
-
-      inline ViscousVariables  operator+(  ViscousVariables q );
-      inline ViscousVariables  operator-(  ViscousVariables q );
-
-      inline ViscousVariables& operator+=( ViscousVariables q );
-      inline ViscousVariables& operator-=( ViscousVariables q );
-      inline ViscousVariables& operator*=( float d );
-      inline ViscousVariables& operator/=( float d );
-      inline ViscousVariables& operator =( float d );
-
-      inline friend std::ostream& operator<<( std::ostream& os, ViscousVariables q );
-  };
+// typedefs
+   typedef VariableSet<'c'> ConservedVariables;
+   typedef VariableSet<'v'> ViscousVariables;
 
 /*
  * Species of ideal gas, including physical constants
@@ -72,9 +44,10 @@ namespace IdealGas2D
   {
       float    state[8];
 
-      inline State(){};
-      inline State( Species& gas, ConservedVariables& qc );
-      inline State( Species& gas, ViscousVariables&   qv );
+      inline State();
+
+      template< char C >
+      inline State( const Species& gas, const VariableSet<C>& q );
 
       inline const float& velocityX()             const { return state[0]; }
       inline const float& velocityY()             const { return state[1]; }
@@ -87,46 +60,71 @@ namespace IdealGas2D
   };
 
 /*
- * Nonlinear transformations for states
+ * Vector of solution variables for an ideal gas, specified by template argument
+ * Conservative <'c'>: ( density,  momentum,    total energy )
+ * Viscous      <'v'>: ( velocity, temperature, pressure     )
  */
-   inline ConservedVariables conservedVariables( Species& gas, ConservedVariables& qc );
-   inline ConservedVariables conservedVariables( Species& gas, ViscousVariables&   qv );
-   inline ConservedVariables conservedVariables( Species& gas, State& s );
+   template< char C >
+   struct VariableSet
+  {
+      float var[4];
 
-   inline ViscousVariables viscousVariables(     Species& gas, ConservedVariables& qc );
-   inline ViscousVariables viscousVariables(     Species& gas, ViscousVariables&   qv );
-   inline ViscousVariables viscousVariables(     Species& gas, State& s );
+      inline VariableSet<C>();
 
-/*
- * Linear transformation of delta from conservative to viscous
- */
-   inline ViscousVariables     dViscousVariables( Species& gas, State& state, ConservedVariables& dqc );
+      inline VariableSet<C>(                     const VariableSet<C>& q0 );
 
-/*
- * Linear transformation of delta from viscous to conservative
- */
-   inline ConservedVariables dConservedVariables( Species& gas, State& state,   ViscousVariables& dqv );
+      inline VariableSet<C>( const Species& gas, const VariableSet<C>& q0 );
+
+      template< char D >
+      inline VariableSet<C>( const Species& gas, const VariableSet<D>& q0 );
+
+      inline VariableSet<C>( const Species& gas, const State& s0 );
+
+      inline       float& operator[]( const int i )       { return var[i]; }
+      inline const float& operator[]( const int i ) const { return var[i]; }
+
+      inline VariableSet<C>& operator+=( const VariableSet<C>& q );
+      inline VariableSet<C>& operator-=( const VariableSet<C>& q );
+
+      inline VariableSet<C>& operator*=(       float d );
+      inline VariableSet<C>& operator/=(       float d );
+      inline VariableSet<C>& operator =(       float d );
+  };
+
+// friend functions for VariableSet
+   template< char C >
+   inline VariableSet<C> operator+( const VariableSet<C>& q0, const VariableSet<C>& q1 );
+   template< char C >
+   inline VariableSet<C> operator-( const VariableSet<C>& q0, const VariableSet<C>& q1 );
+
+   template< char C >
+   inline VariableSet<C> operator*( const VariableSet<C>& q0,                  float   d );
+   template< char C >
+   inline VariableSet<C> operator*(                float   d  , const VariableSet<C>& q1 );
+
+   template< char C >
+   inline VariableSet<C> operator/( const VariableSet<C>& q0,                  float   d );
 
 /*
  * Exact physical flux vector
  */
-   inline void exactFlux(    Species& gas, float n[3], State& s,             ConservedVariables& f, float& lmax );
+   inline void exactFlux(     const Species& gas, const float n[3], const State& s,                   VariableSet<'c'>& f, float& lmax );
 
 /*
  * Local Lax-Friedrichs flux
  */
-   inline void laxFriedrichs( Species& gas, float n[3], State& sl, State& sr, ConservedVariables& f, float& lmax );
+   inline void laxFriedrichs( const Species& gas, const float n[3], const State& sl, const State& sr, VariableSet<'c'>& f, float& lmax );
 
 /*
  * AUSM+up flux for all speeds (M-S Liou 2006)
  */
-   inline void ausm(         Species& gas, float n[3], State& sl, State& sr, ConservedVariables& f, float& lmax );
+   inline void ausm(          const Species& gas, const float n[3], const State& sl, const State& sr, VariableSet<'c'>& f, float& lmax );
 }
 
-# include <idealGas2D/conservedVariables.ipp>
-# include <idealGas2D/viscousVariables.ipp>
 # include <idealGas2D/state.ipp>
-# include <idealGas2D/transformations.ipp>
+# include <idealGas2D/variableSet.ipp>
+# include <idealGas2D/conservedSet.ipp>
+# include <idealGas2D/viscousSet.ipp>
 # include <idealGas2D/fluxes/ausm.ipp>
 # include <idealGas2D/fluxes/exactFlux.ipp>
 # include <idealGas2D/fluxes/laxFriedrichs.ipp>

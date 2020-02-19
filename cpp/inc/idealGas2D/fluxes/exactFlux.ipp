@@ -1,9 +1,7 @@
 
-# include <math.h>
-
 namespace IdealGas2D
 {
-   inline void exactFlux( Species& gas, float n[3], State& s, ConservedVariables& f, float& lmax )
+   inline void exactFlux( const Species& gas, const float n[3], const State& s, VariableSet<'c'>& f, float& lmax )
   {
       float r,u,v,h,p,a;
       float un,mn;

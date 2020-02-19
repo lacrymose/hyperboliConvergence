@@ -1,6 +1,5 @@
 
 # include <idealGas2D/idealGas2D.h>
-# include <idealGas2D/variableSet.h>
 
 # include <iostream>
 

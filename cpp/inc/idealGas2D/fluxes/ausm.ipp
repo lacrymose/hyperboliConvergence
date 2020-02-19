@@ -1,9 +1,7 @@
 
-# include <math.h>
-
 namespace IdealGas2D
 {
-      inline void ausm( Species& gas, float n[3], State& sl, State& sr, ConservedVariables& f, float& lmax )
+   inline void ausm( const Species& gas, const float n[3], const State& sl, const State& sr, VariableSet<'c'>& f, float& lmax )
   {
    // left/right states
       double ul,vl;

@@ -1,7 +1,4 @@
 
-# include <iostream>
-# include <assert.h>
-
 namespace IdealGas2D
 {
    template< char C >
@@ -25,12 +22,22 @@ namespace IdealGas2D
   }
 
    template< char C >
+   inline VariableSet<C>::VariableSet(                     const VariableSet<C>& q0 )
+  {
+      var[0]=q0[0];
+      var[1]=q0[1];
+      var[2]=q0[2];
+      var[3]=q0[3];
+      return;
+  }
+
+   template< char C >
    template< char D >
    inline VariableSet<C>::VariableSet( const Species& gas, const VariableSet<D>& q0 )
   {
       std::cout << std::endl;
       std::cout << "Warning:" << std::endl;
-      std::cout << "VariableSet<C>::VariableSet( const VariableSet<D>& q0 )"
+      std::cout << "VariableSet<C>::VariableSet( const Species& gas, const VariableSet<D>& q0 )"
                 << " is not yet defined for "
                 << "C = '" << C << "' and "
                 << "D = '" << D << "'" << std::endl;
@@ -43,7 +50,7 @@ namespace IdealGas2D
   {
       std::cout << std::endl;
       std::cout << "Warning:" << std::endl;
-      std::cout << "VariableSet<C>::VariableSet( const State& s0 )"
+      std::cout << "VariableSet<C>::VariableSet( const Species& gas, const State& s0 )"
                 << " is not yet defined for "
                 << "C = '" << C << "'" << std::endl;
       std::cout << std::endl;

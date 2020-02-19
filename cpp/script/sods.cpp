@@ -8,16 +8,23 @@
 //auto& flux = IdealGas2D::laxFriedrichs;
 auto& flux = IdealGas2D::ausm;
 
+typedef IdealGas2D::ConservedVariables SolutionVariables;
+//typedef IdealGas2D::ViscousVariables SolutionVariables;
+
    int main()
   {
       std::ifstream initialStatesFile( "initial.dat" );
       std::ifstream parametersFile( "parameters.dat" );
 
+   // initial conditions
       IdealGas2D::ViscousVariables    qvl,qvr;
-      IdealGas2D::ConservedVariables  qcl,qcr;
-      IdealGas2D::ConservedVariables    f;
+      SolutionVariables               ql,qr;
 
-      IdealGas2D::ConservedVariables   *q;
+   // flux / conserved state;
+      IdealGas2D::ConservedVariables    f,qc;
+
+   // solution and residual vectors
+      SolutionVariables                *q;
       IdealGas2D::ConservedVariables   *r;
 
       IdealGas2D::Species  gas;
@@ -63,13 +70,13 @@ auto& flux = IdealGas2D::ausm;
       assert( nt*cfl<0.5*nc );
 
    // initialise
-      q = new IdealGas2D::ConservedVariables[nc];
+      q = new SolutionVariables[nc];
       r = new IdealGas2D::ConservedVariables[nc];
 
-      qcl = IdealGas2D::conservedVariables( gas, qvl );
-      qcr = IdealGas2D::conservedVariables( gas, qvr );
-      for( i=0;    i<nc/2; i++ ){ q[i] = qcl; }
-      for( i=nc/2; i<nc;   i++ ){ q[i] = qcr; }
+      ql = SolutionVariables( gas, qvl );
+      qr = SolutionVariables( gas, qvr );
+      for( i=0;    i<nc/2; i++ ){ q[i] = ql; }
+      for( i=nc/2; i<nc;   i++ ){ q[i] = qr; }
 
    // timesteps
       for( i=0; i<nt; i++ )
@@ -82,23 +89,29 @@ auto& flux = IdealGas2D::ausm;
             sl = IdealGas2D::State( gas, q[j]   );
             sr = IdealGas2D::State( gas, q[j+1] );
 
-            flux( gas, n, sl,sr, f,l );
+//          flux( gas, n, sl,sr, f,l );
+            flux( gas, n,
+                  IdealGas2D::State( gas, q[j]   ),
+                  IdealGas2D::State( gas, q[j+1] ),
+                  f,l );
 
             lmax = fmax( lmax, l );
 
             r[j]  -= f;
             r[j+1]+= f;
         }
+         r[0]=0.;
+         r[nc-1]=0.;
 
       // update
          dt = cfl/lmax;
          for( j=0; j<nc; j++ )
         {
-            q[j]+= dt*r[j];
+            qc = IdealGas2D::ConservedVariables( gas, q[j] );
+            qc+= dt*r[j];
+            q[j] = SolutionVariables( gas, qc );
             r[j] = 0.;
         }
-         q[0]   =qcl;
-         q[nc-1]=qcr;
      }
 
    // save solution

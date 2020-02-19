@@ -1,8 +1,6 @@
 # ifndef IDG2D_VARSET_H
 # define IDG2D_VARSET_H
 
-# include <idealGas2D/idealGas2D.h>
-
 namespace IdealGas2D
 {
 /*
@@ -49,7 +47,5 @@ namespace IdealGas2D
    inline VariableSet<C> operator/( const VariableSet<C>& q0,                  float   d );
 }
 
-# include <idealGas2D/variableSet.ipp>
-# include <idealGas2D/conservedSet.ipp>
 
 # endif
