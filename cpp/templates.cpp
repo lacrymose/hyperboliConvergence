@@ -13,6 +13,9 @@
       template< char D >
       CharTemplate<C>( CharTemplate<D>& source );
 
+      template< char D >
+      void add( CharTemplate<D>& source );
+
       void cout(){ std::cout << C << std::endl; }
 
       void cout2( CharTemplate<C> second ){ std::cout << C << " " << C << std::endl; }
@@ -42,6 +45,22 @@
    template<>
    void CharTemplate<'a'>::cout(){ std::cout << "I am an a!" << std::endl; }
 
+// method with templated arguments
+   template< char C >
+   template< char D >
+   void CharTemplate<C>::add( CharTemplate<D>& source )
+  {
+      std::cout << f0+source.f0 << std::endl;
+      std::cout << f1+source.f1 << std::endl;
+  }
+
+   template<>
+   template<>
+   void CharTemplate<'b'>::add( CharTemplate<'a'>& source )
+  {
+      std::cout << -(f0+source.f0) << std::endl;
+      std::cout << -(f1+source.f1) << std::endl;
+  }
 
    int main()
   {
@@ -82,6 +101,10 @@
       CharTemplate<'a'> a3Template( bTemplate );
       std::cout << a3Template.f0 << std::endl;
       std::cout << a3Template.f1 << std::endl;
+
+   // double template method
+      aTemplate.add( bTemplate );
+      bTemplate.add( aTemplate );
 
       return 0;
   }

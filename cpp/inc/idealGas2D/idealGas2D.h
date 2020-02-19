@@ -26,7 +26,6 @@ namespace IdealGas2D
       inline ConservedVariables& operator/=( float d );
       inline ConservedVariables& operator =( float d );
 
-      inline friend std::ostream& operator<<( std::ostream& os, ConservedVariables q );
   };
 
 /*
@@ -77,14 +76,14 @@ namespace IdealGas2D
       inline State( Species& gas, ConservedVariables& qc );
       inline State( Species& gas, ViscousVariables&   qv );
 
-      inline float& velocityX(){              return state[0]; }
-      inline float& velocityY(){              return state[1]; }
-      inline float& pressure(){               return state[2]; }
-      inline float& density(){                return state[3]; }
-      inline float& temperature(){            return state[4]; }
-      inline float& specificTotalEnthalpy(){  return state[5]; }
-      inline float& velocity2(){              return state[6]; }
-      inline float& speedOfSound2(){          return state[7]; }
+      inline const float& velocityX()             const { return state[0]; }
+      inline const float& velocityY()             const { return state[1]; }
+      inline const float& pressure()              const { return state[2]; }
+      inline const float& density()               const { return state[3]; }
+      inline const float& temperature()           const { return state[4]; }
+      inline const float& specificTotalEnthalpy() const { return state[5]; }
+      inline const float& velocity2()             const { return state[6]; }
+      inline const float& speedOfSound2()         const { return state[7]; }
   };
 
 /*

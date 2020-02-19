@@ -13,7 +13,8 @@ CSOURCE = idealGas2D/species.cpp
 
 # main() function files
 CSCRIPT = test.cpp \
-	sods.cpp
+	sods.cpp \
+	testVariableSet.cpp
 
 CCMP = g++
 
