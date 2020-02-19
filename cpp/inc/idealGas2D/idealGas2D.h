@@ -63,6 +63,8 @@ namespace IdealGas2D
    template<char C>
    struct VariableSet
   {
+      static const char name;
+
       float var[4];
 
       inline VariableSet<C>();

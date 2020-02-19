@@ -4,11 +4,11 @@
 # include <array1D/array1D.h>
 # include <idealGas2D/idealGas2D.h>
 
-   template<char C>
-   void fluxResidual( const IdealGas2D::Species& gas, const char boundaryCondition,
-                      const Array1D< IdealGas2D::VariableSet<C> >&        q,
-                            Array1D< IdealGas2D::ConservedVariables >&    r,
-                            float& lmax );
+   template<char C, typename Flux>
+   void fluxResidual( const IdealGas2D::Species& gas, const char boundaryCondition, Flux flux,
+                            const Array1D< IdealGas2D::VariableSet<C> >&        q,
+                                  Array1D< IdealGas2D::ConservedVariables >&    r,
+                                  float& lmax );
 
    template<char C>
    void eulerForwardUpdate( const IdealGas2D::Species& gas, float dt,

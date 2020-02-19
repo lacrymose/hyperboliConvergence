@@ -9,7 +9,8 @@ PROGRMDIR = progrm/#		executables
 
 # Class / function definition source files
 CSOURCE = idealGas2D/species.cpp \
-	idealGas2D/ausm.cpp
+	idealGas2D/ausm.cpp \
+	idealGas2D/variableSet.cpp
 
 
 # main() function files

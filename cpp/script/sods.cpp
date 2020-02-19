@@ -12,6 +12,11 @@
 //typedef IdealGas2D::ConservedVariables SolutionVariables;
 typedef IdealGas2D::ViscousVariables SolutionVariables;
 
+//typedef IdealGas2D::LaxFriedrichs   Flux;
+typedef IdealGas2D::Ausm            Flux;
+
+//typedef IdealGas2D::Ausm   Flux;
+
    int main()
   {
       std::ifstream initialStatesFile( "data/sods/initial.dat" );
@@ -30,6 +35,7 @@ typedef IdealGas2D::ViscousVariables SolutionVariables;
       Array1D<IdealGas2D::ConservedVariables> r;
 
       IdealGas2D::Species  gas;
+      Flux                flux;
 
       int      nc,nt;
       int          i;
@@ -86,7 +92,7 @@ typedef IdealGas2D::ViscousVariables SolutionVariables;
          lmax=-1;
 
       // flux residual
-         fluxResidual( gas, 'a', q0,r, lmax );
+         fluxResidual( gas, 'a', flux, q0,r, lmax );
 
          dt = cfl/lmax;
 
