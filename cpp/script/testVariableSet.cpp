@@ -1,32 +1,35 @@
 
 # include <idealGas2D/idealGas2D.h>
-# include <array/array1D.h>
+# include <array1D/array1D.h>
 
 # include <iostream>
 
    int main()
   {
       IdealGas2D::Species  gas;
-      IdealGas2D::VariableSet<'c'>  qc0,qc1,qc2;
+      IdealGas2D::VariableSet<IdealGas2D::VariableType<'c'>>     qc0;
+      IdealGas2D::VariableDelta<IdealGas2D::VariableType<'c'>>  dqc0,dqc1;
 
       gas.air();
 
       qc0=1.8;
       std::cout << qc0 << std::endl;
 
-      qc0/=1.35;
+      dqc0=1.8;
+      dqc0/=1.35;
+      std::cout << dqc0 << std::endl;
+
+      dqc0*=0.75;
+      std::cout << dqc0 << std::endl;
+
+      dqc1=3.2;
+      qc0+=dqc1;
       std::cout << qc0 << std::endl;
 
-      qc0*=0.75;
+      qc0-=dqc0;
       std::cout << qc0 << std::endl;
 
-      qc1=3.2;
-      qc0+=qc1;
-      std::cout << qc0 << std::endl;
-
-      qc1-=qc0;
-      std::cout << qc1 << std::endl;
-
+/*
       qc2 = qc0+qc1;
       std::cout << qc2 << std::endl;
 
@@ -92,5 +95,6 @@
          std::cout << arrayCW[i] << std::endl;
      }
 
+*/
       return 0;
   }

@@ -3,7 +3,7 @@ namespace IdealGas2D
 {
    template<>
    template<>
-   inline VariableSet<'v'>::VariableSet( const Species& gas, const VariableSet<'c'>& q0 )
+   inline VariableSet<Viscous>::VariableSet( const Species& gas, const VariableSet<Conserved>& q0 )
   {
       float u,v,t,p;
       float r,ru,rv,re;
@@ -42,12 +42,12 @@ namespace IdealGas2D
   }
 
    template<>
-   inline VariableSet<'v'>::VariableSet( const Species& gas, const State& s0 )
+   inline VariableSet<Viscous>::VariableSet( const Species& gas, const State& state )
   {
-      var[0]=s0.velocityX();
-      var[1]=s0.velocityY();
-      var[2]=s0.temperature();
-      var[3]=s0.pressure();
+      var[0]=state.velocityX();
+      var[1]=state.velocityY();
+      var[2]=state.temperature();
+      var[3]=state.pressure();
 
       return;
   }

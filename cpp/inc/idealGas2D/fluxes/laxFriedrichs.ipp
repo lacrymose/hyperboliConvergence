@@ -1,10 +1,10 @@
 
 namespace IdealGas2D
 {
-   inline void LaxFriedrichs::operator()( const Species& gas, const float n[3], const State& sl, const State& sr, VariableSet<'c'>& f, float& lmax ) const
+   inline void LaxFriedrichs::operator()( const Species& gas, const float n[3], const State& sl, const State& sr, ConservedDelta& f, float& lmax ) const
   {
-      VariableSet<'c'>   fl,fr,fd,fc;
-      VariableSet<'c'>   ql,qr;
+      ConservedDelta   fl,fr,fd,fc;
+      ConservedVariables     ql,qr;
       float  ll,lr;
 
    // central flux
@@ -16,8 +16,8 @@ namespace IdealGas2D
       fc = 0.5*( fl + fr );
 
    // upwind flux
-      ql = VariableSet<'c'>( gas, sl );
-      qr = VariableSet<'c'>( gas, sr );
+      ql = ConservedVariables( gas, sl );
+      qr = ConservedVariables( gas, sr );
 
       fd = -0.5*lmax*( qr - ql );
 

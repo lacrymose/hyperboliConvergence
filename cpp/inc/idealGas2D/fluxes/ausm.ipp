@@ -1,7 +1,7 @@
 
 namespace IdealGas2D
 {
-   inline void Ausm::operator()( const Species& gas, const float n[3], const State& sl, const State& sr, VariableSet<'c'>& f, float& lmax ) const
+   inline void Ausm::operator()( const Species& gas, const float n[3], const State& sl, const State& sr, ConservedDelta& f, float& lmax ) const
   {
    // left/right states
       float ul,vl;

@@ -1,11 +1,8 @@
 
-//typedef IdealGas2D::Ausm            Flux;
-//typedef IdealGas2D::LaxFriedrichs   Flux;
-
-   template<char C, typename Flux>
+   template<typename SolutionType, typename Flux>
    void fluxResidual( const IdealGas2D::Species& gas, const char boundaryCondition, Flux flux,
-                            const Array1D< IdealGas2D::VariableSet<C> >&       q,
-                                  Array1D< IdealGas2D::ConservedVariables >&   r,
+                            const Array1D< IdealGas2D::VariableSet< SolutionType > >& q,
+                                  Array1D< IdealGas2D::ConservedDelta >& r,
                                   float& lmax )
   {
       int n=q.size();
@@ -15,7 +12,7 @@
       float faceMetric[3]={1,0,1};
       float l,lm;
 
-      IdealGas2D::ConservedVariables   f;
+      IdealGas2D::ConservedDelta   f;
 
       r =0.;
       l =-1;

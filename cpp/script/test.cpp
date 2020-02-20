@@ -7,7 +7,6 @@
 
    int main()
   {
-
       IdealGas2D::ConservedVariables qc0,qc1;
       IdealGas2D::ViscousVariables   qv0,qv1;
 
@@ -55,5 +54,8 @@
          assert( fabs( state_c0.state[i] - state_v0.state[i] ) < 1e-6 );
      }
 
+//    IdealGas2D::VariableSet<IdealGas2D::VariableType<'p'>>  qp0;
+
+//    qp0=IdealGas2D::VariableSet<IdealGas2D::VariableType<'p'>>(gas,qc0);
       return 0;
   }

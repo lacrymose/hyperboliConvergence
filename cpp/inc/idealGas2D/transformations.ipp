@@ -91,10 +91,10 @@ namespace IdealGas2D
       float c1,   c3,c4;
       float d1,d2,d3,d4;
 
-      du = dqc[0];
-      dv = dqc[1];
-      dt = dqc[2];
-      dp = dqc[3];
+      du = dqv[0];
+      dv = dqv[1];
+      dt = dqv[2];
+      dp = dqv[3];
 
       u = state.velocityX();
       v = state.velocityY();

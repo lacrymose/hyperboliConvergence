@@ -5,19 +5,32 @@
 # include <assert.h>
 # include <math.h>
 
+# include <checkTypes.h>
 
 namespace IdealGas2D
 {
+   template<char C>
+   struct VariableType{};
+
 // forward declarations
+   template<typename VType>
+   struct VariableSet;
+
+   template<typename VType>
+   struct VariableDelta;
+
    struct Species;
    struct State;
 
-   template<char C>
-   struct VariableSet;
-
 // typedefs
-   typedef VariableSet<'c'> ConservedVariables;
-   typedef VariableSet<'v'> ViscousVariables;
+   typedef VariableType<'c'>               Conserved;
+   typedef VariableType<'v'>                 Viscous;
+
+   typedef VariableSet<Conserved> ConservedVariables;
+   typedef VariableSet<Viscous>     ViscousVariables;
+
+   typedef VariableDelta<Conserved>   ConservedDelta;
+   typedef VariableDelta<Viscous>       ViscousDelta;
 
 /*
  * Species of ideal gas, including physical constants
@@ -42,8 +55,8 @@ namespace IdealGas2D
 
       inline State();
 
-      template<char C>
-      explicit inline State( const Species& gas, const VariableSet<C>& q );
+      template<typename VType>
+      explicit inline State( const Species& gas, const VariableSet<VType>& q );
 
       inline const float& velocityX()             const { return state[0]; }
       inline const float& velocityY()             const { return state[1]; }
@@ -60,60 +73,107 @@ namespace IdealGas2D
  * Conservative <'c'>: ( density,  momentum,    total energy )
  * Viscous      <'v'>: ( velocity, temperature, pressure     )
  */
-   template<char C>
+   template<typename VType>
    struct VariableSet
   {
-      static const char name;
-
+   // variables
       float var[4];
 
-      inline VariableSet<C>();
+   // default constructor
+      inline VariableSet<VType>();
 
-               inline VariableSet<C>(                     const VariableSet<C>& q0 );
+   // copy constructors
+               inline VariableSet<VType>(                     const VariableSet<VType>&    q0 );
+      explicit inline VariableSet<VType>( const Species& gas, const VariableSet<VType>&    q0 );
 
-      explicit inline VariableSet<C>( const Species& gas, const VariableSet<C>& q0 );
+   // convert dq -> q
+      explicit inline VariableSet<VType>(                     const VariableDelta<VType>& dq0 );
 
-      template<char D>
-      explicit inline VariableSet<C>( const Species& gas, const VariableSet<D>& q0 );
+   // nonlinear transformations from other variable sets
+      template<typename VType2>
+      explicit inline VariableSet<VType>( const Species& gas, const VariableSet<VType2>&   q0 );
+      explicit inline VariableSet<VType>( const Species& gas, const State&              state );
 
-      explicit inline VariableSet<C>( const Species& gas, const State& s0 );
-
+   // accessors
       inline       float& operator[]( const int i )       { return var[i]; }
       inline const float& operator[]( const int i ) const { return var[i]; }
 
-      inline VariableSet<C>& operator+=( const VariableSet<C>& q );
-      inline VariableSet<C>& operator-=( const VariableSet<C>& q );
-
-      inline VariableSet<C>& operator*=(       float d );
-      inline VariableSet<C>& operator/=(       float d );
-      inline VariableSet<C>& operator =(       float d );
+   // in-place arithmetic
+      inline VariableSet<VType>& operator+=( const VariableDelta<VType>& dq0 );
+      inline VariableSet<VType>& operator-=( const VariableDelta<VType>& dq0 );
+      inline VariableSet<VType>& operator =(       float a );
   };
 
-// friend functions for VariableSet
-   template<char C>
-   inline VariableSet<C> operator+( const VariableSet<C>& q0, const VariableSet<C>& q1 );
-   template<char C>
-   inline VariableSet<C> operator-( const VariableSet<C>& q0, const VariableSet<C>& q1 );
+/*
+ * Vector of solution variable deltas for an ideal gas, specified by template argument
+ * Conservative <'c'>: ( density,  momentum,    total energy )
+ * Viscous      <'v'>: ( velocity, temperature, pressure     )
+ */
+   template<typename VType>
+   struct VariableDelta
+  {
+   // variables
+      float var[4];
 
-   template<char C>
-   inline VariableSet<C> operator*( const VariableSet<C>& q0,                  float   d );
-   template<char C>
-   inline VariableSet<C> operator*(                float   d  , const VariableSet<C>& q1 );
+   // default constructor
+      inline VariableDelta<VType>();
 
-   template<char C>
-   inline VariableSet<C> operator/( const VariableSet<C>& q0,                  float   d );
+   // copy constructors
+               inline VariableDelta<VType>(                     const VariableDelta<VType>& dq0 );
+      explicit inline VariableDelta<VType>( const Species& gas, const VariableDelta<VType>& dq0 );
+
+   // convert q -> dq
+               inline VariableDelta<VType>(                     const VariableSet<VType>&    q0 );
+
+   // linear transformations from other variable deltas
+      template<typename VType2>
+      explicit inline VariableDelta<VType>( const Species& gas, const State& state, const VariableDelta<VType2>& dq0 );
+
+   // accessors
+      inline       float& operator[]( const int i )       { return var[i]; }
+      inline const float& operator[]( const int i ) const { return var[i]; }
+
+   // in-place arithmetic
+      inline VariableDelta<VType>& operator+=( const VariableDelta<VType>& dq0 );
+      inline VariableDelta<VType>& operator-=( const VariableDelta<VType>& dq0 );
+      inline VariableDelta<VType>& operator*=(       float a );
+      inline VariableDelta<VType>& operator/=(       float a );
+      inline VariableDelta<VType>& operator =(       float a );
+  };
+
+// Arithmetic operations for VariableSets and VariableDeltas
+   template<typename VType>           // dq+dq
+   inline VariableDelta<VType> operator+( const VariableDelta<VType>& dq0, const VariableDelta<VType>& dq1 );
+
+   template<typename VType>           // dq-dq
+   inline VariableDelta<VType> operator-( const VariableDelta<VType>& dq0, const VariableDelta<VType>& dq1 );
+
+   template<typename VType>           //  q+dq
+   inline VariableSet<VType>   operator+( const VariableSet<VType>&    q0, const VariableDelta<VType>& dq0 );
+
+   template<typename VType>           //  q-dq
+   inline VariableSet<VType>   operator-( const VariableSet<VType>&    q0, const VariableDelta<VType>& dq0 );
+
+   template<typename VType>           //  a*dq
+   inline VariableDelta<VType> operator*(                      float    a, const VariableDelta<VType>& dq0 );
+
+   template<typename VType>           // dq*a
+   inline VariableDelta<VType> operator*( const VariableDelta<VType>& dq0,                      float    a );
+
+   template<typename VType>           // dq/a
+   inline VariableDelta<VType> operator/( const VariableDelta<VType>& dq0,                      float    a );
 
 /*
  * Exact physical flux vector
  */
-   inline void exactFlux(     const Species& gas, const float n[3], const State& s,                   VariableSet<'c'>& f, float& lmax );
+   inline void exactFlux(     const Species& gas, const float n[3], const State& state,               ConservedDelta& f, float& lmax );
 
 /*
  * Local Lax-Friedrichs flux
  */
    struct LaxFriedrichs
   {
-    inline void operator()( const Species& gas, const float n[3], const State& sl, const State& sr, VariableSet<'c'>& f, float& lmax ) const;
+      inline void operator()( const Species& gas, const float n[3], const State& sl, const State& sr, ConservedDelta& f, float& lmax ) const;
   };
 
 /*
@@ -128,15 +188,23 @@ namespace IdealGas2D
       float     Kp;
 
       Ausm();
-      inline void operator()( const Species& gas, const float n[3], const State& sl, const State& sr, VariableSet<'c'>& f, float& lmax ) const;
+      inline void operator()( const Species& gas, const float n[3], const State& sl, const State& sr, ConservedDelta& f, float& lmax ) const;
   };
 
 }
 
 # include <idealGas2D/state.ipp>
+
 # include <idealGas2D/variables/variableSet.ipp>
-# include <idealGas2D/variables/conservedVariables.ipp>
-# include <idealGas2D/variables/viscousVariables.ipp>
+# include <idealGas2D/variables/variableDelta.ipp>
+# include <idealGas2D/variables/variableArithmetic.ipp>
+
+# include <idealGas2D/variables/viscousSet.ipp>
+# include <idealGas2D/variables/viscousDelta.ipp>
+
+# include <idealGas2D/variables/conservedSet.ipp>
+# include <idealGas2D/variables/conservedDelta.ipp>
+
 # include <idealGas2D/fluxes/exactFlux.ipp>
 # include <idealGas2D/fluxes/ausm.ipp>
 # include <idealGas2D/fluxes/laxFriedrichs.ipp>

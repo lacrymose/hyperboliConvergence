@@ -10,12 +10,14 @@
 # include <math.h>
 
 //typedef IdealGas2D::ConservedVariables SolutionVariables;
-typedef IdealGas2D::ViscousVariables SolutionVariables;
+typedef IdealGas2D::ViscousVariables   SolutionVariables;
+
+//typedef IdealGas2D::ConservedDelta SolutionDelta;
+typedef IdealGas2D::ViscousDelta   SolutionDelta;
 
 //typedef IdealGas2D::LaxFriedrichs   Flux;
 typedef IdealGas2D::Ausm            Flux;
 
-//typedef IdealGas2D::Ausm   Flux;
 
    int main()
   {
@@ -27,12 +29,12 @@ typedef IdealGas2D::Ausm            Flux;
       SolutionVariables               ql,qr;
 
    // flux / conserved state;
-      IdealGas2D::ConservedVariables    f,qc;
+      IdealGas2D::ConservedDelta    f,qc;
 
    // initialise arrays
       Array1D<             SolutionVariables> q0;
       Array1D<             SolutionVariables> q1;
-      Array1D<IdealGas2D::ConservedVariables> r;
+      Array1D<IdealGas2D::ConservedDelta> r;
 
       IdealGas2D::Species  gas;
       Flux                flux;

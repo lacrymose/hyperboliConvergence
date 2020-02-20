@@ -13,20 +13,19 @@ namespace IdealGas2D
       state[7]=0.;
   }
 
-   template<char C>
-   inline State::State( const Species& gas, const VariableSet<C>& q )
+   template<typename VType>
+   inline State::State( const Species& gas, const VariableSet<VType>& q )
   {
-      std::cout << std::endl;
-      std::cout << "Warning:" << std::endl;
-      std::cout << "State::State( const Species& gas, const VariableSet<D>& q0 )"
-                << " is not yet defined for "
-                << "C = '" << C << "'" << std::endl;
-      std::cout << std::endl;
+      static_assert( CheckTypes<VType,Conserved>::val ||
+                     CheckTypes<VType,Viscous  >::val,
+                    "\n\nWarning:\n"
+                    "State::State( const Species& gas, const VariableSet<VType>& q0 )\n"
+                    "is not yet defined for this VariableType\n" );
       assert( false );
   }
 
    template<>
-   inline State::State( const Species& gas, const VariableSet<'c'>& q )
+   inline State::State( const Species& gas, const VariableSet<Conserved>& q )
   {
       float p,r,t,h,v2,a2;
       float u,v;
@@ -73,7 +72,7 @@ namespace IdealGas2D
   }
 
    template<>
-   inline State::State( const Species& gas, const VariableSet<'v'>& q )
+   inline State::State( const Species& gas, const VariableSet<Viscous>& q )
   {
       float p,r,t,h,v2,a2;
       float u,v;
