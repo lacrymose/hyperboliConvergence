@@ -1,20 +1,22 @@
 
+namespace Array
+{
    template<typename T>
-   inline Array1D<T>& Array1D<T>::operator =( float d)
+   inline Array1D<T>& Array1D<T>::operator =( float d )
   {
       for( T& t : data ){ t=d; }
       return *this;
   }
 
    template<typename T>
-   inline Array1D<T>& Array1D<T>::operator*=( float d)
+   inline Array1D<T>& Array1D<T>::operator*=( float d )
   {
       for( T& t : data ){ t*=d; }
       return *this;
   }
 
    template<typename T>
-   inline Array1D<T>& Array1D<T>::operator/=( float d)
+   inline Array1D<T>& Array1D<T>::operator/=( float d )
   {
       for( T& t : data ){ t/=d; }
       return *this;
@@ -115,4 +117,4 @@
      }
       return a1;
   }
-
+}

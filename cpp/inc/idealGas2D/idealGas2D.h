@@ -2,6 +2,7 @@
 # define IDEAL_GAS_2D_H
 
 # include <iostream>
+# include <iomanip>
 # include <assert.h>
 # include <math.h>
 
@@ -141,27 +142,27 @@ namespace IdealGas2D
       inline VariableDelta<VType>& operator =(       float a );
   };
 
-// Arithmetic operations for VariableSets and VariableDeltas
-   template<typename VType>           // dq+dq
-   inline VariableDelta<VType> operator+( const VariableDelta<VType>& dq0, const VariableDelta<VType>& dq1 );
-
-   template<typename VType>           // dq-dq
-   inline VariableDelta<VType> operator-( const VariableDelta<VType>& dq0, const VariableDelta<VType>& dq1 );
-
-   template<typename VType>           //  q+dq
-   inline VariableSet<VType>   operator+( const VariableSet<VType>&    q0, const VariableDelta<VType>& dq0 );
-
-   template<typename VType>           //  q-dq
-   inline VariableSet<VType>   operator-( const VariableSet<VType>&    q0, const VariableDelta<VType>& dq0 );
-
-   template<typename VType>           //  a*dq
-   inline VariableDelta<VType> operator*(                      float    a, const VariableDelta<VType>& dq0 );
-
-   template<typename VType>           // dq*a
-   inline VariableDelta<VType> operator*( const VariableDelta<VType>& dq0,                      float    a );
-
-   template<typename VType>           // dq/a
-   inline VariableDelta<VType> operator/( const VariableDelta<VType>& dq0,                      float    a );
+//// Arithmetic operations for VariableSets and VariableDeltas
+//   template<typename VType>           // dq+dq
+//   inline VariableDelta<VType> operator+( const VariableDelta<VType>& dq0, const VariableDelta<VType>& dq1 );
+//
+//   template<typename VType>           // dq-dq
+//   inline VariableDelta<VType> operator-( const VariableDelta<VType>& dq0, const VariableDelta<VType>& dq1 );
+//
+//   template<typename VType>           //  q+dq
+//   inline VariableSet<VType>   operator+( const VariableSet<VType>&    q0, const VariableDelta<VType>& dq0 );
+//
+//   template<typename VType>           //  q-dq
+//   inline VariableSet<VType>   operator-( const VariableSet<VType>&    q0, const VariableDelta<VType>& dq0 );
+//
+//   template<typename VType>           //  a*dq
+//   inline VariableDelta<VType> operator*(                      float    a, const VariableDelta<VType>& dq0 );
+//
+//   template<typename VType>           // dq*a
+//   inline VariableDelta<VType> operator*( const VariableDelta<VType>& dq0,                      float    a );
+//
+//   template<typename VType>           // dq/a
+//   inline VariableDelta<VType> operator/( const VariableDelta<VType>& dq0,                      float    a );
 
 /*
  * Exact physical flux vector

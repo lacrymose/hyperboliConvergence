@@ -3,6 +3,16 @@ namespace IdealGas2D
 {
    template<>
    template<>
+   inline VariableDelta<Viscous>::VariableDelta( const Species& gas, const State& state, const VariableDelta<Viscous>& dq0 )
+  {
+      var[0]=dq0[0];
+      var[1]=dq0[1];
+      var[2]=dq0[2];
+      var[3]=dq0[3];
+  }
+
+   template<>
+   template<>
    inline VariableDelta<Viscous>::VariableDelta( const Species& gas, const State& state, const VariableDelta<Conserved>& dq0 )
   {
       float u,v;

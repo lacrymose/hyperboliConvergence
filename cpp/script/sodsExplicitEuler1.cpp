@@ -30,11 +30,13 @@ typedef IdealGas2D::Ausm            Flux;
 
    // flux / conserved state;
       IdealGas2D::ConservedDelta    f,qc;
+      IdealGas2D::ConservedDelta     res;
 
    // initialise arrays
       Array1D<             SolutionVariables> q0;
       Array1D<             SolutionVariables> q1;
       Array1D<IdealGas2D::ConservedDelta> r;
+
 
       IdealGas2D::Species  gas;
       Flux                flux;
@@ -99,8 +101,9 @@ typedef IdealGas2D::Ausm            Flux;
          dt = cfl/lmax;
 
       // update
-         eulerForwardUpdate( gas, dt, q0,q1, r );
+         eulerForwardUpdate( gas, dt, q0,q1, r, res );
          q0=q1;
+         std::cout << res << std::endl;
      }
 
    // save solution

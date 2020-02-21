@@ -1,22 +1,26 @@
 
+# include <ode.h>
+# include <controls.h>
 # include <array1D/array1D.h>
 # include <idealGas2D/idealGas2D.h>
 # include <fieldOperations/fieldOperations.h>
-
 
 # include <iostream>
 # include <fstream>
 # include <assert.h>
 # include <math.h>
 
-//typedef IdealGas2D::ConservedVariables SolutionVariables;
-typedef IdealGas2D::ViscousVariables   SolutionVariables;
 
-//typedef IdealGas2D::ConservedDelta SolutionDelta;
-typedef IdealGas2D::ViscousDelta   SolutionDelta;
+namespace Gas = IdealGas2D;
 
-//typedef IdealGas2D::LaxFriedrichs   Flux;
-typedef IdealGas2D::Ausm            Flux;
+//typedef Gas::Conserved    SolutionType;
+typedef Gas::Viscous      SolutionType;
+
+//typedef Gas::LaxFriedrichs   Flux;
+typedef Gas::Ausm            Flux;
+
+typedef Gas::VariableSet<  SolutionType>   SolutionVariables;
+typedef Gas::VariableDelta<SolutionType>   SolutionDelta;
 
 
    int main()
@@ -25,27 +29,39 @@ typedef IdealGas2D::Ausm            Flux;
       std::ifstream parametersFile( "data/sods/parameters.dat" );
 
    // initial conditions
-      IdealGas2D::ViscousVariables    qvl,qvr;
+      Gas::ViscousVariables    qvl,qvr;
       SolutionVariables               ql,qr;
 
-   // flux / conserved state;
-      IdealGas2D::ConservedDelta    f,qc;
-
    // initialise arrays
-      Array1D<             SolutionVariables> q0;
-      Array1D<             SolutionVariables> q1;
-      Array1D<IdealGas2D::ConservedDelta> r;
+      Array::Array1D<            SolutionVariables>  qm;
+      Array::Array1D<            SolutionVariables>  q[3];
+      Array::Array1D<Gas::ConservedDelta>     r[2];
+      Array::Array1D<Gas::ConservedDelta>      s;
 
-      IdealGas2D::Species  gas;
+      Gas::ConservedDelta    res;
+      Gas::ConservedDelta    res0;
+
+      Gas::Species  gas;
       Flux                flux;
 
-      int      nc,nt;
-      int          i;
+      Controls::GridControls1D             grid;
+      Controls::TimeSteppingControls  outerTime;
+      Controls::TimeSteppingControls  innerTime;
 
-      float      cfl;
-      float  lmax,dt;
+      ODE::Implicit::MultiStep      outerTimeDerivative;
+
+
+      int      i,j,k;
+
+      float  lmax,dt,dtau;
+
+      std::cout << std::scientific;
+      std::cout.precision(2);
 
       gas.air();
+//    outerTimeDerivative.eulerBackward1();
+//    outerTimeDerivative.backwardDifference2();
+      outerTimeDerivative.trapeziumRule2();
 
    // read parameters
       if( initialStatesFile.is_open() )
@@ -62,9 +78,9 @@ typedef IdealGas2D::Ausm            Flux;
 
       if( parametersFile.is_open() )
      {
-         parametersFile >>  nc;
-         parametersFile >>  nt;
-         parametersFile >> cfl;
+         parametersFile >>      grid;
+         parametersFile >> outerTime;
+         parametersFile >> innerTime;
      }
       else
      {
@@ -74,47 +90,128 @@ typedef IdealGas2D::Ausm            Flux;
       parametersFile.close();
 
    // ensure domain is symmetric and waves will not reach boundaries
-      assert( nc%2==0 );
-//    assert( nt*cfl<0.5*nc );
+      assert( grid.n%2==0 );
 
-      q0.resize(nc);
-      q1.resize(nc);
-      r.resize(nc);
+      q[0].resize(grid.n);
+      q[1].resize(grid.n);
+      q[2].resize(grid.n);
+      qm.resize(grid.n);
+
+      r[0].resize(grid.n);
+      r[1].resize(grid.n);
+      s.resize( grid.n);
+
+//    qvl[0]=1.;      qvr[0]=1.;
+//    qvl[1]=0.;      qvr[1]=0.;
+//    qvl[2]=0.02765; qvr[2]=0.02865;
+//    qvl[3]=7.937;   qvr[3]=7.937;
 
       ql = SolutionVariables( gas, qvl );
       qr = SolutionVariables( gas, qvr );
-      for( i=0;    i<nc/4; i++ ){ q0[i] = ql; }
-      for( i=nc/4; i<nc;   i++ ){ q0[i] = qr; }
+
+      for( i=0;        i<grid.n/4; i++ ){ q[0][i] = ql; }
+      for( i=grid.n/4; i<grid.n;   i++ ){ q[0][i] = qr; }
 
    // timesteps
-      r=0.;
-      q1=0.;
-      for( i=0; i<nt; i++ )
+      q[1]=q[0];
+      q[2]=q[0];
+      qm  =q[0];
+      r[0]=0.;
+      r[1]=0.;
+      s   =0.;
+
+      for( i=0; i<outerTime.nt; i++ )
      {
+      // outer timestep calculation
          lmax=-1;
+         fluxResidual( gas, grid.boundaryCondition, flux, q[1],r[1], lmax );
+         if( i==0 ){ dt = outerTime.cfl/lmax; }
 
-      // flux residual
-         fluxResidual( gas, 'a', flux, q0,r, lmax );
+      // dualtime iterations
+         for( j=0; j<innerTime.nt; j++ )
+        {
+            for( k=0; k<grid.n; k++ )
+           {
+               s[k] =  outerTimeDerivative.beta[0]*Gas::ConservedDelta( Gas::ConservedVariables( gas, q[0][k] ) )
+                     + outerTimeDerivative.beta[1]*Gas::ConservedDelta( Gas::ConservedVariables( gas, q[1][k] ) );
+                     + outerTimeDerivative.beta[2]*Gas::ConservedDelta( Gas::ConservedVariables( gas, q[2][k] ) );
+               s[k]/= dt;
+           }
 
-         dt = cfl/lmax;
+            lmax=-1;
+            fluxResidual( gas, grid.boundaryCondition, flux, q[0],r[0], lmax );
+            dtau = innerTime.cfl/lmax;
 
-      // update
-         eulerForwardUpdate( gas, dt, q0,q1, r );
-         q0=q1;
+            for( k=0; k<grid.n; k++ )
+           {
+               r[0][k] =  outerTimeDerivative.gamma[0]*r[0][k]
+                        + outerTimeDerivative.gamma[1]*r[1][k]
+                        - s[k];
+           }
+
+            dtau/= ( 1. + outerTimeDerivative.beta[0]*dtau/dt );
+
+            eulerForwardUpdate( gas, dtau, q[0],qm, r[0], res );
+            q[0]=qm;
+
+            if( j==0 )
+           {
+               res0=res;
+               std::cout << std::left << std::setw(4) << i;
+               std::cout << std::left << std::setw(4) << j;
+               std::cout << res << std::endl;
+           }
+            else
+           {
+               for( int m=0; m<4; m++ ){ res[m]/=res0[m]; }
+               res[2]=0;
+               std::cout << std::left << std::setw(4) << i;
+               std::cout << std::left << std::setw(4) << j;
+               std::cout << res << std::endl;
+           }
+        }
+
+         res=0;
+         for( k=0; k<grid.n; k++ )
+        {
+            for( int m=0; m<4; m++ )
+           {
+               res[m]+= fabs( Gas::ConservedVariables( gas, q[0][k] )[m]
+                             -Gas::ConservedVariables( gas, q[1][k] )[m] );
+           }
+        }
+
+         std::cout << std::endl;
+         std::cout << std::left << std::setw(8) << i;
+         std::cout << res << std::endl;
+         std::cout << std::endl;
+
+         qm=q[0];
+         float relax=0.0;
+         for( k=0; k<grid.n; k++ )
+        {
+            qm[k]= q[0][k] + relax*outerTimeDerivative.beta[0]*SolutionDelta( q[0][k] )
+                           + relax*outerTimeDerivative.beta[1]*SolutionDelta( q[1][k] )
+                           + relax*outerTimeDerivative.beta[2]*SolutionDelta( q[2][k] );
+        }
+
+         q[2]=q[1];
+         q[1]=q[0];
+         q[0]=qm;
      }
 
    // save solution
       std::ofstream solutionFile( "data/sods/sods.dat" );
-      IdealGas2D::State s;
+      Gas::State state;
       if( solutionFile.is_open() )
      {
-         for( i=0; i<nc; i++ )
+         for( i=0; i<grid.n; i++ )
         {
-            s = IdealGas2D::State( gas, q0[i] );
-            solutionFile << s.density()     << " "
-                         << s.velocityX()   << " "
-                         << s.pressure()    << " "
-                         << s.temperature() << std::endl;
+            state = Gas::State( gas, q[0][i] );
+            solutionFile << state.density()     << " "
+                         << state.velocityX()   << " "
+                         << state.pressure()    << " "
+                         << state.temperature() << std::endl;
         }
      }
       else

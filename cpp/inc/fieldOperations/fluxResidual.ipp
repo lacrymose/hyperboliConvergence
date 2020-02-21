@@ -1,9 +1,9 @@
 
    template<typename SolutionType, typename Flux>
    void fluxResidual( const IdealGas2D::Species& gas, const char boundaryCondition, Flux flux,
-                            const Array1D< IdealGas2D::VariableSet< SolutionType > >& q,
-                                  Array1D< IdealGas2D::ConservedDelta >& r,
-                                  float& lmax )
+                            const Array::Array1D< IdealGas2D::VariableSet< SolutionType > >& q,
+                                  Array::Array1D< IdealGas2D::ConservedDelta >&              r,
+                                                                         float&           lmax  )
   {
       int n=q.size();
 
@@ -14,7 +14,7 @@
 
       IdealGas2D::ConservedDelta   f;
 
-      r =0.;
+      r = 0;
       l =-1;
       lm=-1;
 
@@ -25,7 +25,7 @@
                IdealGas2D::State( gas, q[i+1] ),
                f,l );
 
-         lm = fmax( lm, l );
+         lm  = fmax( lm, l );
 
          r[i]  -= f;
          r[i+1]+= f;

@@ -50,12 +50,11 @@ namespace IdealGas2D
    template<typename VType2>
    inline VariableDelta<VType>::VariableDelta( const Species& gas, const State& state, const VariableDelta<VType2>& dq0 )
   {
-      static_assert( CheckTypes<VType,Conserved>::val ||
+      static_assert( CheckTypes<VType,Conserved>::val or
                      CheckTypes<VType,Viscous  >::val,
                     "\n\nWarning:\n"
                     "VariableDelta<VType>::VariableDelta( const Species& gas, const State& state, const VariableDelta<VType2>& dq0 )\n"
                     "is not yet defined for these VariableTypes\n" );
-      assert( false );
   }
 
 // setter
@@ -118,10 +117,10 @@ namespace IdealGas2D
    template<typename VType>
    inline std::ostream& operator<<( std::ostream& os, VariableDelta<VType> q )
   {
-      os << q[0] << " "
-         << q[1] << " "
-         << q[2] << " "
-         << q[3];
+      os << std::left << std::setw(10) << q[0] << " "
+         << std::left << std::setw(10) << q[1] << " "
+         << std::left << std::setw(10) << q[2] << " "
+         << std::left << std::setw(10) << q[3];
       return os;
   }
 }
