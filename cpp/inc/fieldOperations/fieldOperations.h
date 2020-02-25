@@ -11,11 +11,18 @@
                                                                          float&           lmax  );
 
    template<typename SolutionType>
-   void eulerForwardUpdate( const IdealGas2D::Species& gas, float dt,
-                            const Array::Array1D< IdealGas2D::VariableSet< SolutionType > >& q0,
-                                  Array::Array1D< IdealGas2D::VariableSet< SolutionType > >&  q,
-                            const Array::Array1D< IdealGas2D::ConservedDelta >&               r,
-                                                    IdealGas2D::ConservedDelta&             res  );
+   void eulerForwardLinearUpdate( const IdealGas2D::Species& gas, float dt,
+                                  const Array::Array1D< IdealGas2D::VariableSet< SolutionType > >& q0,
+                                        Array::Array1D< IdealGas2D::VariableSet< SolutionType > >&  q,
+                                  const Array::Array1D< IdealGas2D::ConservedDelta >&               r,
+                                                        IdealGas2D::ConservedDelta&             res  );
+
+   template<typename SolutionType>
+   void eulerForwardNonlinearUpdate( const IdealGas2D::Species& gas, float dt,
+                                     const Array::Array1D< IdealGas2D::VariableSet< SolutionType > >& q0,
+                                           Array::Array1D< IdealGas2D::VariableSet< SolutionType > >&  q,
+                                     const Array::Array1D< IdealGas2D::ConservedDelta >&               r,
+                                                           IdealGas2D::ConservedDelta&             res  );
 
 # include <fieldOperations/fluxResidual.ipp>
 # include <fieldOperations/eulerForwardUpdate.ipp>

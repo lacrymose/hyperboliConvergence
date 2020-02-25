@@ -22,7 +22,6 @@ typedef Gas::Ausm            Flux;
 typedef Gas::VariableSet<  SolutionType>   SolutionVariables;
 typedef Gas::VariableDelta<SolutionType>   SolutionDelta;
 
-
    int main()
   {
       std::ifstream initialStatesFile( "data/sods/initial.dat" );
@@ -30,19 +29,19 @@ typedef Gas::VariableDelta<SolutionType>   SolutionDelta;
 
    // initial conditions
       Gas::ViscousVariables    qvl,qvr;
-      SolutionVariables               ql,qr;
+      SolutionVariables         ql, qr;
 
    // initialise arrays
-      Array::Array1D<            SolutionVariables>  qm;
-      Array::Array1D<            SolutionVariables>  q[3];
-      Array::Array1D<Gas::ConservedDelta>     r[2];
-      Array::Array1D<Gas::ConservedDelta>      s;
+      Array::Array1D<  SolutionVariables>  qm;
+      Array::Array1D<  SolutionVariables>  q[3];
+      Array::Array1D<Gas::ConservedDelta>  r[2];
+      Array::Array1D<Gas::ConservedDelta>  s;
 
       Gas::ConservedDelta    res;
       Gas::ConservedDelta    res0;
 
       Gas::Species  gas;
-      Flux                flux;
+      Flux         flux;
 
       Controls::GridControls1D             grid;
       Controls::TimeSteppingControls  outerTime;
@@ -144,6 +143,14 @@ typedef Gas::VariableDelta<SolutionType>   SolutionDelta;
 
             for( k=0; k<grid.n; k++ )
            {
+               s[k] =  outerTimeDerivative.beta[0]*Gas::ConservedDelta( Gas::ConservedVariables( gas, q[0][k] ) )
+                     + outerTimeDerivative.beta[1]*Gas::ConservedDelta( Gas::ConservedVariables( gas, q[1][k] ) );
+                     + outerTimeDerivative.beta[2]*Gas::ConservedDelta( Gas::ConservedVariables( gas, q[2][k] ) );
+               s[k]/= dt;
+           }
+
+            for( k=0; k<grid.n; k++ )
+           {
                r[0][k] =  outerTimeDerivative.gamma[0]*r[0][k]
                         + outerTimeDerivative.gamma[1]*r[1][k]
                         - s[k];
@@ -151,7 +158,7 @@ typedef Gas::VariableDelta<SolutionType>   SolutionDelta;
 
             dtau/= ( 1. + outerTimeDerivative.beta[0]*dtau/dt );
 
-            eulerForwardUpdate( gas, dtau, q[0],qm, r[0], res );
+            eulerForwardLinearUpdate( gas, dtau, q[0],qm, r[0], res );
             q[0]=qm;
 
             if( j==0 )
