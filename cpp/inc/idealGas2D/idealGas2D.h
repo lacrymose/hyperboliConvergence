@@ -1,12 +1,12 @@
 # ifndef IDEAL_GAS_2D_H
 # define IDEAL_GAS_2D_H
 
+# include <array1D/array1D.h>
+
 # include <iostream>
 # include <iomanip>
 # include <assert.h>
 # include <math.h>
-
-# include <checkTypes.h>
 
 namespace IdealGas2D
 {
@@ -56,8 +56,10 @@ namespace IdealGas2D
 
       inline State();
 
+   // create state using nonlinear transformation from VariableSet
+      // delete prevents compiling for undefined VType
       template<typename VType>
-      explicit inline State( const Species& gas, const VariableSet<VType>& q );
+      explicit inline State( const Species& gas, const VariableSet<VType>& q ) = delete;
 
       inline const float& velocityX()             const { return state[0]; }
       inline const float& velocityY()             const { return state[1]; }
@@ -91,9 +93,10 @@ namespace IdealGas2D
       explicit inline VariableSet<VType>(                     const VariableDelta<VType>& dq0 );
 
    // nonlinear transformations from other variable sets
+      // delete prevents compiling for undefined (VType,VType2) pairs
       template<typename VType2>
-      explicit inline VariableSet<VType>( const Species& gas, const VariableSet<VType2>&   q0 );
-      explicit inline VariableSet<VType>( const Species& gas, const State&              state );
+      explicit inline VariableSet<VType>( const Species& gas, const VariableSet<VType2>&   q0 ) = delete;
+      explicit inline VariableSet<VType>( const Species& gas, const State&              state ) = delete;
 
    // accessors
       inline       float& operator[]( const int i )       { return var[i]; }
@@ -128,7 +131,7 @@ namespace IdealGas2D
 
    // linear transformations from other variable deltas
       template<typename VType2>
-      explicit inline VariableDelta<VType>( const Species& gas, const State& state, const VariableDelta<VType2>& dq0 );
+      explicit inline VariableDelta<VType>( const Species& gas, const State& state, const VariableDelta<VType2>& dq0 ) = delete;
 
    // accessors
       inline       float& operator[]( const int i )       { return var[i]; }
@@ -141,28 +144,6 @@ namespace IdealGas2D
       inline VariableDelta<VType>& operator/=(       float a );
       inline VariableDelta<VType>& operator =(       float a );
   };
-
-//// Arithmetic operations for VariableSets and VariableDeltas
-//   template<typename VType>           // dq+dq
-//   inline VariableDelta<VType> operator+( const VariableDelta<VType>& dq0, const VariableDelta<VType>& dq1 );
-//
-//   template<typename VType>           // dq-dq
-//   inline VariableDelta<VType> operator-( const VariableDelta<VType>& dq0, const VariableDelta<VType>& dq1 );
-//
-//   template<typename VType>           //  q+dq
-//   inline VariableSet<VType>   operator+( const VariableSet<VType>&    q0, const VariableDelta<VType>& dq0 );
-//
-//   template<typename VType>           //  q-dq
-//   inline VariableSet<VType>   operator-( const VariableSet<VType>&    q0, const VariableDelta<VType>& dq0 );
-//
-//   template<typename VType>           //  a*dq
-//   inline VariableDelta<VType> operator*(                      float    a, const VariableDelta<VType>& dq0 );
-//
-//   template<typename VType>           // dq*a
-//   inline VariableDelta<VType> operator*( const VariableDelta<VType>& dq0,                      float    a );
-//
-//   template<typename VType>           // dq/a
-//   inline VariableDelta<VType> operator/( const VariableDelta<VType>& dq0,                      float    a );
 
 /*
  * Exact physical flux vector
@@ -191,7 +172,6 @@ namespace IdealGas2D
       Ausm();
       inline void operator()( const Species& gas, const float n[3], const State& sl, const State& sr, ConservedDelta& f, float& lmax ) const;
   };
-
 }
 
 # include <idealGas2D/state.ipp>

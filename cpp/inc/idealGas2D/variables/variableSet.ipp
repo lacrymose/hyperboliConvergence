@@ -45,31 +45,6 @@ namespace IdealGas2D
       return;
   }
 
-// nonlinear transformation from VType2 to VType
-   template<typename VType>
-   template<typename VType2>
-   inline VariableSet<VType>::VariableSet( const Species& gas, const VariableSet<VType2>& q0 )
-  {
-      static_assert( CheckTypes<VType,Conserved>::val ||
-                     CheckTypes<VType,Viscous  >::val,
-                    "\n\nWarning:\n"
-                    "VariableSet<VType>::VariableSet( const Species& gas, const VariableSet<VType2>& q0 )\n"
-                    "is not yet defined for these VariableTypes\n" );
-      assert( false );
-  }
-
-// nonlinear transformation from State to VType
-   template<typename VType>
-   inline VariableSet<VType>::VariableSet( const Species& gas, const State& state )
-  {
-      static_assert( CheckTypes<VType,Conserved>::val ||
-                     CheckTypes<VType,Viscous  >::val,
-                    "\n\nWarning:\n"
-                    "VariableSet<VType>::VariableSet( const Species& gas, const State& s0 )\n"
-                    "is not yet defined for these VariableTypes\n" );
-      assert( false );
-  }
-
 // setter
    template<typename VType>
    inline VariableSet<VType>& VariableSet<VType>::operator=( float a )

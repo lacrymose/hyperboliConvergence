@@ -13,17 +13,6 @@ namespace IdealGas2D
       state[7]=0.;
   }
 
-   template<typename VType>
-   inline State::State( const Species& gas, const VariableSet<VType>& q )
-  {
-      static_assert( CheckTypes<VType,Conserved>::val ||
-                     CheckTypes<VType,Viscous  >::val,
-                    "\n\nWarning:\n"
-                    "State::State( const Species& gas, const VariableSet<VType>& q0 )\n"
-                    "is not yet defined for this VariableType\n" );
-      assert( false );
-  }
-
    template<>
    inline State::State( const Species& gas, const VariableSet<Conserved>& q )
   {
