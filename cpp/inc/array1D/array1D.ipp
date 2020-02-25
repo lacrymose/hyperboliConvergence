@@ -49,6 +49,34 @@ namespace Array
   }
 
    template<typename T>
+   template<typename T2>
+   inline Array1D<T>& Array1D<T>::operator+=( const Array1D<T2>& da )
+  {
+      int n=size();
+      assert( n=da.size() );
+
+      for( int i=0; i<n; i++ )
+     {
+         data[i]+=da[i];
+     }
+      return *this;
+  }
+
+   template<typename T>
+   template<typename T2>
+   inline Array1D<T>& Array1D<T>::operator-=( const Array1D<T2>& da )
+  {
+      int n=size();
+      assert( n=da.size() );
+
+      for( int i=0; i<n; i++ )
+     {
+         data[i]-=da[i];
+     }
+      return *this;
+  }
+
+   template<typename T>
    inline Array1D<T> operator+( const Array1D<T>& a0, const Array1D<T>& a1 )
   {
       int n0=a0.size();
@@ -109,7 +137,6 @@ namespace Array
   {
       int   n=a0.size();
       float     d1=1./d;
-
       Array1D<T>  a1( n );
       for( int i=0; i<n; i++ )
      {
