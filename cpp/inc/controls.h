@@ -1,6 +1,8 @@
 # ifndef CONTROLS_H
 # define CONTROLS_H
 
+# include <types.h>
+
 # include <iostream>
 
 namespace Controls
@@ -26,7 +28,7 @@ namespace Controls
       int nt;
 
    // cfl number
-      float cfl;
+      Types::Real cfl;
   };
 
    inline std::istream& operator>>( std::istream& is, TimeSteppingControls& t )

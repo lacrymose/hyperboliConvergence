@@ -47,7 +47,7 @@ namespace IdealGas2D
 
 // setter
    template<typename VType>
-   inline VariableDelta<VType>& VariableDelta<VType>::operator=( float a )
+   inline VariableDelta<VType>& VariableDelta<VType>::operator=( Types::Real a )
   {
       var[0]=a;
       var[1]=a;
@@ -80,7 +80,7 @@ namespace IdealGas2D
 
 // dq*=a
    template<typename VType>
-   inline VariableDelta<VType>& VariableDelta<VType>::operator*=( float a )
+   inline VariableDelta<VType>& VariableDelta<VType>::operator*=( Types::Real a )
   {
       var[0]*=a;
       var[1]*=a;
@@ -91,9 +91,9 @@ namespace IdealGas2D
 
 // dq/=a
    template<typename VType>
-   inline VariableDelta<VType>& VariableDelta<VType>::operator/=( float a )
+   inline VariableDelta<VType>& VariableDelta<VType>::operator/=( Types::Real a )
   {
-      float a1=1./a;
+      Types::Real a1=1./a;
       var[0]*=a1;
       var[1]*=a1;
       var[2]*=a1;

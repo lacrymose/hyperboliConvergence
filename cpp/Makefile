@@ -16,7 +16,8 @@ CSOURCE = idealGas2D/species.cpp \
 CSCRIPT = test.cpp \
 	testVariableSet.cpp \
 	sodsExplicitEuler1.cpp \
-	sodsDualTime.cpp
+	sodsDualTime.cpp \
+	sods.cpp
 
 CCMP = g++
 

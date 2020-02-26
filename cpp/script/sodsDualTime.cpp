@@ -8,7 +8,7 @@
 # include <iostream>
 # include <fstream>
 # include <assert.h>
-# include <math.h>
+# include <cmath>
 
 
 namespace Gas = IdealGas2D;
@@ -49,6 +49,7 @@ typedef Gas::VariableDelta<SolutionType>   SolutionDelta;
 
       ODE::Implicit::MultiStep      outerTimeDerivative;
 
+      bool contact=false;
 
       int      i,j,k;
 
@@ -100,10 +101,24 @@ typedef Gas::VariableDelta<SolutionType>   SolutionDelta;
       r[1].resize(grid.n);
       s.resize( grid.n);
 
-//    qvl[0]=1.;      qvr[0]=1.;
-//    qvl[1]=0.;      qvr[1]=0.;
-//    qvl[2]=0.02765; qvr[2]=0.02865;
-//    qvl[3]=7.937;   qvr[3]=7.937;
+      contact=true;
+      if( contact )
+     {
+         float mach=0.2;
+         float perturbation=0.05;
+
+         float temp,press;
+
+         press= 1./(gas.gamma*mach*mach);
+         temp = press/gas.Rgas;
+
+         qvl[0]=1.;      qvr[0]=1.;
+         qvl[1]=0.;      qvr[1]=0.;
+         qvl[2]=temp;    qvr[2]=temp;
+         qvl[3]=press;   qvr[3]=press;
+
+         qvl[2]*=(1.+perturbation);
+     }
 
       ql = SolutionVariables( gas, qvl );
       qr = SolutionVariables( gas, qvr );
@@ -217,6 +232,7 @@ typedef Gas::VariableDelta<SolutionType>   SolutionDelta;
             state = Gas::State( gas, q[0][i] );
             solutionFile << state.density()     << " "
                          << state.velocityX()   << " "
+                         << state.velocityY()   << " "
                          << state.pressure()    << " "
                          << state.temperature() << std::endl;
         }

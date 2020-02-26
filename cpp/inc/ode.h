@@ -1,6 +1,8 @@
 # ifndef ODE_H
 # define ODE_H
 
+# include <types.h>
+
 namespace ODE
 {
    namespace Implicit
@@ -19,8 +21,8 @@ namespace ODE
          int nsteps;
              
       // coefficients
-         float  beta[3]={0,0,0};
-         float gamma[2]={0,0};
+         Types::Real  beta[3]={0,0,0};
+         Types::Real gamma[2]={0,0};
    
          inline void eulerBackward1()
         {
@@ -70,11 +72,11 @@ namespace ODE
          int nstages;
 
       // maximum allowable cfl
-         float maxCFL;
+         Types::Real maxCFL;
 
       // coefficients
       // alpha[s][t] is coefficient of residual t at stage s
-         float alpha[6][6]= {{0,0,0,0,0,0},
+         Types::Real alpha[6][6]= {{0,0,0,0,0,0},
                              {0,0,0,0,0,0},
                              {0,0,0,0,0,0},
                              {0,0,0,0,0,0},
@@ -82,7 +84,7 @@ namespace ODE
                              {0,0,0,0,0,0}};
 
       // beta[s] is the size of the timestep of stage s
-         float beta[6]={0,0,0,0,0,0};
+         Types::Real beta[6]={0,0,0,0,0,0};
 
          inline void SSP11()
         {

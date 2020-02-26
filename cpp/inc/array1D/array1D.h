@@ -2,7 +2,7 @@
 # ifndef ARRAY1D_H
 # define ARRAY1D_H
 
-# include <assert.h>
+# include <cassert>
 # include <vector>
 # include <algorithm>
 # include <functional>

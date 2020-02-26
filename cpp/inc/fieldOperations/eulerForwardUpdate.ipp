@@ -2,8 +2,10 @@
 # include <idealGas2D/idealGas2D.h>
 # include <fieldOperations/fieldOperations.h>
 
+# include <types.h>
+
    template<typename SolutionType>
-   void eulerForwardLinearUpdate( const IdealGas2D::Species& gas, float dt,
+   void eulerForwardLinearUpdate( const IdealGas2D::Species& gas, Types::Real dt,
                                   const Array::Array1D< IdealGas2D::VariableSet< SolutionType > >& q0,
                                         Array::Array1D< IdealGas2D::VariableSet< SolutionType > >& q,
                                   const Array::Array1D< IdealGas2D::ConservedDelta >&              r,
@@ -29,7 +31,7 @@
   }
 
    template<typename SolutionType>
-   void eulerForwardNonlinearUpdate( const IdealGas2D::Species& gas, float dt,
+   void eulerForwardNonlinearUpdate( const IdealGas2D::Species& gas, Types::Real dt,
                                      const Array::Array1D< IdealGas2D::VariableSet< SolutionType > >& q0,
                                            Array::Array1D< IdealGas2D::VariableSet< SolutionType > >& q,
                                      const Array::Array1D< IdealGas2D::ConservedDelta >&              r,

@@ -1,16 +1,16 @@
 
    template<typename SolutionType, typename Flux>
-   void fluxResidual( const IdealGas2D::Species& gas, const char boundaryCondition, Flux flux,
+   void fluxResidual( const IdealGas2D::Species& gas, const char boundaryCondition, const Flux flux,
                             const Array::Array1D< IdealGas2D::VariableSet< SolutionType > >& q,
                                   Array::Array1D< IdealGas2D::ConservedDelta >&              r,
-                                                                         float&           lmax  )
+                                                                         Types::Real&           lmax  )
   {
       int n=q.size();
 
       assert( n = r.size() );
 
-      float faceMetric[3]={1,0,1};
-      float l,lm;
+      Types::Real faceMetric[3]={1,0,1};
+      Types::Real l,lm;
 
       IdealGas2D::ConservedDelta   f;
 

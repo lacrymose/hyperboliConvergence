@@ -1,8 +1,8 @@
 # include <idealGas2D/idealGas2D.h>
 
 # include <iostream>
-# include <assert.h>
-# include <math.h>
+# include <cassert>
+# include <cmath>
 
 
    int main()

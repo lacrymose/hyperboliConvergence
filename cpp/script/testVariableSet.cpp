@@ -3,8 +3,8 @@
 # include <array1D/array1D.h>
 
 # include <iostream>
-# include <assert.h>
-# include <math.h>
+# include <cassert>
+# include <cmath>
 
    int main()
   {

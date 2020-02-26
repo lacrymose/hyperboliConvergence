@@ -47,7 +47,7 @@ namespace IdealGas2D
 
 // setter
    template<typename VType>
-   inline VariableSet<VType>& VariableSet<VType>::operator=( float a )
+   inline VariableSet<VType>& VariableSet<VType>::operator=( Types::Real a )
   {
       var[0]=a;
       var[1]=a;
