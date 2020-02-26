@@ -1,28 +1,28 @@
 
 namespace IdealGas2D
 {
-   inline void Ausm::operator()( const Species& gas, const float n[3], const State& sl, const State& sr, ConservedDelta& f, float& lmax ) const
+   inline void Ausm::operator()( const Species& gas, const Types::Real n[3], const State& sl, const State& sr, ConservedDelta& f, Types::Real& lmax ) const
   {
    // left/right states
-      float ul,vl;
-      float ur,vr;
-      float unl, rl,pl, al,hl;
-      float unr, rr,pr, ar,hr;
+      Types::Real ul,vl;
+      Types::Real ur,vr;
+      Types::Real unl, rl,pl, al,hl;
+      Types::Real unr, rr,pr, ar,hr;
 
    // left/right numerical states/splittings
-      float als,ml,mlp,plp;
-      float ars,mr,mrm,prm;
-      float m2m,m2p;
+      Types::Real als,ml,mlp,plp;
+      Types::Real ars,mr,mrm,prm;
+      Types::Real m2m,m2p;
 
    // interface values
-      float as,m2,m0,fa, ra,ma,pa;
-      float psi[5];
-      float pu,mp, delu,delp;
-      float alpha;
+      Types::Real as,m2,m0,fa, ra,ma,pa;
+      Types::Real psi[5];
+      Types::Real pu,mp, delu,delp;
+      Types::Real alpha;
 
    // parameters/constants
-      float ascoeff;
-      float  gam1;
+      Types::Real ascoeff;
+      Types::Real  gam1;
 
       gam1=gas.gamma-1;
       gam1=1./gam1;
@@ -71,7 +71,7 @@ namespace IdealGas2D
       m0 = fmin( 1., fmax( m2, gas.minf*gas.minf ) );
       m0 = sqrt( m0 );
       fa = 1.;
-//    if( m0<1. ){ fa = m0*( 2. - m0 ); }
+      if( m0<1. ){ fa = m0*( 2. - m0 ); }
 
       alpha = alpha0*( 5.*fa*fa - 4. );
 
@@ -167,7 +167,7 @@ namespace IdealGas2D
          psi[3] = hr;
      }
 
-      float mdot = as*psi[0]*ma;
+      Types::Real mdot = as*psi[0]*ma;
       mdot*=n[2];
       pa  *=n[2];
 
@@ -176,8 +176,10 @@ namespace IdealGas2D
       f[2] = psi[2]*mdot + n[1]*pa;
       f[3] = psi[3]*mdot;
 
-      lmax = fmax(         as,  fmax(       al,        ar  ) );
-      lmax+= fmax( fabs(ma*as), fmax( fabs(unl), fabs(unr) ) );
+      Types::Real  lmd = 0.5*(fa+1)/fa;
+
+      lmax = fmax(     lmd*as,  fmax(       al,        ar  ) );
+      lmax+= fmax( fabs(ma*as),  fmax( fabs(unl), fabs(unr) ) );
       lmax*= n[2];
 
       return;
