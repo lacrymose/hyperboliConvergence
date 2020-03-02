@@ -4,6 +4,7 @@
 # include <array1D/array1D.h>
 
 # include <types.h>
+# include <utils.h>
 
 # include <iostream>
 # include <iomanip>
@@ -174,6 +175,17 @@ namespace IdealGas2D
       Ausm();
       inline void operator()( const Species& gas, const Types::Real n[3], const State& sl, const State& sr, ConservedDelta& f, Types::Real& lmax ) const;
   };
+
+/*
+ * SLAU flux for all speeds (Shima & Kitamura 2011)
+ */
+   struct Slau
+  {
+      Types::Real alpha;
+
+      Slau();
+      inline void operator()( const Species& gas, const Types::Real n[3], const State& sl, const State& sr, ConservedDelta& f, Types::Real& lmax ) const;
+  };
 }
 
 # include <idealGas2D/state.ipp>
@@ -188,8 +200,10 @@ namespace IdealGas2D
 # include <idealGas2D/variables/conservedSet.ipp>
 # include <idealGas2D/variables/conservedDelta.ipp>
 
+# include <idealGas2D/fluxes/machSplittings.ipp>
 # include <idealGas2D/fluxes/exactFlux.ipp>
-# include <idealGas2D/fluxes/ausm.ipp>
 # include <idealGas2D/fluxes/laxFriedrichs.ipp>
+# include <idealGas2D/fluxes/ausm.ipp>
+# include <idealGas2D/fluxes/slau.ipp>
 
 # endif

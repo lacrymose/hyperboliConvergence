@@ -16,6 +16,7 @@ typedef Gas::Viscous     SolutionType;
 
 //typedef Gas::LaxFriedrichs  Flux;
 typedef Gas::Ausm           Flux;
+//typedef Gas::Slau           Flux;
 
 typedef Gas::VariableSet<  SolutionType>  SolutionVariables;
 typedef Gas::VariableDelta<SolutionType>  SolutionDelta;
@@ -43,7 +44,7 @@ typedef Gas::VariableDelta<SolutionType>  SolutionDelta;
       int  i;
 
       bool shocktube=false;
-      bool contact  = true;
+      bool contact  =true;
 
       std::cout << std::scientific;
       std::cout.precision(2);
@@ -72,6 +73,7 @@ typedef Gas::VariableDelta<SolutionType>  SolutionDelta;
 
       if( shocktube )
      {
+         grid.boundaryCondition='a';
          gas.minf=1.;
          std::ifstream initialStatesFile( "data/sods/initial.dat" );
          if( initialStatesFile.is_open() )
@@ -89,6 +91,7 @@ typedef Gas::VariableDelta<SolutionType>  SolutionDelta;
 
       if( contact )
      {
+         grid.boundaryCondition='p';
          float mach=0.001;
          float perturbation=0.05;
 

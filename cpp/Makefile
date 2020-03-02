@@ -9,12 +9,14 @@ PROGRMDIR = progrm/#		executables
 
 # Class / function definition source files
 CSOURCE = idealGas2D/species.cpp \
-	idealGas2D/ausm.cpp
+	idealGas2D/ausm.cpp \
+	idealGas2D/slau.cpp
 
 
 # main() function files
 CSCRIPT = test.cpp \
 	testVariableSet.cpp \
+	testUtils.cpp \
 	sodsExplicitEuler1.cpp \
 	sodsDualTime.cpp \
 	sods.cpp

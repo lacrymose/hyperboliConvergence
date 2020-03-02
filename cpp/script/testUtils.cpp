@@ -1,7 +1,7 @@
 
 # include <iostream>
 
-# include "inc/utils.h"
+# include <utils.h>
 
    int main()
   {

@@ -1,6 +1,7 @@
 # ifndef UTILS_H
 # define UTILS_H
 
+# include <types.h>
 # include <cmath>
 
 namespace Utils
@@ -65,6 +66,11 @@ namespace Utils
    inline int negativeRamp( const int val )
   {
       return ( val - abs( val ) )/2;
+  }
+
+   inline int int_or( const int a, const int b )
+  {
+      return a + b - a*b;
   }
 }
 
