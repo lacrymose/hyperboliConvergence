@@ -10,29 +10,29 @@
 namespace Limiters
 {
 /*
+ * Limits left and right extrapolation across face
+ */
+   template<typename Limiter>
+   struct ScalarFaceLimiter
+  {
+      Limiter  limiter;
+      inline void operator()( Types::Real  dl,    Types::Real dc, Types::Real  dr,
+                              Types::Real& dl_lim,                Types::Real& dr_lim ) const;
+  };
+
+/*
  * Limits left and right vector extrapolation across face
  */
    template<typename Limiter>
-   struct FaceVectorLimiter
+   struct VectorFaceLimiter
   {
-      Limiter  limiter;
+      ScalarFaceLimiter<Limiter>  limiter;
       template<typename DeltaType>
       inline void operator()( const IdealGas2D::VariableDelta<DeltaType>& dl,
                               const IdealGas2D::VariableDelta<DeltaType>& dc,
                               const IdealGas2D::VariableDelta<DeltaType>& dr,
                                     IdealGas2D::VariableDelta<DeltaType>& dl_lim,
                                     IdealGas2D::VariableDelta<DeltaType>& dr_lim ) const;
-  };
-
-/*
- * Limits left and right extrapolation across face
- */
-   template<typename Limiter>
-   struct FaceLimiter
-  {
-      Limiter  limiter;
-      inline void operator()( Types::Real  dl,    Types::Real dc, Types::Real  dr,
-                              Types::Real& dl_lim,                Types::Real& dr_lim ) const;
   };
 
 /*
@@ -93,7 +93,6 @@ namespace Limiters
 
       inline Types::Real operator()( Types::Real a, Types::Real b ) const;
   };
-
 }
 
 # include <limiter.ipp>

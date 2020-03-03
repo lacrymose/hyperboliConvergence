@@ -12,8 +12,9 @@
 
 namespace Gas = IdealGas2D;
 
-//typedef Gas::Conserved   SolutionType;
-typedef Gas::Viscous     SolutionType;
+//typedef Gas::Conserved        SolutionType;
+typedef Gas::Viscous          SolutionType;
+typedef Gas::Viscous     ExtrapolationType;
 
 //typedef Gas::LaxFriedrichs  Flux;
 //typedef Gas::Ausm           Flux;
@@ -23,8 +24,9 @@ typedef Gas::Slau           Flux;
 //typedef Limiters::MinMod2 Limiter;
 typedef Limiters::Cada3 Limiter;
 
-typedef Gas::VariableSet<  SolutionType>  SolutionVariables;
-typedef Gas::VariableDelta<SolutionType>  SolutionDelta;
+typedef Gas::VariableSet<  SolutionType>         SolutionVariables;
+typedef Gas::VariableDelta<SolutionType>             SolutionDelta;
+typedef Gas::VariableDelta<ExtrapolationType>   ExtrapolationDelta;
 
    int main()
   {
@@ -38,7 +40,7 @@ typedef Gas::VariableDelta<SolutionType>  SolutionDelta;
       Gas::Species   gas;
       Flux          flux;
 
-      Limiters::FaceVectorLimiter<Limiters::FaceLimiter<Limiter>>    limiter;
+      Limiters::VectorFaceLimiter<Limiter>      limiter;
 
       Controls::GridControls1D                     grid;
       Controls::TimeSteppingControls  outerTimeControls;

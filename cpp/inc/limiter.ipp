@@ -2,8 +2,21 @@
 namespace Limiters
 {
    template<typename Limiter>
+   inline void ScalarFaceLimiter<Limiter>::operator()( Types::Real  dl,
+                                                       Types::Real  dc,
+                                                       Types::Real  dr,
+                                                       Types::Real& dl_lim,
+                                                       Types::Real& dr_lim ) const
+  {
+      dl_lim = limiter( dc, dl );
+      dr_lim = limiter( dc, dr );
+      return;
+  }
+
+
+   template<typename Limiter>
    template<typename DeltaType>
-   inline void FaceVectorLimiter<Limiter>::operator()( const IdealGas2D::VariableDelta<DeltaType>& dl,
+   inline void VectorFaceLimiter<Limiter>::operator()( const IdealGas2D::VariableDelta<DeltaType>& dl,
                                                        const IdealGas2D::VariableDelta<DeltaType>& dc,
                                                        const IdealGas2D::VariableDelta<DeltaType>& dr,
                                                              IdealGas2D::VariableDelta<DeltaType>& dl_lim,
@@ -13,15 +26,6 @@ namespace Limiters
      {
          limiter( dl[i],dc[i],dr[i], dl_lim[i],dr_lim[i] );
      }
-      return;
-  }
-
-   template<typename Limiter>
-   inline void FaceLimiter<Limiter>::operator()( Types::Real  dl,    Types::Real dc, Types::Real  dr,
-                                                 Types::Real& dl_lim,                Types::Real& dr_lim ) const
-  {
-      dl_lim = limiter( dc, dl );
-      dr_lim = limiter( dc, dr );
       return;
   }
 
@@ -140,5 +144,4 @@ namespace Limiters
 
       return w;
   }
-
 }
