@@ -23,8 +23,8 @@ CSCRIPT = test.cpp \
 
 CCMP = g++
 
-COPT = -g  -Wall
-#COPT = -O3 -Wall
+#COPT = -g  -Wall
+COPT = -O3 -Wall
 
 LIBS =
 

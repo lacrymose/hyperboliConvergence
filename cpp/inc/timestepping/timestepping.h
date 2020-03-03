@@ -13,15 +13,27 @@
 
 namespace TimeStepping
 {
-   template<typename Flux, typename SolutionType>
-   void ExplicitEuler( const Controls::TimeSteppingControls& time,
+   template<typename SolutionType, typename Flux, typename Limiter>
+   void explicitEuler( const Controls::TimeSteppingControls& time,
                        const Controls::GridControls1D&       grid,
                        const IdealGas2D::Species&             gas,
                        const Flux                            flux,
+                       const Limiter                      limiter,
                              Array::Array1D< IdealGas2D::VariableSet< SolutionType > >& q,
                        const bool print );
+
+   template<typename SolutionType, typename Flux, typename Limiter>
+   void rungeKutta( const Controls::TimeSteppingControls& time,
+                    const ODE::Explicit::RungeKutta&        rk,
+                    const Controls::GridControls1D&       grid,
+                    const IdealGas2D::Species&             gas,
+                    const Flux                            flux,
+                    const Limiter                      limiter,
+                          Array::Array1D< IdealGas2D::VariableSet< SolutionType > >& q,
+                    const bool print );
 }
 
 # include <timestepping/explicitEuler.ipp>
+# include <timestepping/rungeKutta.ipp>
 
 # endif

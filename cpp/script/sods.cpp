@@ -1,6 +1,7 @@
 
 # include <ode.h>
 # include <controls.h>
+# include <limiter.h>
 # include <array1D/array1D.h>
 # include <idealGas2D/idealGas2D.h>
 # include <timestepping/timestepping.h>
@@ -15,8 +16,12 @@ namespace Gas = IdealGas2D;
 typedef Gas::Viscous     SolutionType;
 
 //typedef Gas::LaxFriedrichs  Flux;
-typedef Gas::Ausm           Flux;
-//typedef Gas::Slau           Flux;
+//typedef Gas::Ausm           Flux;
+typedef Gas::Slau           Flux;
+
+//typedef Limiters::NoLimit1 Limiter;
+//typedef Limiters::MinMod2 Limiter;
+typedef Limiters::Cada3 Limiter;
 
 typedef Gas::VariableSet<  SolutionType>  SolutionVariables;
 typedef Gas::VariableDelta<SolutionType>  SolutionDelta;
@@ -33,6 +38,8 @@ typedef Gas::VariableDelta<SolutionType>  SolutionDelta;
       Gas::Species   gas;
       Flux          flux;
 
+      Limiters::FaceVectorLimiter<Limiters::FaceLimiter<Limiter>>    limiter;
+
       Controls::GridControls1D                     grid;
       Controls::TimeSteppingControls  outerTimeControls;
       Controls::TimeSteppingControls  innerTimeControls;
@@ -43,15 +50,15 @@ typedef Gas::VariableDelta<SolutionType>  SolutionDelta;
       bool print=true;
       int  i;
 
-      bool shocktube=false;
-      bool contact  =true;
+      bool shocktube=true;
+      bool contact  =false;
 
       std::cout << std::scientific;
       std::cout.precision(2);
 
       gas.air();
       implicitIntegrator.trapeziumRule2();
-
+      explicitIntegrator.ssp34();
 
    // read problem parameters
       std::ifstream parametersFile( "data/sods/parameters.dat" );
@@ -92,7 +99,7 @@ typedef Gas::VariableDelta<SolutionType>  SolutionDelta;
       if( contact )
      {
          grid.boundaryCondition='p';
-         float mach=0.001;
+         float mach=0.1;
          float perturbation=0.05;
 
          float temp,press;
@@ -117,10 +124,10 @@ typedef Gas::VariableDelta<SolutionType>  SolutionDelta;
       for( i=grid.n/4; i<grid.n;   i++ ){ q[i] = qr; }
 
 
-      TimeStepping::ExplicitEuler( outerTimeControls,                    grid, gas,flux, q, print );
-//    TimeStepping::RungeKutta(    outerTimeControls,explicitIntegrator, grid, gas,flux, q, print );
-//    TimeStepping::DualTime(      outerTimeControls,implicitIntegrator,
-//                                 innerTimeControls,explicitIntegrator, grid, gas,flux, q, print );
+//    TimeStepping::explicitEuler( outerTimeControls,                    grid, gas,flux,limiter, q, print );
+      TimeStepping::rungeKutta(    outerTimeControls,explicitIntegrator, grid, gas,flux,limiter, q, print );
+//    TimeStepping::dualTime(      outerTimeControls,implicitIntegrator,
+//                                 innerTimeControls,explicitIntegrator, grid, gas,flux,limiter, q, print );
 
 
    // save solution

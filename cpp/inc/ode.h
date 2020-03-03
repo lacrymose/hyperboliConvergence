@@ -86,7 +86,7 @@ namespace ODE
       // beta[s] is the size of the timestep of stage s
          Types::Real beta[6]={0,0,0,0,0,0};
 
-         inline void SSP11()
+         inline void ssp11()
         {
             order=1;
             nstages=1;
@@ -97,7 +97,7 @@ namespace ODE
             alpha[0][0]=1.0;
         }
 
-         inline void SSP22()
+         inline void ssp22()
         {
             order=2;
             nstages=2;
@@ -112,7 +112,7 @@ namespace ODE
             alpha[1][1]=0.5;
         }
 
-         inline void SSP33()
+         inline void ssp33()
         {
             order=3;
             nstages=3;
@@ -132,7 +132,7 @@ namespace ODE
             alpha[2][2]=2./3.;
         }
 
-         inline void SSP34()
+         inline void ssp34()
         {
             order=3;
             nstages=4;
