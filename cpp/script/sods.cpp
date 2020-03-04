@@ -12,21 +12,19 @@
 
 namespace Gas = IdealGas2D;
 
-//typedef Gas::Conserved        SolutionType;
-typedef Gas::Viscous          SolutionType;
-typedef Gas::Viscous     ExtrapolationType;
+typedef Gas::Conserved        SolutionType;
+//typedef Gas::Viscous          SolutionType;
 
-//typedef Gas::LaxFriedrichs  Flux;
+typedef Gas::Rusanov        Flux;
 //typedef Gas::Ausm           Flux;
-typedef Gas::Slau           Flux;
+//typedef Gas::Slau           Flux;
 
-//typedef Limiters::NoLimit1 Limiter;
+typedef Limiters::NoLimit1 Limiter;
 //typedef Limiters::MinMod2 Limiter;
-typedef Limiters::Cada3 Limiter;
+//typedef Limiters::Cada3 Limiter;
 
 typedef Gas::VariableSet<  SolutionType>         SolutionVariables;
 typedef Gas::VariableDelta<SolutionType>             SolutionDelta;
-typedef Gas::VariableDelta<ExtrapolationType>   ExtrapolationDelta;
 
    int main()
   {
@@ -59,6 +57,8 @@ typedef Gas::VariableDelta<ExtrapolationType>   ExtrapolationDelta;
       std::cout.precision(2);
 
       gas.air();
+//    implicitIntegrator.eulerBackward1();
+//    implicitIntegrator.backwardDifference2();
       implicitIntegrator.trapeziumRule2();
       explicitIntegrator.ssp34();
 
@@ -122,22 +122,21 @@ typedef Gas::VariableDelta<ExtrapolationType>   ExtrapolationDelta;
       ql = SolutionVariables( gas, qvl );
       qr = SolutionVariables( gas, qvr );
 
-      for( i=0;        i<grid.n/4; i++ ){ q[i] = ql; }
-      for( i=grid.n/4; i<grid.n;   i++ ){ q[i] = qr; }
+      for( i=0;        i<(int)grid.n/4; i++ ){ q[i] = ql; }
+      for( i=grid.n/4; i<(int)grid.n;   i++ ){ q[i] = qr; }
 
 
 //    TimeStepping::explicitEuler( outerTimeControls,                    grid, gas,flux,limiter, q, print );
-      TimeStepping::rungeKutta(    outerTimeControls,explicitIntegrator, grid, gas,flux,limiter, q, print );
-//    TimeStepping::dualTime(      outerTimeControls,implicitIntegrator,
-//                                 innerTimeControls,explicitIntegrator, grid, gas,flux,limiter, q, print );
-
+//    TimeStepping::rungeKutta(    outerTimeControls,explicitIntegrator, grid, gas,flux,limiter, q, print );
+      TimeStepping::dualTime(      outerTimeControls,implicitIntegrator,
+                                   innerTimeControls,explicitIntegrator, grid, gas,flux,limiter, q, print );
 
    // save solution
       std::ofstream solutionFile( "data/sods/sods.dat" );
       Gas::State state;
       if( solutionFile.is_open() )
      {
-         for( i=0; i<grid.n; i++ )
+         for( i=0; i<(int)grid.n; i++ )
         {
             state = Gas::State( gas, q[i] );
             solutionFile << state.density()     << " "

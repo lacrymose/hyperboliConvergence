@@ -21,7 +21,7 @@ namespace Array
       Array1D( const int n=0 ){ data.resize(n); }
 
       void resize( const int n ){ data.resize(n); }
-      int  size() const { return data.size(); }
+      size_t  size() const { return data.size(); }
 
       inline const T& operator[]( const int i ) const { return data[i]; }
       inline       T& operator[](       int i )       { return data[i]; }

@@ -31,9 +31,22 @@ namespace TimeStepping
                     const Limiter                      limiter,
                           Array::Array1D< IdealGas2D::VariableSet< SolutionType > >& q,
                     const bool print );
+
+   template<typename SolutionType, typename Flux, typename Limiter>
+   void dualTime( const Controls::TimeSteppingControls&  otime,
+                  const ODE::Implicit::MultiStep&          bdf,
+                  const Controls::TimeSteppingControls&  itime,
+                  const ODE::Explicit::RungeKutta&          rk,
+                  const Controls::GridControls1D&         grid,
+                  const IdealGas2D::Species&               gas,
+                  const Flux                              flux,
+                  const Limiter                        limiter,
+                        Array::Array1D< IdealGas2D::VariableSet< SolutionType > >& q,
+                  const bool print );
 }
 
 # include <timestepping/explicitEuler.ipp>
 # include <timestepping/rungeKutta.ipp>
+# include <timestepping/dualTime.ipp>
 
 # endif

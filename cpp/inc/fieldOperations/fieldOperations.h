@@ -34,8 +34,25 @@
                                      const Array::Array1D< IdealGas2D::ConservedDelta >&               r,
                                                            IdealGas2D::ConservedDelta&               res  );
 
+   template<typename SolutionType, typename ResidualType>
+   void residual( const IdealGas2D::Species& gas,
+                  const Array::Array1D< IdealGas2D::VariableSet<  SolutionType > >&   q0,
+                  const Array::Array1D< IdealGas2D::VariableSet<  SolutionType > >&   q1,
+                                        IdealGas2D::VariableDelta<ResidualType>&     res );
+
+   template<typename SolutionType>
+   void dualTimeResidual( const ODE::Implicit::MultiStep& otime,
+                          const IdealGas2D::Species&        gas,
+                          const Controls::GridControls1D&  grid,
+                          const Types::Real                  dt,
+                          const std::vector<Array::Array1D<IdealGas2D::VariableSet<SolutionType>>>&   q,
+                          const std::vector<Array::Array1D<IdealGas2D::ConservedDelta>>&              r,
+                                Array::Array1D<IdealGas2D::ConservedDelta>&                          rm );
+
 # include <fieldOperations/gradientCalculation.ipp>
 # include <fieldOperations/fluxResidual.ipp>
 # include <fieldOperations/eulerForwardUpdate.ipp>
+# include <fieldOperations/residual.ipp>
+# include <fieldOperations/dualTimeResidual.ipp>
 
 # endif

@@ -147,4 +147,15 @@ namespace IdealGas2D
      }
       return q;
   }
+
+// absolute function
+   template<typename VType>
+   inline VariableDelta<VType> abs( VariableDelta<VType> dq )
+  {
+      dq[0]=fabs(dq[0]);
+      dq[1]=fabs(dq[1]);
+      dq[2]=fabs(dq[2]);
+      dq[3]=fabs(dq[3]);
+      return dq;
+  }
 }

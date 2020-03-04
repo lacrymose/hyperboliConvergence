@@ -10,7 +10,7 @@ namespace Controls
    struct GridControls1D
   {
    // number of grid cells
-      int n;
+      size_t n;
 
    // type of boundary condition
       char boundaryCondition;

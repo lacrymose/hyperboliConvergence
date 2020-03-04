@@ -3,12 +3,13 @@
                              const Array::Array1D< IdealGas2D::VariableSet<   SolutionType > >&  q,
                                    Array::Array1D< IdealGas2D::VariableDelta< SolutionType > >& dq )
   {
-      int n=grid.n;
+      size_t n=grid.n;
+      size_t i;
       assert( dq.size() == n+2 );
       assert(  q.size() == n   );
 
    // internal cells
-      for( int i=1; i<n; i++ )
+      for( i=1; i<n; i++ )
      {
          dq[i+1] = q[i]-q[i-1];
      }

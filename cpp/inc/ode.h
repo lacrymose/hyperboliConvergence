@@ -10,7 +10,7 @@ namespace ODE
       struct MultiStep
      {
    // du/dt = R(u)
-   
+
    // ( b_0*u_{n+1} + b_1*u_{n} + b_2*u_{n-1} )/dt
    //       = g_0*R( u_{n+1} ) + g_1*R( u_{n} )
 
@@ -19,42 +19,48 @@ namespace ODE
 
       // number of nsteps
          int nsteps;
-             
+
+      // number of residual evaluations
+         int nresid;
+
       // coefficients
          Types::Real  beta[3]={0,0,0};
          Types::Real gamma[2]={0,0};
-   
+
          inline void eulerBackward1()
         {
             order=1;
             nsteps=2;
+            nresid=1;
 
             beta[0]= 1.;
             beta[1]=-1.;
-   
+
             gamma[0]=1.;
         }
-   
+
          inline void backwardDifference2()
         {
             order=2;
             nsteps=3;
+            nresid=1;
 
             beta[0]= 1.5;
             beta[1]=-2.0;
             beta[2]= 0.5;
-   
+
             gamma[0]=1.;
         }
-   
+
          inline void trapeziumRule2()
         {
             order=2;
             nsteps=2;
+            nresid=2;
 
             beta[0]= 1.;
             beta[1]=-1.;
-   
+
             gamma[0]=0.5;
             gamma[1]=0.5;
         }

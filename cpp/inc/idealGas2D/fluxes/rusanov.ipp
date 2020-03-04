@@ -1,7 +1,7 @@
 
 namespace IdealGas2D
 {
-   inline void LaxFriedrichs::operator()( const Species& gas, const Types::Real n[3], const State& sl, const State& sr, ConservedDelta& f, Types::Real& lmax ) const
+   inline void Rusanov::operator()( const Species& gas, const Types::Real n[3], const State& sl, const State& sr, ConservedDelta& f, Types::Real& lmax ) const
   {
       ConservedDelta   fl,fr,fd,fc;
       ConservedVariables     ql,qr;

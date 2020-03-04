@@ -29,6 +29,9 @@ namespace IdealGas2D
 // typedefs
    typedef VariableType<'c'>               Conserved;
    typedef VariableType<'v'>                 Viscous;
+// typedef VariableType<'p'>               Primitive;
+// typedef VariableType<'g'>          Preconditioned;
+// typedef VariableType<'w'>          Characteristic;
 
    typedef VariableSet<Conserved> ConservedVariables;
    typedef VariableSet<Viscous>     ViscousVariables;
@@ -148,15 +151,18 @@ namespace IdealGas2D
       inline VariableDelta<VType>& operator =(       Types::Real a );
   };
 
+   template<typename VType>
+   inline VariableDelta<VType> abs( VariableDelta<VType> dq );
+
 /*
  * Exact physical flux vector
  */
    inline void exactFlux(     const Species& gas, const Types::Real n[3], const State& state,               ConservedDelta& f, Types::Real& lmax );
 
 /*
- * Local Lax-Friedrichs flux
+ * Local Rusanov flux
  */
-   struct LaxFriedrichs
+   struct Rusanov
   {
       inline void operator()( const Species& gas, const Types::Real n[3], const State& sl, const State& sr, ConservedDelta& f, Types::Real& lmax ) const;
   };
@@ -202,7 +208,7 @@ namespace IdealGas2D
 
 # include <idealGas2D/fluxes/machSplittings.ipp>
 # include <idealGas2D/fluxes/exactFlux.ipp>
-# include <idealGas2D/fluxes/laxFriedrichs.ipp>
+# include <idealGas2D/fluxes/rusanov.ipp>
 # include <idealGas2D/fluxes/ausm.ipp>
 # include <idealGas2D/fluxes/slau.ipp>
 

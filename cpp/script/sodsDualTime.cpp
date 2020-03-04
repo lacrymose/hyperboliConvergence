@@ -13,11 +13,16 @@
 
 namespace Gas = IdealGas2D;
 
-//typedef Gas::Conserved    SolutionType;
-typedef Gas::Viscous      SolutionType;
+typedef Gas::Conserved    SolutionType;
+//typedef Gas::Viscous      SolutionType;
 
-//typedef Gas::LaxFriedrichs   Flux;
-typedef Gas::Ausm            Flux;
+typedef Gas::Rusanov   Flux;
+//typedef Gas::Ausm      Flux;
+//typedef Gas::Slau      Flux;
+
+typedef Limiters::NoLimit1 Limiter;
+//typedef Limiters::MinMod2 Limiter;
+//typedef Limiters::Cada3 Limiter;
 
 typedef Gas::VariableSet<  SolutionType>   SolutionVariables;
 typedef Gas::VariableDelta<SolutionType>   SolutionDelta;
@@ -43,11 +48,14 @@ typedef Gas::VariableDelta<SolutionType>   SolutionDelta;
       Gas::Species  gas;
       Flux         flux;
 
-      Controls::GridControls1D             grid;
-      Controls::TimeSteppingControls  outerTime;
-      Controls::TimeSteppingControls  innerTime;
+      Limiters::VectorFaceLimiter<Limiter>      limiter;
 
-      ODE::Implicit::MultiStep      outerTimeDerivative;
+      Controls::GridControls1D                     grid;
+      Controls::TimeSteppingControls          outerTime;
+      Controls::TimeSteppingControls          innerTime;
+
+      ODE::Implicit::MultiStep       implicitIntegrator;
+      ODE::Explicit::RungeKutta      explicitIntegrator;
 
       bool contact=false;
 
@@ -62,6 +70,7 @@ typedef Gas::VariableDelta<SolutionType>   SolutionDelta;
 //    outerTimeDerivative.eulerBackward1();
 //    outerTimeDerivative.backwardDifference2();
       outerTimeDerivative.trapeziumRule2();
+      explicitIntegrator.ssp34();
 
    // read parameters
       if( initialStatesFile.is_open() )
@@ -155,14 +164,6 @@ typedef Gas::VariableDelta<SolutionType>   SolutionDelta;
             lmax=-1;
             fluxResidual( gas, grid.boundaryCondition, flux, q[0],r[0], lmax );
             dtau = innerTime.cfl/lmax;
-
-            for( k=0; k<grid.n; k++ )
-           {
-               s[k] =  outerTimeDerivative.beta[0]*Gas::ConservedDelta( Gas::ConservedVariables( gas, q[0][k] ) )
-                     + outerTimeDerivative.beta[1]*Gas::ConservedDelta( Gas::ConservedVariables( gas, q[1][k] ) );
-                     + outerTimeDerivative.beta[2]*Gas::ConservedDelta( Gas::ConservedVariables( gas, q[2][k] ) );
-               s[k]/= dt;
-           }
 
             for( k=0; k<grid.n; k++ )
            {
