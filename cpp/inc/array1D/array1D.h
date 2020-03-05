@@ -2,6 +2,8 @@
 # ifndef ARRAY1D_H
 # define ARRAY1D_H
 
+# include <types.h>
+
 # include <cassert>
 # include <vector>
 # include <algorithm>
@@ -34,9 +36,9 @@ namespace Array
       template<typename T2>
       inline Array1D<T>& operator-=( const Array1D<T2>& da );
 
-      inline Array1D<T>& operator =(       float d );
-      inline Array1D<T>& operator*=(       float d );
-      inline Array1D<T>& operator/=(       float d );
+      inline Array1D<T>& operator =(       Types::Real d );
+      inline Array1D<T>& operator*=(       Types::Real d );
+      inline Array1D<T>& operator/=(       Types::Real d );
   };
 
 // Arithmetic operations
@@ -47,12 +49,12 @@ namespace Array
    inline Array1D<T> operator-( const Array1D<T>& a0, const Array1D<T>& a1 );
 
    template<typename T>
-   inline Array1D<T> operator*( const Array1D<T>& a0,            float   d );
+   inline Array1D<T> operator*( const Array1D<T>& a0,            Types::Real   d );
    template<typename T>
-   inline Array1D<T> operator*(            float   d, const Array1D<T>& a1 );
+   inline Array1D<T> operator*(            Types::Real   d, const Array1D<T>& a1 );
 
    template<typename T>
-   inline Array1D<T> operator/( const Array1D<T>& a0,            float   d );
+   inline Array1D<T> operator/( const Array1D<T>& a0,            Types::Real   d );
 }
 
 # include <array1D/array1D.ipp>

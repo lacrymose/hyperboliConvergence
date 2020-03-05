@@ -124,7 +124,6 @@ namespace IdealGas2D
       lmax = fmax(  aa, fmax(       al,        ar  ) );
       lmax+= fmax( una, fmax( fabs(unl), fabs(unr) ) );
       lmax*= n[2];
-//      lmax*=  2.0;
 
       return;
   }

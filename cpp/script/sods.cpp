@@ -15,9 +15,9 @@ namespace Gas = IdealGas2D;
 typedef Gas::Conserved        SolutionType;
 //typedef Gas::Viscous          SolutionType;
 
-typedef Gas::Rusanov        Flux;
+//typedef Gas::Rusanov        Flux;
 //typedef Gas::Ausm           Flux;
-//typedef Gas::Slau           Flux;
+typedef Gas::Slau           Flux;
 
 typedef Limiters::NoLimit1 Limiter;
 //typedef Limiters::MinMod2 Limiter;

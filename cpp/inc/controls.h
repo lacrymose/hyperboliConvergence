@@ -29,11 +29,14 @@ namespace Controls
 
    // cfl number
       Types::Real cfl;
+
+   // convergence test
+      Types::Real  convergenceDrop;
   };
 
    inline std::istream& operator>>( std::istream& is, TimeSteppingControls& t )
   {
-      is >> t.nt >> t.cfl;
+      is >> t.nt >> t.cfl >> t.convergenceDrop;
       return is;
   }
 }

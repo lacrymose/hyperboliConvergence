@@ -28,8 +28,8 @@
             qc = IdealGas2D::ConservedVariables( gas, q[j][i] );
             rm[i]-= bdf.beta[j]*IdealGas2D::ConservedDelta( qc );
         }
+         rm[i]/=dt;
      }
-      rm/=dt;
 
    // accumulate flux residuals
       for( j=0; j<bdf.nresid; j++ )
