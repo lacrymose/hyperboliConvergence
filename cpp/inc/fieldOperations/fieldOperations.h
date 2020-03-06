@@ -1,6 +1,7 @@
 # ifndef FIELDOPS_H
 # define FIELDOPS_H
 
+# include <ode.h>
 # include <controls.h>
 # include <array1D/array1D.h>
 # include <idealGas2D/idealGas2D.h>
@@ -49,10 +50,27 @@
                           const std::vector<Array::Array1D<IdealGas2D::ConservedDelta>>&              r,
                                 Array::Array1D<IdealGas2D::ConservedDelta>&                          rm );
 
+   template<typename T>
+   void centralExplicitSmoothing( const Controls::GridControls1D&  grid,
+                                  const Types::Real               alpha,
+                                  const Array::Array1D<T>&           r0,
+                                        Array::Array1D<T>&           r1 );
+
+   template<typename T>
+   void centralImplicitSmoothing( const Controls::GridControls1D&  grid,
+                                  const Types::Real               alpha,
+                                  const Array::Array1D<T>&           r0,
+                                        Array::Array1D<T>&           r1 );
+
 # include <fieldOperations/gradientCalculation.ipp>
 # include <fieldOperations/fluxResidual.ipp>
-# include <fieldOperations/eulerForwardUpdate.ipp>
-# include <fieldOperations/residual.ipp>
 # include <fieldOperations/dualTimeResidual.ipp>
+
+# include <fieldOperations/residual.ipp>
+
+# include <fieldOperations/eulerForwardUpdate.ipp>
+
+# include <fieldOperations/centralExplicitSmoothing.ipp>
+# include <fieldOperations/centralImplicitSmoothing.ipp>
 
 # endif

@@ -17,10 +17,9 @@ namespace TimeStepping
 
       std::vector<Array::Array1D<IdealGas2D::VariableSet<SolutionType>>>    qn(bdf.nsteps);  // outer iteration solutions
       std::vector<Array::Array1D<IdealGas2D::ConservedDelta>>                r(bdf.nresid);   // flux residuals
+      std::vector<Array::Array1D<IdealGas2D::ConservedDelta>>               rj(rk.nstages);   // flux residuals
                   Array::Array1D<IdealGas2D::VariableDelta<SolutionType>>   dq;               // solution gradient
-                  Array::Array1D<IdealGas2D::ConservedDelta>                rm0;              // total dualtime residual
-                  Array::Array1D<IdealGas2D::ConservedDelta>                rm1;              // total dualtime residual
-                  Array::Array1D<IdealGas2D::ConservedDelta>                rm2;              // total dualtime residual
+                  Array::Array1D<IdealGas2D::ConservedDelta>                rm;               // total dualtime residual
                   Array::Array1D<IdealGas2D::ConservedDelta>                s;                // dual time source term
 
       IdealGas2D::VariableDelta<SolutionType> du;
