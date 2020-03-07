@@ -1,6 +1,8 @@
 # ifndef CONTROLS_H
 # define CONTROLS_H
 
+# include <types.h>
+
 # include <iostream>
 
 namespace Controls
@@ -8,7 +10,7 @@ namespace Controls
    struct GridControls1D
   {
    // number of grid cells
-      int n;
+      size_t n;
 
    // type of boundary condition
       char boundaryCondition;
@@ -26,12 +28,15 @@ namespace Controls
       int nt;
 
    // cfl number
-      float cfl;
+      Types::Real cfl;
+
+   // convergence test
+      Types::Real  convergenceDrop;
   };
 
    inline std::istream& operator>>( std::istream& is, TimeSteppingControls& t )
   {
-      is >> t.nt >> t.cfl;
+      is >> t.nt >> t.cfl >> t.convergenceDrop;
       return is;
   }
 }

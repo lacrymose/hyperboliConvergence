@@ -1,27 +1,34 @@
 
 # include <ode.h>
 # include <controls.h>
+# include <limiter.h>
 # include <array1D/array1D.h>
 # include <idealGas2D/idealGas2D.h>
 # include <fieldOperations/fieldOperations.h>
 
+# include <types.h>
+
 # include <iostream>
 # include <fstream>
 # include <assert.h>
-# include <math.h>
+# include <cmath>
 
 
 namespace Gas = IdealGas2D;
 
-//typedef Gas::Conserved    SolutionType;
-typedef Gas::Viscous      SolutionType;
+typedef Gas::Conserved    SolutionType;
+//typedef Gas::Viscous      SolutionType;
 
-//typedef Gas::LaxFriedrichs   Flux;
-typedef Gas::Ausm            Flux;
+typedef Gas::Rusanov   Flux;
+//typedef Gas::Ausm      Flux;
+//typedef Gas::Slau      Flux;
+
+typedef Limiters::NoLimit1 Limiter;
+//typedef Limiters::MinMod2 Limiter;
+//typedef Limiters::Cada3 Limiter;
 
 typedef Gas::VariableSet<  SolutionType>   SolutionVariables;
 typedef Gas::VariableDelta<SolutionType>   SolutionDelta;
-
 
    int main()
   {
@@ -30,44 +37,52 @@ typedef Gas::VariableDelta<SolutionType>   SolutionDelta;
 
    // initial conditions
       Gas::ViscousVariables    qvl,qvr;
-      SolutionVariables               ql,qr;
+      SolutionVariables         ql, qr;
 
    // initialise arrays
-      Array::Array1D<            SolutionVariables>  qm;
-      Array::Array1D<            SolutionVariables>  q[3];
-      Array::Array1D<Gas::ConservedDelta>     r[2];
-      Array::Array1D<Gas::ConservedDelta>      s;
+      Array::Array1D<  SolutionDelta>      dq;
+      Array::Array1D<  SolutionVariables>  qm;
+      std::vector<Array::Array1D<  SolutionVariables>>  q;
+      std::vector<Array::Array1D<Gas::ConservedDelta>>  r;
+      Array::Array1D<Gas::ConservedDelta>  rm;
+      Array::Array1D<Gas::ConservedDelta>  s;
 
       Gas::ConservedDelta    res;
       Gas::ConservedDelta    res0;
 
       Gas::Species  gas;
-      Flux                flux;
+      Flux         flux;
 
-      Controls::GridControls1D             grid;
-      Controls::TimeSteppingControls  outerTime;
-      Controls::TimeSteppingControls  innerTime;
+      Limiters::VectorFaceLimiter<Limiter>      limiter;
 
-      ODE::Implicit::MultiStep      outerTimeDerivative;
+      Controls::GridControls1D                     grid;
+      Controls::TimeSteppingControls          outerTime;
+      Controls::TimeSteppingControls          innerTime;
 
+      ODE::Implicit::MultiStep       implicitIntegrator;
+      ODE::Explicit::RungeKutta      explicitIntegrator;
 
-      int      i,j,k;
+      bool contact=true;
 
-      float  lmax,dt,dtau;
+      size_t    ii,k;
+      int        i,j;
+
+      Types::Real  lmax,dt,dtau;
 
       std::cout << std::scientific;
       std::cout.precision(2);
 
       gas.air();
-//    outerTimeDerivative.eulerBackward1();
-//    outerTimeDerivative.backwardDifference2();
-      outerTimeDerivative.trapeziumRule2();
+//    implicitIntegrator.eulerBackward1();
+//    implicitIntegrator.backwardDifference2();
+      implicitIntegrator.trapeziumRule2();
+      explicitIntegrator.ssp34();
 
    // read parameters
       if( initialStatesFile.is_open() )
      {
-         for( i=0; i<4; i++ ){ initialStatesFile >> qvl[i]; }
-         for( i=0; i<4; i++ ){ initialStatesFile >> qvr[i]; }
+         for( j=0; j<4; j++ ){ initialStatesFile >> qvl[j]; }
+         for( j=0; j<4; j++ ){ initialStatesFile >> qvr[j]; }
      }
       else
      {
@@ -92,66 +107,80 @@ typedef Gas::VariableDelta<SolutionType>   SolutionDelta;
    // ensure domain is symmetric and waves will not reach boundaries
       assert( grid.n%2==0 );
 
-      q[0].resize(grid.n);
-      q[1].resize(grid.n);
-      q[2].resize(grid.n);
-      qm.resize(grid.n);
+      q.resize(implicitIntegrator.nsteps);
+      r.resize(implicitIntegrator.nresid);
 
-      r[0].resize(grid.n);
-      r[1].resize(grid.n);
+      for( ii=0; ii<q.size(); ii++ ){ q[ii].resize( grid.n ); }
+      for( ii=0; ii<r.size(); ii++ ){ r[ii].resize( grid.n ); }
+
+      rm.resize( grid.n   );
+      qm.resize( grid.n   );
+      dq.resize( grid.n+2 );
+
       s.resize( grid.n);
 
-//    qvl[0]=1.;      qvr[0]=1.;
-//    qvl[1]=0.;      qvr[1]=0.;
-//    qvl[2]=0.02765; qvr[2]=0.02865;
-//    qvl[3]=7.937;   qvr[3]=7.937;
+      if( contact )
+     {
+         float mach=0.2;
+         float perturbation=0.05;
+
+         float temp,press;
+
+         grid.boundaryCondition='p';
+
+         press= 1./(gas.gamma*mach*mach);
+         temp = press/gas.Rgas;
+
+         qvl[0]=1.;      qvr[0]=1.;
+         qvl[1]=0.;      qvr[1]=0.;
+         qvl[2]=temp;    qvr[2]=temp;
+         qvl[3]=press;   qvr[3]=press;
+
+         qvl[2]*=(1.+perturbation);
+     }
 
       ql = SolutionVariables( gas, qvl );
       qr = SolutionVariables( gas, qvr );
 
-      for( i=0;        i<grid.n/4; i++ ){ q[0][i] = ql; }
-      for( i=grid.n/4; i<grid.n;   i++ ){ q[0][i] = qr; }
+      for( ii=0;        ii<grid.n/4; ii++ ){ q[0][ii] = ql; }
+      for( ii=grid.n/4; ii<grid.n;   ii++ ){ q[0][ii] = qr; }
 
    // timesteps
-      q[1]=q[0];
-      q[2]=q[0];
+      for( ii=1; ii<q.size(); ii++ ){ q[ii]=q[0]; }
+      for( ii=1; ii<r.size(); ii++ ){ r[ii]=  0.; }
       qm  =q[0];
-      r[0]=0.;
-      r[1]=0.;
       s   =0.;
 
       for( i=0; i<outerTime.nt; i++ )
      {
       // outer timestep calculation
          lmax=-1;
-         fluxResidual( gas, grid.boundaryCondition, flux, q[1],r[1], lmax );
+         gradientCalculation( grid, q[1],dq );
+         if( r.size()==2 )
+        {
+            fluxResidual( gas, grid.boundaryCondition, flux,limiter, q[0],dq,r[1], lmax );
+        }
+         else
+        {
+            fluxResidual( gas, grid.boundaryCondition, flux,limiter, q[0],dq,r[0], lmax );
+        }
          if( i==0 ){ dt = outerTime.cfl/lmax; }
 
       // dualtime iterations
          for( j=0; j<innerTime.nt; j++ )
         {
-            for( k=0; k<grid.n; k++ )
-           {
-               s[k] =  outerTimeDerivative.beta[0]*Gas::ConservedDelta( Gas::ConservedVariables( gas, q[0][k] ) )
-                     + outerTimeDerivative.beta[1]*Gas::ConservedDelta( Gas::ConservedVariables( gas, q[1][k] ) );
-                     + outerTimeDerivative.beta[2]*Gas::ConservedDelta( Gas::ConservedVariables( gas, q[2][k] ) );
-               s[k]/= dt;
-           }
-
             lmax=-1;
-            fluxResidual( gas, grid.boundaryCondition, flux, q[0],r[0], lmax );
+            gradientCalculation( grid, q[0],dq );
+            fluxResidual( gas, grid.boundaryCondition, flux,limiter, q[0],dq,r[0], lmax );
+
             dtau = innerTime.cfl/lmax;
+            dtau/= ( 1. + implicitIntegrator.beta[0]*dtau/dt );
 
-            for( k=0; k<grid.n; k++ )
-           {
-               r[0][k] =  outerTimeDerivative.gamma[0]*r[0][k]
-                        + outerTimeDerivative.gamma[1]*r[1][k]
-                        - s[k];
-           }
+            dualTimeResidual( implicitIntegrator, gas, grid,
+                              dt,q,r, rm );
 
-            dtau/= ( 1. + outerTimeDerivative.beta[0]*dtau/dt );
 
-            eulerForwardUpdate( gas, dtau, q[0],qm, r[0], res );
+            eulerForwardLinearUpdate( gas, dtau, q[0],qm, rm, res );
             q[0]=qm;
 
             if( j==0 )
@@ -171,33 +200,14 @@ typedef Gas::VariableDelta<SolutionType>   SolutionDelta;
            }
         }
 
-         res=0;
-         for( k=0; k<grid.n; k++ )
-        {
-            for( int m=0; m<4; m++ )
-           {
-               res[m]+= fabs( Gas::ConservedVariables( gas, q[0][k] )[m]
-                             -Gas::ConservedVariables( gas, q[1][k] )[m] );
-           }
-        }
+         residual( gas, q[0],q[1], res );
 
          std::cout << std::endl;
          std::cout << std::left << std::setw(8) << i;
          std::cout << res << std::endl;
          std::cout << std::endl;
 
-         qm=q[0];
-         float relax=0.0;
-         for( k=0; k<grid.n; k++ )
-        {
-            qm[k]= q[0][k] + relax*outerTimeDerivative.beta[0]*SolutionDelta( q[0][k] )
-                           + relax*outerTimeDerivative.beta[1]*SolutionDelta( q[1][k] )
-                           + relax*outerTimeDerivative.beta[2]*SolutionDelta( q[2][k] );
-        }
-
-         q[2]=q[1];
-         q[1]=q[0];
-         q[0]=qm;
+         for( ii=q.size()-1; ii>0; ii-- ){ q[ii]=q[ii-1]; }
      }
 
    // save solution
@@ -205,11 +215,12 @@ typedef Gas::VariableDelta<SolutionType>   SolutionDelta;
       Gas::State state;
       if( solutionFile.is_open() )
      {
-         for( i=0; i<grid.n; i++ )
+         for( k=0; k<grid.n; k++ )
         {
-            state = Gas::State( gas, q[0][i] );
+            state = Gas::State( gas, q[0][k] );
             solutionFile << state.density()     << " "
                          << state.velocityX()   << " "
+                         << state.velocityY()   << " "
                          << state.pressure()    << " "
                          << state.temperature() << std::endl;
         }

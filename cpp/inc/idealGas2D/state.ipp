@@ -13,25 +13,14 @@ namespace IdealGas2D
       state[7]=0.;
   }
 
-   template<typename VType>
-   inline State::State( const Species& gas, const VariableSet<VType>& q )
-  {
-      static_assert( CheckTypes<VType,Conserved>::val ||
-                     CheckTypes<VType,Viscous  >::val,
-                    "\n\nWarning:\n"
-                    "State::State( const Species& gas, const VariableSet<VType>& q0 )\n"
-                    "is not yet defined for this VariableType\n" );
-      assert( false );
-  }
-
    template<>
    inline State::State( const Species& gas, const VariableSet<Conserved>& q )
   {
-      float p,r,t,h,v2,a2;
-      float u,v;
-      float ru,rv,re;
+      Types::Real p,r,t,h,v2,a2;
+      Types::Real u,v;
+      Types::Real ru,rv,re;
 
-      float r1,k,gam1;
+      Types::Real r1,k,gam1;
 
       gam1=gas.gamma-1;
       gam1=1./gam1;
@@ -74,9 +63,9 @@ namespace IdealGas2D
    template<>
    inline State::State( const Species& gas, const VariableSet<Viscous>& q )
   {
-      float p,r,t,h,v2,a2;
-      float u,v;
-      float k,gam1;
+      Types::Real p,r,t,h,v2,a2;
+      Types::Real u,v;
+      Types::Real k,gam1;
 
       gam1=gas.gamma-1;
       gam1=1./gam1;

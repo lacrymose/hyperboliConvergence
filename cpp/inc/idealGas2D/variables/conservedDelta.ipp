@@ -15,17 +15,17 @@ namespace IdealGas2D
    template<>
    inline VariableDelta<Conserved>::VariableDelta( const Species& gas, const State& state, const VariableDelta<Viscous>& dq0 )
   {
-      float u,v;
-      float r,h,t,a2;
-      float cp;
+      Types::Real u,v;
+      Types::Real r,h,t,a2;
+      Types::Real cp;
 
-      float dr,dru,drv,dre;
-      float du,dv,dt,dp;
+      Types::Real dr,dru,drv,dre;
+      Types::Real du,dv,dt,dp;
 
-      float a1,      a4;
-      float b1,b2,   b4;
-      float c1,   c3,c4;
-      float d1,d2,d3,d4;
+      Types::Real a1,      a4;
+      Types::Real b1,b2,   b4;
+      Types::Real c1,   c3,c4;
+      Types::Real d1,d2,d3,d4;
 
       du = dq0[0];
       dv = dq0[1];

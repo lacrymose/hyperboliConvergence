@@ -5,21 +5,21 @@ namespace IdealGas2D
   {
       ViscousVariables dqv;
 
-      float u,v;
-      float r,h,t,a2;
-      float cp;
+      Types::Real u,v;
+      Types::Real r,h,t,a2;
+      Types::Real cp;
 
-      float dr,dru,drv,dre;
-      float du,dv,dt,dp;
+      Types::Real dr,dru,drv,dre;
+      Types::Real du,dv,dt,dp;
 
-      float a1_1;
+      Types::Real a1_1;
 
-      float a1,          a4;
-      float b1,b2_1,     b4;
-      float c1,     c3_1,c4;
-      float d1,d2,  d3,  d4;
+      Types::Real a1,          a4;
+      Types::Real b1,b2_1,     b4;
+      Types::Real c1,     c3_1,c4;
+      Types::Real d1,d2,  d3,  d4;
 
-      float omega1,omega2,omega3;
+      Types::Real omega1,omega2,omega3;
 
       dr = dqc[0];
       dru= dqc[1];
@@ -79,17 +79,17 @@ namespace IdealGas2D
   {
       ConservedVariables dqc;
 
-      float u,v;
-      float r,h,t,a2;
-      float cp;
+      Types::Real u,v;
+      Types::Real r,h,t,a2;
+      Types::Real cp;
 
-      float dr,dru,drv,dre;
-      float du,dv,dt,dp;
+      Types::Real dr,dru,drv,dre;
+      Types::Real du,dv,dt,dp;
 
-      float a1,      a4;
-      float b1,b2,   b4;
-      float c1,   c3,c4;
-      float d1,d2,d3,d4;
+      Types::Real a1,      a4;
+      Types::Real b1,b2,   b4;
+      Types::Real c1,   c3,c4;
+      Types::Real d1,d2,d3,d4;
 
       du = dqv[0];
       dv = dqv[1];

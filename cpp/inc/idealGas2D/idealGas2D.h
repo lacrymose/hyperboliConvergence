@@ -1,12 +1,15 @@
 # ifndef IDEAL_GAS_2D_H
 # define IDEAL_GAS_2D_H
 
+# include <array1D/array1D.h>
+
+# include <types.h>
+# include <utils.h>
+
 # include <iostream>
 # include <iomanip>
-# include <assert.h>
-# include <math.h>
-
-# include <checkTypes.h>
+# include <cassert>
+# include <cmath>
 
 namespace IdealGas2D
 {
@@ -26,6 +29,9 @@ namespace IdealGas2D
 // typedefs
    typedef VariableType<'c'>               Conserved;
    typedef VariableType<'v'>                 Viscous;
+// typedef VariableType<'p'>               Primitive;
+// typedef VariableType<'g'>          Preconditioned;
+// typedef VariableType<'w'>          Characteristic;
 
    typedef VariableSet<Conserved> ConservedVariables;
    typedef VariableSet<Viscous>     ViscousVariables;
@@ -38,11 +44,11 @@ namespace IdealGas2D
  */
    struct Species
   {
-      float gamma;
-      float  Rgas;
-      float    nu;
-      float    pr;
-      float  minf;
+      Types::Real gamma;
+      Types::Real  Rgas;
+      Types::Real    nu;
+      Types::Real    pr;
+      Types::Real  minf;
 
       void air();
   };
@@ -52,21 +58,23 @@ namespace IdealGas2D
  */
    struct State
   {
-      float    state[8];
+      Types::Real    state[8];
 
       inline State();
 
+   // create state using nonlinear transformation from VariableSet
+      // delete prevents compiling for undefined VType
       template<typename VType>
-      explicit inline State( const Species& gas, const VariableSet<VType>& q );
+      explicit inline State( const Species& gas, const VariableSet<VType>& q ) = delete;
 
-      inline const float& velocityX()             const { return state[0]; }
-      inline const float& velocityY()             const { return state[1]; }
-      inline const float& pressure()              const { return state[2]; }
-      inline const float& density()               const { return state[3]; }
-      inline const float& temperature()           const { return state[4]; }
-      inline const float& specificTotalEnthalpy() const { return state[5]; }
-      inline const float& velocity2()             const { return state[6]; }
-      inline const float& speedOfSound2()         const { return state[7]; }
+      inline const Types::Real& velocityX()             const { return state[0]; }
+      inline const Types::Real& velocityY()             const { return state[1]; }
+      inline const Types::Real& pressure()              const { return state[2]; }
+      inline const Types::Real& density()               const { return state[3]; }
+      inline const Types::Real& temperature()           const { return state[4]; }
+      inline const Types::Real& specificTotalEnthalpy() const { return state[5]; }
+      inline const Types::Real& velocity2()             const { return state[6]; }
+      inline const Types::Real& speedOfSound2()         const { return state[7]; }
   };
 
 /*
@@ -78,7 +86,7 @@ namespace IdealGas2D
    struct VariableSet
   {
    // variables
-      float var[4];
+      Types::Real var[4];
 
    // default constructor
       inline VariableSet<VType>();
@@ -91,18 +99,19 @@ namespace IdealGas2D
       explicit inline VariableSet<VType>(                     const VariableDelta<VType>& dq0 );
 
    // nonlinear transformations from other variable sets
+      // delete prevents compiling for undefined (VType,VType2) pairs
       template<typename VType2>
-      explicit inline VariableSet<VType>( const Species& gas, const VariableSet<VType2>&   q0 );
-      explicit inline VariableSet<VType>( const Species& gas, const State&              state );
+      explicit inline VariableSet<VType>( const Species& gas, const VariableSet<VType2>&   q0 ) = delete;
+      explicit inline VariableSet<VType>( const Species& gas, const State&              state ) = delete;
 
    // accessors
-      inline       float& operator[]( const int i )       { return var[i]; }
-      inline const float& operator[]( const int i ) const { return var[i]; }
+      inline       Types::Real& operator[]( const int i )       { return var[i]; }
+      inline const Types::Real& operator[]( const int i ) const { return var[i]; }
 
    // in-place arithmetic
       inline VariableSet<VType>& operator+=( const VariableDelta<VType>& dq0 );
       inline VariableSet<VType>& operator-=( const VariableDelta<VType>& dq0 );
-      inline VariableSet<VType>& operator =(       float a );
+      inline VariableSet<VType>& operator =(       Types::Real a );
   };
 
 /*
@@ -114,7 +123,7 @@ namespace IdealGas2D
    struct VariableDelta
   {
    // variables
-      float var[4];
+      Types::Real var[4];
 
    // default constructor
       inline VariableDelta<VType>();
@@ -128,53 +137,34 @@ namespace IdealGas2D
 
    // linear transformations from other variable deltas
       template<typename VType2>
-      explicit inline VariableDelta<VType>( const Species& gas, const State& state, const VariableDelta<VType2>& dq0 );
+      explicit inline VariableDelta<VType>( const Species& gas, const State& state, const VariableDelta<VType2>& dq0 ) = delete;
 
    // accessors
-      inline       float& operator[]( const int i )       { return var[i]; }
-      inline const float& operator[]( const int i ) const { return var[i]; }
+      inline       Types::Real& operator[]( const int i )       { return var[i]; }
+      inline const Types::Real& operator[]( const int i ) const { return var[i]; }
 
    // in-place arithmetic
       inline VariableDelta<VType>& operator+=( const VariableDelta<VType>& dq0 );
       inline VariableDelta<VType>& operator-=( const VariableDelta<VType>& dq0 );
-      inline VariableDelta<VType>& operator*=(       float a );
-      inline VariableDelta<VType>& operator/=(       float a );
-      inline VariableDelta<VType>& operator =(       float a );
+      inline VariableDelta<VType>& operator*=(       Types::Real a );
+      inline VariableDelta<VType>& operator/=(       Types::Real a );
+      inline VariableDelta<VType>& operator =(       Types::Real a );
   };
 
-//// Arithmetic operations for VariableSets and VariableDeltas
-//   template<typename VType>           // dq+dq
-//   inline VariableDelta<VType> operator+( const VariableDelta<VType>& dq0, const VariableDelta<VType>& dq1 );
-//
-//   template<typename VType>           // dq-dq
-//   inline VariableDelta<VType> operator-( const VariableDelta<VType>& dq0, const VariableDelta<VType>& dq1 );
-//
-//   template<typename VType>           //  q+dq
-//   inline VariableSet<VType>   operator+( const VariableSet<VType>&    q0, const VariableDelta<VType>& dq0 );
-//
-//   template<typename VType>           //  q-dq
-//   inline VariableSet<VType>   operator-( const VariableSet<VType>&    q0, const VariableDelta<VType>& dq0 );
-//
-//   template<typename VType>           //  a*dq
-//   inline VariableDelta<VType> operator*(                      float    a, const VariableDelta<VType>& dq0 );
-//
-//   template<typename VType>           // dq*a
-//   inline VariableDelta<VType> operator*( const VariableDelta<VType>& dq0,                      float    a );
-//
-//   template<typename VType>           // dq/a
-//   inline VariableDelta<VType> operator/( const VariableDelta<VType>& dq0,                      float    a );
+   template<typename VType>
+   inline VariableDelta<VType> abs( VariableDelta<VType> dq );
 
 /*
  * Exact physical flux vector
  */
-   inline void exactFlux(     const Species& gas, const float n[3], const State& state,               ConservedDelta& f, float& lmax );
+   inline void exactFlux(     const Species& gas, const Types::Real n[3], const State& state,               ConservedDelta& f, Types::Real& lmax );
 
 /*
- * Local Lax-Friedrichs flux
+ * Local Rusanov flux
  */
-   struct LaxFriedrichs
+   struct Rusanov
   {
-      inline void operator()( const Species& gas, const float n[3], const State& sl, const State& sr, ConservedDelta& f, float& lmax ) const;
+      inline void operator()( const Species& gas, const Types::Real n[3], const State& sl, const State& sr, ConservedDelta& f, Types::Real& lmax ) const;
   };
 
 /*
@@ -182,16 +172,26 @@ namespace IdealGas2D
  */
    struct Ausm
   {
-      float alpha0;
-      float  sigma;
-      float   beta;
-      float     Ku;
-      float     Kp;
+      Types::Real alpha0;
+      Types::Real  sigma;
+      Types::Real   beta;
+      Types::Real     Ku;
+      Types::Real     Kp;
 
       Ausm();
-      inline void operator()( const Species& gas, const float n[3], const State& sl, const State& sr, ConservedDelta& f, float& lmax ) const;
+      inline void operator()( const Species& gas, const Types::Real n[3], const State& sl, const State& sr, ConservedDelta& f, Types::Real& lmax ) const;
   };
 
+/*
+ * SLAU flux for all speeds (Shima & Kitamura 2011)
+ */
+   struct Slau
+  {
+      Types::Real alpha;
+
+      Slau();
+      inline void operator()( const Species& gas, const Types::Real n[3], const State& sl, const State& sr, ConservedDelta& f, Types::Real& lmax ) const;
+  };
 }
 
 # include <idealGas2D/state.ipp>
@@ -206,8 +206,10 @@ namespace IdealGas2D
 # include <idealGas2D/variables/conservedSet.ipp>
 # include <idealGas2D/variables/conservedDelta.ipp>
 
+# include <idealGas2D/fluxes/machSplittings.ipp>
 # include <idealGas2D/fluxes/exactFlux.ipp>
+# include <idealGas2D/fluxes/rusanov.ipp>
 # include <idealGas2D/fluxes/ausm.ipp>
-# include <idealGas2D/fluxes/laxFriedrichs.ipp>
+# include <idealGas2D/fluxes/slau.ipp>
 
 # endif

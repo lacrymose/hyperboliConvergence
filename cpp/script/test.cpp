@@ -1,8 +1,8 @@
 # include <idealGas2D/idealGas2D.h>
 
 # include <iostream>
-# include <assert.h>
-# include <math.h>
+# include <cassert>
+# include <cmath>
 
 
    int main()
@@ -54,7 +54,7 @@
          assert( fabs( state_c0.state[i] - state_v0.state[i] ) < 1e-6 );
      }
 
-//    IdealGas2D::VariableSet<IdealGas2D::VariableType<'p'>>  qp0;
+      IdealGas2D::VariableSet<IdealGas2D::VariableType<'p'>>  qp0;
 
 //    qp0=IdealGas2D::VariableSet<IdealGas2D::VariableType<'p'>>(gas,qc0);
       return 0;

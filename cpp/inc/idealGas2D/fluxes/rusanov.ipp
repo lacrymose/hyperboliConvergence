@@ -1,11 +1,11 @@
 
 namespace IdealGas2D
 {
-   inline void LaxFriedrichs::operator()( const Species& gas, const float n[3], const State& sl, const State& sr, ConservedDelta& f, float& lmax ) const
+   inline void Rusanov::operator()( const Species& gas, const Types::Real n[3], const State& sl, const State& sr, ConservedDelta& f, Types::Real& lmax ) const
   {
       ConservedDelta   fl,fr,fd,fc;
       ConservedVariables     ql,qr;
-      float  ll,lr;
+      Types::Real  ll,lr;
 
    // central flux
       exactFlux( gas, n, sl, fl, ll );

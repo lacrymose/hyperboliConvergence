@@ -45,21 +45,9 @@ namespace IdealGas2D
       return;
   }
 
-// linear transformations from d(Vtype2) to d(VType)
-   template<typename VType>
-   template<typename VType2>
-   inline VariableDelta<VType>::VariableDelta( const Species& gas, const State& state, const VariableDelta<VType2>& dq0 )
-  {
-      static_assert( CheckTypes<VType,Conserved>::val or
-                     CheckTypes<VType,Viscous  >::val,
-                    "\n\nWarning:\n"
-                    "VariableDelta<VType>::VariableDelta( const Species& gas, const State& state, const VariableDelta<VType2>& dq0 )\n"
-                    "is not yet defined for these VariableTypes\n" );
-  }
-
 // setter
    template<typename VType>
-   inline VariableDelta<VType>& VariableDelta<VType>::operator=( float a )
+   inline VariableDelta<VType>& VariableDelta<VType>::operator=( Types::Real a )
   {
       var[0]=a;
       var[1]=a;
@@ -92,7 +80,7 @@ namespace IdealGas2D
 
 // dq*=a
    template<typename VType>
-   inline VariableDelta<VType>& VariableDelta<VType>::operator*=( float a )
+   inline VariableDelta<VType>& VariableDelta<VType>::operator*=( Types::Real a )
   {
       var[0]*=a;
       var[1]*=a;
@@ -103,9 +91,9 @@ namespace IdealGas2D
 
 // dq/=a
    template<typename VType>
-   inline VariableDelta<VType>& VariableDelta<VType>::operator/=( float a )
+   inline VariableDelta<VType>& VariableDelta<VType>::operator/=( Types::Real a )
   {
-      float a1=1./a;
+      Types::Real a1=1./a;
       var[0]*=a1;
       var[1]*=a1;
       var[2]*=a1;

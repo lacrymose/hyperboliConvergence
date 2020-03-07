@@ -2,23 +2,24 @@
 namespace Array
 {
    template<typename T>
-   inline Array1D<T>& Array1D<T>::operator =( float d )
+   inline Array1D<T>& Array1D<T>::operator =( Types::Real d )
   {
       for( T& t : data ){ t=d; }
       return *this;
   }
 
    template<typename T>
-   inline Array1D<T>& Array1D<T>::operator*=( float d )
+   inline Array1D<T>& Array1D<T>::operator*=( Types::Real d )
   {
       for( T& t : data ){ t*=d; }
       return *this;
   }
 
    template<typename T>
-   inline Array1D<T>& Array1D<T>::operator/=( float d )
+   inline Array1D<T>& Array1D<T>::operator/=( Types::Real d )
   {
-      for( T& t : data ){ t/=d; }
+      Types::Real d1=1./d;
+      for( T& t : data ){ t*=d1; }
       return *this;
   }
 
@@ -45,6 +46,34 @@ namespace Array
                          data.begin(),
                          std::minus<T>() );
 
+      return *this;
+  }
+
+   template<typename T>
+   template<typename T2>
+   inline Array1D<T>& Array1D<T>::operator+=( const Array1D<T2>& da )
+  {
+      int n=size();
+      assert( n=da.size() );
+
+      for( int i=0; i<n; i++ )
+     {
+         data[i]+=da[i];
+     }
+      return *this;
+  }
+
+   template<typename T>
+   template<typename T2>
+   inline Array1D<T>& Array1D<T>::operator-=( const Array1D<T2>& da )
+  {
+      int n=size();
+      assert( n=da.size() );
+
+      for( int i=0; i<n; i++ )
+     {
+         data[i]-=da[i];
+     }
       return *this;
   }
 
@@ -81,7 +110,7 @@ namespace Array
   }
 
    template<typename T>
-   inline Array1D<T> operator*( const Array1D<T>& a0, float d )
+   inline Array1D<T> operator*( const Array1D<T>& a0, Types::Real d )
   {
       int n=a0.size();
       Array1D<T>  a1( n );
@@ -93,7 +122,7 @@ namespace Array
   }
 
    template<typename T>
-   inline Array1D<T> operator*( float d, const Array1D<T>& a0 )
+   inline Array1D<T> operator*( Types::Real d, const Array1D<T>& a0 )
   {
       int n=a0.size();
       Array1D<T>  a1( n );
@@ -105,11 +134,10 @@ namespace Array
   }
 
    template<typename T>
-   inline Array1D<T> operator/( const Array1D<T>& a0, float d )
+   inline Array1D<T> operator/( const Array1D<T>& a0, Types::Real d )
   {
       int   n=a0.size();
-      float     d1=1./d;
-
+      Types::Real     d1=1./d;
       Array1D<T>  a1( n );
       for( int i=0; i<n; i++ )
      {

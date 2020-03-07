@@ -1,10 +1,10 @@
 
 namespace IdealGas2D
 {
-   inline void exactFlux( const Species& gas, const float n[3], const State& state, ConservedDelta& f, float& lmax )
+   inline void exactFlux( const Species& gas, const Types::Real n[3], const State& state, ConservedDelta& f, Types::Real& lmax )
   {
-      float r,u,v,h,p,a;
-      float un,mn;
+      Types::Real r,u,v,h,p,a;
+      Types::Real un,mn;
 
    // unpack state
       r = state.density();

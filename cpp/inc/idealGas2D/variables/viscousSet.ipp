@@ -5,10 +5,10 @@ namespace IdealGas2D
    template<>
    inline VariableSet<Viscous>::VariableSet( const Species& gas, const VariableSet<Conserved>& q0 )
   {
-      float u,v,t,p;
-      float r,ru,rv,re;
-      float k,r1;
-      float gam1;
+      Types::Real u,v,t,p;
+      Types::Real r,ru,rv,re;
+      Types::Real k,r1;
+      Types::Real gam1;
 
       gam1=gas.gamma-1;
       gam1=1./gam1;

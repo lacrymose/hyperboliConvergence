@@ -6,18 +6,20 @@
 
 # include <iostream>
 # include <fstream>
-# include <assert.h>
-# include <math.h>
+# include <cassert>
+# include <cmath>
 
-//typedef IdealGas2D::ConservedVariables SolutionVariables;
-typedef IdealGas2D::ViscousVariables   SolutionVariables;
 
-//typedef IdealGas2D::ConservedDelta SolutionDelta;
-typedef IdealGas2D::ViscousDelta   SolutionDelta;
+namespace Gas = IdealGas2D;
 
-//typedef IdealGas2D::LaxFriedrichs   Flux;
-typedef IdealGas2D::Ausm            Flux;
+//typedef Gas::Conserved    SolutionType;
+typedef Gas::Viscous      SolutionType;
 
+//typedef Gas::LaxFriedrichs   Flux;
+typedef Gas::Ausm            Flux;
+
+typedef Gas::VariableSet<  SolutionType>   SolutionVariables;
+typedef Gas::VariableDelta<SolutionType>   SolutionDelta;
 
    int main()
   {
@@ -29,17 +31,18 @@ typedef IdealGas2D::Ausm            Flux;
       SolutionVariables               ql,qr;
 
    // flux / conserved state;
-      IdealGas2D::ConservedDelta    f,qc;
-      IdealGas2D::ConservedDelta     res;
+      IdealGas2D::ConservedDelta    f,res;
 
    // initialise arrays
-      Array1D<             SolutionVariables> q0;
-      Array1D<             SolutionVariables> q1;
-      Array1D<IdealGas2D::ConservedDelta> r;
+      Array::Array1D<     SolutionVariables> q0;
+      Array::Array1D<     SolutionVariables> q1;
+      Array::Array1D<Gas::ConservedDelta> r;
 
 
-      IdealGas2D::Species  gas;
-      Flux                flux;
+      Gas::Species  gas;
+      Flux         flux;
+
+      bool contact=false;
 
       int      nc,nt;
       int          i;
@@ -83,6 +86,25 @@ typedef IdealGas2D::Ausm            Flux;
       q1.resize(nc);
       r.resize(nc);
 
+      contact=true;
+      if( contact )
+     {
+         float mach=0.2;
+         float perturbation=0.05;
+
+         float temp,press;
+
+         press= 1./(gas.gamma*mach*mach);
+         temp = press/gas.Rgas;
+
+         qvl[0]=1.;      qvr[0]=1.;
+         qvl[1]=0.;      qvr[1]=0.;
+         qvl[2]=temp;    qvr[2]=temp;
+         qvl[3]=press;   qvr[3]=press;
+
+         qvl[2]*=(1.+perturbation);
+     }
+
       ql = SolutionVariables( gas, qvl );
       qr = SolutionVariables( gas, qvr );
       for( i=0;    i<nc/4; i++ ){ q0[i] = ql; }
@@ -101,7 +123,7 @@ typedef IdealGas2D::Ausm            Flux;
          dt = cfl/lmax;
 
       // update
-         eulerForwardUpdate( gas, dt, q0,q1, r, res );
+         eulerForwardNonlinearUpdate( gas, dt, q0,q1, r, res );
          q0=q1;
          std::cout << res << std::endl;
      }
@@ -116,6 +138,7 @@ typedef IdealGas2D::Ausm            Flux;
             s = IdealGas2D::State( gas, q0[i] );
             solutionFile << s.density()     << " "
                          << s.velocityX()   << " "
+                         << s.velocityY()   << " "
                          << s.pressure()    << " "
                          << s.temperature() << std::endl;
         }

@@ -1,28 +1,27 @@
 
 namespace IdealGas2D
 {
-   inline void Ausm::operator()( const Species& gas, const float n[3], const State& sl, const State& sr, ConservedDelta& f, float& lmax ) const
+   inline void Ausm::operator()( const Species& gas, const Types::Real n[3], const State& sl, const State& sr, ConservedDelta& f, Types::Real& lmax ) const
   {
    // left/right states
-      float ul,vl;
-      float ur,vr;
-      float unl, rl,pl, al,hl;
-      float unr, rr,pr, ar,hr;
+      Types::Real ul,vl;
+      Types::Real ur,vr;
+      Types::Real unl, rl,pl, al,hl;
+      Types::Real unr, rr,pr, ar,hr;
 
    // left/right numerical states/splittings
-      float als,ml,mlp,plp;
-      float ars,mr,mrm,prm;
-      float m2m,m2p;
+      Types::Real als,ml,mlp,plp;
+      Types::Real ars,mr,mrm,prm;
 
    // interface values
-      float as,m2,m0,fa, ra,ma,pa;
-      float psi[5];
-      float pu,mp, delu,delp;
-      float alpha;
+      Types::Real as,m2,m0,fa, ra,ma,pa;
+      Types::Real psi[5];
+      Types::Real pu,mp, delu,delp;
+      Types::Real alpha;
 
    // parameters/constants
-      float ascoeff;
-      float  gam1;
+      Types::Real ascoeff;
+      Types::Real  gam1;
 
       gam1=gas.gamma-1;
       gam1=1./gam1;
@@ -70,72 +69,33 @@ namespace IdealGas2D
       m2 = 0.5*( ml*ml + mr*mr );
       m0 = fmin( 1., fmax( m2, gas.minf*gas.minf ) );
       m0 = sqrt( m0 );
-      fa = 1.;
-//    if( m0<1. ){ fa = m0*( 2. - m0 ); }
+      fa = m0*( 2. - m0 );
 
       alpha = alpha0*( 5.*fa*fa - 4. );
 
    // fourth order mach splitting, 5th order pressure splitting
+      int mlsup,mlsub;
+      int mrsup,mrsub;
 
-   // left mach splitting
-      if( ml < -1. )
-     {
-         mlp = 0.;
-         plp = 0.;
-         m2p = 0.;
-         mrm = 0.;
-     }
-      else
-     {
-         if( ml < 1. )
-        {
-            m2p = ml+1.;
-            m2p = 0.25*m2p*m2p;
+      mlsup = fabs(ml)>1 ? 1:0;
+      mlsub = 1-mlsup;
 
-            m2m = ml-1.;
-            m2m =-0.25*m2m*m2m;
+      mrsup = fabs(mr)>1 ? 1:0;
+      mrsub = 1-mrsup;
 
-            mlp = m2p*( 1. - 16.*beta*m2m );
-            plp = m2p*( 2. - ml - 16.*alpha*m2m*ml );
-        }
-         else
-        {
-            mlp = ml;
-            plp = 1.;
-            m2p = 0.;
-            mrm = 0.;
-        }
-     }
+   // mach splittings
+      mlp = mlsub*MachSplitting::M4(  1, ml, beta );
+      mlp+= mlsup*MachSplitting::M1(  1, ml );
 
-   // right mach splitting
-      if( mr < -1. )
-     {
-         mrm = mr;
-         prm = 1.;
-         m2p = 0.;
-         mrm = 0.;
-     }
-      else
-     {
-         if( mr< 1. )
-        {
-            m2p = mr+1;
-            m2p = 0.25*m2p*m2p;
+      mrm = mrsub*MachSplitting::M4( -1, mr, beta );
+      mrm+= mrsup*MachSplitting::M1( -1, mr );
 
-            m2m = mr-1;
-            m2m =-0.25*m2m*m2m;
+   // pressure splittings
+      plp = mlsub*MachSplitting::P5(  1, ml, alpha );
+      plp+= mlsup*MachSplitting::P1(  1, ml );
 
-            mrm = m2m*( 1. + 16.*beta*m2p );
-            prm = m2m*(-2. - mr + 16.*alpha*m2p*mr );
-        }
-         else
-        {
-            mrm = 0.;
-            prm = 0.;
-            m2p = 0.;
-            mrm = 0.;
-        }
-     }
+      prm = mrsub*MachSplitting::P5( -1, mr, alpha );
+      prm+= mrsup*MachSplitting::P1( -1, mr );
 
    // mach number diffusion terms
       ra = 0.5*( rl + rr );
@@ -143,7 +103,8 @@ namespace IdealGas2D
       delp = pr - pl;
 
       mp = -Kp*fmax( 1.-sigma*m2, 0. );
-      mp*=  delp/( fa*ra*as*as );
+      mp*=          delp/( fa*ra*as*as );
+//    mp*=  (1.-fa)*delp/(    ra*as*as );   // cfl limit bodge -not tested for proper low-mach scaling!
 
       pu = -Ku*plp*prm;
       pu*=  2.*ra*(fa*as)*delu;
@@ -167,7 +128,7 @@ namespace IdealGas2D
          psi[3] = hr;
      }
 
-      float mdot = as*psi[0]*ma;
+      Types::Real mdot = as*psi[0]*ma;
       mdot*=n[2];
       pa  *=n[2];
 
@@ -176,7 +137,10 @@ namespace IdealGas2D
       f[2] = psi[2]*mdot + n[1]*pa;
       f[3] = psi[3]*mdot;
 
-      lmax = fmax(         as,  fmax(       al,        ar  ) );
+      Types::Real  lmd=1.;
+      lmd= 0.5*(m0+1)/fa;
+
+      lmax = lmd*fmax(     as,  fmax(       al,        ar  ) );
       lmax+= fmax( fabs(ma*as), fmax( fabs(unl), fabs(unr) ) );
       lmax*= n[2];
 
