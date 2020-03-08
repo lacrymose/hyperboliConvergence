@@ -8,6 +8,6 @@ namespace IdealGas2D
       minf=     1.0;
       gamma=    1.4;
       Rgas= 287.058;
-      nu=1.81*10e-5;
+      nu=   1.81e-5;
   }
 }

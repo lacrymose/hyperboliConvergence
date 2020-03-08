@@ -1,10 +1,10 @@
 # ifndef  TEST_BLANK_H
 # define  TEST_BLANK_H
 
-#include "cppunit/TestFixture.h"
-#include "cppunit/extensions/HelperMacros.h"
+#include <cppunit/TestFixture.h>
+#include <cppunit/extensions/HelperMacros.h>
 
-#include "BLANK.h"
+#include <BLANK.h>
 
 /*
    Tests for public methods of the BLANK class

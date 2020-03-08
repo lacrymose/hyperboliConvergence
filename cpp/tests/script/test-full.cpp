@@ -1,6 +1,6 @@
-#include "cppunit/extensions/HelperMacros.h"
-#include "cppunit/ui/text/TestRunner.h"
-#include "cppunit/TestResult.h"
+#include <cppunit/extensions/HelperMacros.h>
+#include <cppunit/ui/text/TestRunner.h>
+#include <cppunit/TestResult.h>
 
    int main()
   {

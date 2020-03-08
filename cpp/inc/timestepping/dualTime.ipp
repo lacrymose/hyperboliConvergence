@@ -33,9 +33,7 @@ namespace TimeStepping
 
    // allocate array sizes
       dq.resize( grid.n+2 );
-      rm0.resize( grid.n );
-      rm1.resize( grid.n );
-      rm2.resize( grid.n );
+      rm.resize( grid.n );
       s.resize(  grid.n );
       for( i=0; i<bdf.nsteps; i++ ){ qn[i].resize( grid.n ); qn[i]=q; }
       for( i=0; i<bdf.nresid; i++ ){ r[i].resize(  grid.n ); }
@@ -69,7 +67,7 @@ namespace TimeStepping
 
          // dualtime residual
             dualTimeResidual( bdf, gas, grid,
-                              dt,qn,r, rm0 );
+                              dt,qn,r, rm );
 
 
          // euler update

@@ -24,7 +24,7 @@ CSCRIPT = test.cpp \
 
 CCMP = g++
 
-#COPT = -g  -Wall
+#COPT = -g -D_GLIBCXX_DEBUG  -Wall
 COPT = -O3 -Wall
 
 LIBS =

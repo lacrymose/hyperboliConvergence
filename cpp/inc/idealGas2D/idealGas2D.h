@@ -54,7 +54,7 @@ namespace IdealGas2D
   };
 
 /*
- * Particular point in phase space, used for defining jacobians between different phase space bases
+ * Variety of data at a particular point in phase space, used for defining jacobians between different phase space bases or to hide particular choice of basis
  */
    struct State
   {
