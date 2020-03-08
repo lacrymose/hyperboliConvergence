@@ -25,6 +25,7 @@
       Array::Array1D<Types::Real>   re;
       Array::Array1D<Types::Real>   ri;
       Array::Array1D<Types::Real>   rei;
+      Array::Array1D<Types::Real>   rie;
 
       Controls::GridControls1D    grid;
 
@@ -52,6 +53,7 @@
       re.resize(n);
       ri.resize(n);
       rei.resize(n);
+      rie.resize(n);
 
    // smoothing parameters
       beta = 0.25*( alpha*alpha - 1. );
@@ -88,17 +90,26 @@
 
          centralExplicitSmoothing( grid,alpha, r0, re  );
          centralImplicitSmoothing( grid,alpha, r0, ri  );
+
          centralImplicitSmoothing( grid,alpha, re, rei );
+         centralExplicitSmoothing( grid,alpha, ri, rie );
 
          rn1=0.;
          for( int i=0; i<n; i++ ){ rn1=fmax(rn1,fabs(re[i])); }
          outputFile << " " << rn1/rn0;
+
          rn1=0.;
          for( int i=0; i<n; i++ ){ rn1=fmax(rn1,fabs(ri[i])); }
          outputFile << " " << rn1/rn0;
+
          rn1=0.;
          for( int i=0; i<n; i++ ){ rn1=fmax(rn1,fabs(rei[i])); }
          outputFile << " " << rn1/rn0;
+
+         rn1=0.;
+         for( int i=0; i<n; i++ ){ rn1=fmax(rn1,fabs(rie[i])); }
+         outputFile << " " << rn1/rn0;
+
          outputFile << std::endl;
 
      }

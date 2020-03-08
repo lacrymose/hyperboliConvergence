@@ -77,6 +77,9 @@ namespace IdealGas2D
       inline const Types::Real& speedOfSound2()         const { return state[7]; }
   };
 
+   inline bool operator==( const State& s0, const State& s1 );
+   inline bool operator!=( const State& s0, const State& s1 );
+
 /*
  * Vector of solution variables for an ideal gas, specified by template argument
  * Conservative <'c'>: ( density,  momentum,    total energy )
@@ -91,8 +94,10 @@ namespace IdealGas2D
    // default constructor
       inline VariableSet<VType>();
 
-   // copy constructors
+   // copy constructor
                inline VariableSet<VType>(                     const VariableSet<VType>&    q0 );
+
+   // copy constructor to shadow nonlinear transformation from another set
       explicit inline VariableSet<VType>( const Species& gas, const VariableSet<VType>&    q0 );
 
    // convert dq -> q
@@ -128,9 +133,11 @@ namespace IdealGas2D
    // default constructor
       inline VariableDelta<VType>();
 
-   // copy constructors
+   // copy constructor
                inline VariableDelta<VType>(                     const VariableDelta<VType>& dq0 );
-      explicit inline VariableDelta<VType>( const Species& gas, const VariableDelta<VType>& dq0 );
+
+   // copy constructor to shadow linear transformation from another delta
+      explicit inline VariableDelta<VType>( const Species& gas, const State& state, const VariableDelta<VType>& dq0 );
 
    // convert q -> dq
                inline VariableDelta<VType>(                     const VariableSet<VType>&    q0 );

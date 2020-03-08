@@ -22,5 +22,7 @@
       CPPUNIT_ASSERT_DOUBLES_EQUAL( gas.gamma, gamma,   Types::EPS );
       CPPUNIT_ASSERT_DOUBLES_EQUAL( gas.Rgas,  rGas,    Types::EPS );
       CPPUNIT_ASSERT_DOUBLES_EQUAL( gas.nu,    viscous, Types::EPS );
+
+      return;
   }
 

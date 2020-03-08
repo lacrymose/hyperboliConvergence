@@ -14,11 +14,15 @@ testPROGRMDIR = progrm/#		test executables
 
 # definition source files for the tests for each section of the program
 testCSOURCE = idealGas2D/test-Species.cpp \
-              idealGas2D/test-VariableSet.cpp
+              idealGas2D/test-VariableSet.cpp \
+              idealGas2D/test-VariableDelta.cpp \
+              idealGas2D/test-State.cpp
 
 # main() function files for running the tests for each section of the program
 testCSCRIPT = idealGas2D/test-Species.cpp \
-              idealGas2D/test-VariableSet.cpp
+              idealGas2D/test-VariableSet.cpp \
+              idealGas2D/test-VariableDelta.cpp \
+              idealGas2D/test-State.cpp
 
 # main() function file for running all tests
 testallCSCRIPT = test-full.cpp

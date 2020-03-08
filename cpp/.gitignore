@@ -2,7 +2,5 @@
 *.o
 *.out
 *.log
-*.dat
 progrm/*
 tests/progrm/*
-data/*

@@ -1,7 +1,11 @@
 
 # include <idealGas2D/test-VariableSet.h>
 
-   void Test_IdealGas2D_VariableSet::setUp(){}
+   void Test_IdealGas2D_VariableSet::setUp()
+  {
+      dq0=0.;
+      dq1=0.;
+  }
 
    void Test_IdealGas2D_VariableSet::tearDown(){}
 
@@ -18,9 +22,9 @@
       q0.var[2]=3.;
       q0.var[3]=4.;
 
+   // copy constructor
       q1=IdealGas2D::VariableSet<IdealGas2D::VariableType<'0'>>(q0);
 
-   // copy constructor
       CPPUNIT_ASSERT_DOUBLES_EQUAL( q1.var[0], q0.var[0], Types::EPS );
       CPPUNIT_ASSERT_DOUBLES_EQUAL( q1.var[1], q0.var[1], Types::EPS );
       CPPUNIT_ASSERT_DOUBLES_EQUAL( q1.var[2], q0.var[2], Types::EPS );
@@ -42,18 +46,18 @@
       CPPUNIT_ASSERT_DOUBLES_EQUAL( q0.var[2], q0[2], Types::EPS );
       CPPUNIT_ASSERT_DOUBLES_EQUAL( q0.var[3], q0[3], Types::EPS );
 
+   // const accessor
       const IdealGas2D::VariableSet<IdealGas2D::VariableType<'0'>>  q2(q0);
 
-   // const accessor
       CPPUNIT_ASSERT_DOUBLES_EQUAL( q2[0], q0[0], Types::EPS );
       CPPUNIT_ASSERT_DOUBLES_EQUAL( q2[1], q0[1], Types::EPS );
       CPPUNIT_ASSERT_DOUBLES_EQUAL( q2[2], q0[2], Types::EPS );
       CPPUNIT_ASSERT_DOUBLES_EQUAL( q2[3], q0[3], Types::EPS );
-      
+
       return;
   }
 
-   void Test_IdealGas2D_VariableSet::test_operator_equality()
+   void Test_IdealGas2D_VariableSet::test_operator_assignment()
   {
       q0=3.4;
 

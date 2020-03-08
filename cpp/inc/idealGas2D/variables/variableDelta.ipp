@@ -23,9 +23,9 @@ namespace IdealGas2D
       return;
   }
 
-// copy constructor
+   // copy constructor to shadow linear transformation from another delta
    template<typename VType>
-   inline VariableDelta<VType>::VariableDelta( const Species& gas, const VariableDelta<VType>& dq0 )
+   inline VariableDelta<VType>::VariableDelta( const Species& gas, const State& state, const VariableDelta<VType>& dq0 )
   {
       var[0]=dq0[0];
       var[1]=dq0[1];

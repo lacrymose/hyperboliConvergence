@@ -16,11 +16,13 @@
 
       beta = 0.25*( alpha*alpha - 1. );
 
-      bool fromZero=false;
-      int m=100;
+      bool  fromZero=false;
+      int   m=4;
 
-      r1 =r0;
-      if( !fromZero ){ wrk=r0; }
+      wrk= 0;
+
+      if( !fromZero ){ wrk=0.8*r0; }
+
       for( j=0; j<m; j++ )
      {
          r1=r0;
@@ -47,7 +49,8 @@
         }
          if( j<m-1 ){ wrk=r1; }
      }
-      if( fromZero ){ r1=0.5*(r1+wrk); }
+
+//    if( fromZero ){ r1=0.5*(r1+wrk); }
 
       r1*=alpha;
       return;

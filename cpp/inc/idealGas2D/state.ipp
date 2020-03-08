@@ -98,4 +98,25 @@ namespace IdealGas2D
 
       return;
   }
+
+   inline bool operator==( const State& s0, const State& s1 )
+  {
+      bool same=true;
+
+      same = same and ( fabs( s0.velocityX()             - s1.velocityX()             ) < Types::EPS );
+      same = same and ( fabs( s0.velocityY()             - s1.velocityY()             ) < Types::EPS );
+      same = same and ( fabs( s0.pressure()              - s1.pressure()              ) < Types::EPS );
+      same = same and ( fabs( s0.density()               - s1.density()               ) < Types::EPS );
+      same = same and ( fabs( s0.temperature()           - s1.temperature()           ) < Types::EPS );
+      same = same and ( fabs( s0.specificTotalEnthalpy() - s1.specificTotalEnthalpy() ) < Types::EPS );
+      same = same and ( fabs( s0.velocity2()             - s1.velocity2()             ) < Types::EPS );
+      same = same and ( fabs( s0.speedOfSound2()         - s1.speedOfSound2()         ) < Types::EPS );
+
+      return same;
+  }
+
+   inline bool operator!=( const State& s0, const State& s1 )
+  {
+      return !(s0==s1);
+  }
 }

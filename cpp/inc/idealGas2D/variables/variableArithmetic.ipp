@@ -84,10 +84,10 @@ namespace IdealGas2D
    inline Array::Array1D<VariableDelta<VType>> operator-( const Array::Array1D<VariableSet<VType>>& q0,
                                                           const Array::Array1D<VariableSet<VType>>& q1 )
   {
-      int n=q0.size();
+      size_t n=q0.size();
       assert( n==q1.size() );
       Array::Array1D<VariableDelta<VType>> dq(n);
-      for( int i=0; i<n; i++ )
+      for( size_t i=0; i<n; i++ )
      {
          dq[i]=q0[i]-q1[i];
      }
@@ -99,7 +99,7 @@ namespace IdealGas2D
    inline Array::Array1D<VariableSet<VType>> operator+( const Array::Array1D<VariableSet<  VType>>& q0,
                                                         const Array::Array1D<VariableDelta<VType>>& dq )
   {
-      int n=q0.size();
+      size_t n=q0.size();
       assert( n==dq.size() );
       Array::Array1D<VariableSet<VType>> q1(n);
       q1 =q0;
@@ -112,7 +112,7 @@ namespace IdealGas2D
    inline Array::Array1D<VariableSet<VType>> operator-( const Array::Array1D<VariableSet<  VType>>& q0,
                                                         const Array::Array1D<VariableDelta<VType>>& dq )
   {
-      int n=q0.size();
+      size_t n=q0.size();
       assert( n==dq.size() );
       Array::Array1D<VariableSet<VType>> q1(n);
       q1 =q0;
@@ -125,9 +125,9 @@ namespace IdealGas2D
    inline Array::Array1D<VariableSet<VType>>& operator+=(       Array::Array1D<VariableSet<  VType>>& q,
                                                           const Array::Array1D<VariableDelta<VType>>& dq )
   {
-      int n=q.size();
+      size_t n=q.size();
       assert( n==dq.size() );
-      for( int i=0; i<n; i++ )
+      for( size_t i=0; i<n; i++ )
      {
          q[i]+=dq[i];
      }
@@ -139,9 +139,9 @@ namespace IdealGas2D
    inline Array::Array1D<VariableSet<VType>>& operator-=(       Array::Array1D<VariableSet<  VType>>& q,
                                                           const Array::Array1D<VariableDelta<VType>>& dq )
   {
-      int n=q.size();
+      size_t n=q.size();
       assert( n==dq.size() );
-      for( int i=0; i<n; i++ )
+      for( size_t i=0; i<n; i++ )
      {
          q[i]-=dq[i];
      }

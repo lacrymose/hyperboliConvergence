@@ -15,9 +15,9 @@
    private:
       CPPUNIT_TEST_SUITE( Test_IdealGas2D_VariableSet );
 
-         CPPUNIT_TEST( test_constructors       );
-         CPPUNIT_TEST( test_accessors          );
-         CPPUNIT_TEST( test_operator_equality  );
+         CPPUNIT_TEST( test_constructors        );
+         CPPUNIT_TEST( test_accessors           );
+         CPPUNIT_TEST( test_operator_assignment );
 
       CPPUNIT_TEST_SUITE_END();
 
@@ -30,7 +30,7 @@
       void test_constructors();
       void test_accessors();
 
-      void test_operator_equality();
+      void test_operator_assignment();
   };
 
 CPPUNIT_TEST_SUITE_REGISTRATION( Test_IdealGas2D_VariableSet );
