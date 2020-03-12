@@ -62,6 +62,16 @@
                                   const Array::Array1D<T>&           r0,
                                         Array::Array1D<T>&           r1 );
 
+   template<typename T>
+   void multigridRestriction( const Controls::GridControls1D&  grid,
+                              const Array::Array1D<T>&           rh,
+                                    Array::Array1D<T>&          r2h );
+
+   template<typename T>
+   void multigridProlongation( const Controls::GridControls1D&  grid,
+                               const Array::Array1D<T>&          e2h,
+                                     Array::Array1D<T>&           eh );
+
 # include <fieldOperations/gradientCalculation.ipp>
 # include <fieldOperations/fluxResidual.ipp>
 # include <fieldOperations/dualTimeResidual.ipp>
@@ -72,5 +82,7 @@
 
 # include <fieldOperations/centralExplicitSmoothing.ipp>
 # include <fieldOperations/centralImplicitSmoothing.ipp>
+
+# include <fieldOperations/multigrid.ipp>
 
 # endif

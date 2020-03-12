@@ -6,6 +6,7 @@
 # include <types.h>
 # include <utils.h>
 
+# include <array>
 # include <iostream>
 # include <iomanip>
 # include <cassert>
@@ -58,7 +59,7 @@ namespace IdealGas2D
  */
    struct State
   {
-      Types::Real    state[8];
+      std::array<Types::Real,8>  state;
 
       inline State();
 
@@ -89,7 +90,7 @@ namespace IdealGas2D
    struct VariableSet
   {
    // variables
-      Types::Real var[4];
+      std::array<Types::Real,4>  var;
 
    // default constructor
       inline VariableSet<VType>();
@@ -128,7 +129,7 @@ namespace IdealGas2D
    struct VariableDelta
   {
    // variables
-      Types::Real var[4];
+      std::array<Types::Real,4>  var;
 
    // default constructor
       inline VariableDelta<VType>();

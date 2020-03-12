@@ -25,5 +25,5 @@ replot file1 u 5 title 'Numeric: implicit'
 replot file1 u 6 title 'Numeric: exp-imp'
 
 # implicit-explicit numerical
-replot file1 u 7 title 'Numeric: imp-exp'
+replot file1 u 7 title 'Numeric: imp-exp' pt 1
 

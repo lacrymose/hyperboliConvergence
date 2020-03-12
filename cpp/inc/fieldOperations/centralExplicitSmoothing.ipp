@@ -10,7 +10,7 @@
       assert( r1.size() == n );
 
       Types::Real beta,gamma;
-      T  dr;
+      auto  dr=r0[0]-r0[1];
 
       beta = 0.25*( alpha*alpha - 1. );
 

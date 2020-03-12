@@ -13,6 +13,13 @@ namespace Utils
       return ( T(0) < val ) - ( val < T(0) );
   }
 
+// specialisation using signbit for floating point types
+   template<>
+   inline int sign( const double val )
+  {
+      return 1-2*std::signbit(val);
+  }
+
 // return 1 if val>0, else 0
    template<typename T>
    inline int greaterThan0( const T val )
