@@ -71,7 +71,7 @@ namespace Limiters
 
    inline Types::Real VanLeer2::operator()( Types::Real a, Types::Real b ) const
   {
-      return (b+fabs(b))/(a+fabs(b));
+      return (b+fabs(b))/(a+fabs(b)+Types::EPS);
   }
 
    inline Types::Real Cada3::operator()( Types::Real a, Types::Real b ) const
@@ -83,7 +83,7 @@ namespace Limiters
       Types::Real c2=  0.4;
       Types::Real c3=  3*gam-2;
       Types::Real u,v,w,p,q;
- 
+
       if( a > 0 )
      {
          u= a;
