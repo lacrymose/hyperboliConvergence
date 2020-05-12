@@ -1,309 +1,313 @@
-# ifndef CONSERVATIONLAW_BASE_BASE_H
-# define CONSERVATIONLAW_BASE_BASE_H
+
+# pragma once
+
+# include <conservationLaws/base/concepts.h>
+# include <conservationLaws/base/type_traits.h>
+# include <conservationLaws/base/declarations.h>
+
+# include <geometry/geometry.h>
 
 # include <types.h>
 
-# include <geometry.h>
+# include <type_traits>
+# include <ostream>
 
-# include <array>
-
-// forward declarations
-
-   template<char LawLabel>
-   struct ConservationLaw;
-
-   template<typename Law>
-   struct Species;
-
-   template<typename Law, int nDim>
-   struct State;
-
-   template<typename Law, char BasisLabel, int nDim>
-   struct PhaseSpaceBasis;
-
-   template<typename Law, typename Basis>
-   struct VariableSet;
-
-   template<typename Law, typename Basis>
-   struct VariableDelta;
-
-   template<typename Law, int nDim>
-   struct FluxResult;
-
-// typedefs
-
-   static constexpr char            ScalarAdvectionLabel = 'a';
-   static constexpr char                    BurgersLabel = 'b';
-   static constexpr char  ArtificialCompressibilityLabel = 'c';
-   static constexpr char                      EulerLabel = 'e';
-   static constexpr char              IsothermalGasLabel = 'i';
-   static constexpr char               ShallowWaterLabel = 's';
-   static constexpr char                TrafficFlowLabel = 't';
-
-   static constexpr char             ConservedBasisLabel = 'c';
-   static constexpr char        CharacteristicBasisLabel = 'w';
+// ---------- integral values ----------
 
 /*
- * Static class holding values, types and functions for a generic hyperbolic conservation law
- *       LawLabel must be the label associated with an implemented type of Law
- */
-   template<char LawLabel>
-   struct ConservationLaw
-  {
-   // number and type of conserved quantities
-   //    must be specialised for each LawLabel
-      static constexpr int  nScalarQuantities;
-      static constexpr int  nVectorQuantities;
-
-   // total number of variables (dimension of phase space)
-      template<int nDim>
-      static constexpr int  nVar = nScalarQuantities + nDim*nVectorQuantities;
-
-   // species of conserved quantities - contains physical properties
-      using ::Species<ConservationLaw>  = Species;
-
-   // Basis-independent state
-      template<nDim>
-      using ::State<ConservationLaw,nDim> = State;
-
-   // specialised phase space bases
-      template<char BasisLabel, int nDim>
-      using ::PhaseSpaceBasis<ConservationLaw,BasisLabel,nDim> = PhaseSpaceBasis;
-
-   // specialised variable vectors
-      template<typename Basis> using ::VariableSet<  ConservationLaw,Basis> = VariableSet;
-      template<typename Basis> using ::VariableDelta<ConservationLaw,Basis> = VariableDelta;
-
-   // standard variable bases
-      // conserved variables
-      template<int nDim> using PhaseSpaceBasis<'c',nDim>           = ConservedBasis;
-      template<int nDim> using VariableSet<  ConservedBasis<nDim>> = ConservedVariables;
-      template<int nDim> using VariableDelta<ConservedBasis<nDim>> = ConservedDelta;
-
-      // characteristic variables
-      template<int nDim> using PhaseSpaceBasis<'w',nDim>                = CharacteristicBasis;
-      template<int nDim> using VariableDelta<CharacteristicBasis<nDim>> = CharacteristicDelta;
-
-   // specialised return values of flux functions
-      template<int nDim> using ::FluxResult<ConservationLaw,nDim> = FluxResult;
-
-   // specialised standard flux functors
-      using ::CentralFLux<ConservationLaw> = CentralFlux;
-      using ::RusanovFLux<ConservationLaw> = RusanovFlux;
-
-   // analytical expression for flux
-   //    must be specialised for each LawLabel
-      template<int nDim>
-      static FluxResult<nDim> exactFlux( const Species              species,
-                                         const Geometry::Quad<nDim>    face,
-                                         const State<nDim>            state ) = delete;
-
-   // analytical expression for flux
-   //    this defaults to a wrapper calling exactFlux with a State argument but can be specialised for faster performance
-      template<typename Basis>
-      static FluxResult<Basis::nDim> exactFlux( const Species                     species,
-                                                const Geometry::Quad<Basis::nDim>    face,
-                                                const VariableSet<Basis>                q );
-  };
+ * unique identifier for each Conservation Law
+*/
+   enum LawType struct { NoLaw,
+                         ArtificialCompressibility,
+                         Burgers,
+                         Euler,
+                         IsothermalGas,
+                         Maxwell,
+                         ScalarAdvection,
+                         ShallowWater,
+                         TrafficFlow };
 
 /*
- * Physical constants
- *    Includes properties such as ratio of specific heats for ideal gas, gravity for shallow water equations etc
- *       Law must be an instantiated ConservationLaw template class
+ * total dimension of the phase space for each Conservation Law for a given number of spatial dimensions
  */
-   template<typename Law>
-   struct Species{};
+   template<LawType Law, int nDim>
+   constexpr int nVar = nScalarQuantities<Law> + nDim*nVectorQuantities<Law>;
+
+
+// ---------- types for variables in conservation law phase space ----------
 
 /*
- * Point in phase space independent of any phase space basis.
- *    Used to hide particular phase space basis, and save common computations
- *       Law must be an instantiated ConservationLaw template class
+ * Vector of variables for a hyperbolic conservation law (Law) in a particular basis for the phase space (Basis) with (nDim) spatial dimensions
+ * VariableSet is a point in an affine space, with VariableDelta<Law,nDim,Basis> being displacements in this space
  */
-   template<typename Law, int nDim>
-   struct State
-  {
-   // state values
-   //    number of elements must be specialised for each Law
-      std::array<Types::Real,Law::nVar<nDim>> state;
-
-   // default constructor
-      State();
-
-   // copy constructor
-      State( State s0 );
-
-   // nonlinear transformation from a variable set
-   //    must be specialised for each Basis
-      template<typename Basis>
-      explicit State( const Species<Law>           species,
-                      const VariableSet<Law,Basis>       q ) = delete;
-
-   // accessors with verbose names for retrieving elements of state
-   //    must be specialised for each Law
-
-   // Types::Real some_state_element() const { return state[some_index]; }
-  };
-
-/*
- * Basis for the solution phase space, for example conserved or characteristic variables
- *       Law must be an instantiated ConservationLaw template class
- *       BasisLabel determines the particular basis
- *       NDIM is the dimension of the physical space: {1,2,3}
- */
-   template<typename Law, char BasisLabel, int NDIM>
-   struct PhaseSpaceBasis
-  {
-      static constexpr int nDim=NDIM;
-      static constexpr int nVar=Law::nVar<nDim>;
-  };
-
-/*
- * Vector of solution variables for a hyperbolic conservation law (Law) in a particular variable set (Basis)
- *    Provides nonlinear transformations between VariableSets with the same Law but different Basis, and arithmetic operations with other VariableSets and VariableDeltas of the same Law and Basis
- *       Law   must be an instantiated ConservationLaw template class
- *       Basis must be an instantiated PhaseSpaceBasis template class
- */
-   template<typename Law, typename Basis>
+   template<LawType Law, int nDim, BasisType<Law> Basis>
    struct VariableSet
   {
+   // equivalent VariableDelta
+      using VariableDelta = VariableDelta<Law,nDim,Basis>;
+
    // variables
-      std::array<Types::Real,Basis::nVar> var;
+      std::array<Types::Real,nVar<Law,nDim>> var{0};
 
-   // default constructor
-      VariableSet();
+   // default, copy and move constructors
+      VariableSet() = default;
+      VariableSet( const VariableSet&  ) = default;
+      VariableSet(       VariableSet&& ) = default;
 
-   // copy constructor
-      VariableSet( VariableSet q0 );
+   // only explicit conversion from VariableDelta
+      explicit VariableSet( const VariableDelta&  dq ) noexcept;
+      explicit VariableSet(       VariableDelta&& dq ) noexcept;
 
-   // convert dq -> q
-      explicit VariableSet( const VariableDelta<Law,Basis> dq );
-
-   // nonlinear transformation from another basis
-   //    defaults to converting Basis2 -> State -> Basis but can be specialized for faster performance
-      template<typename Basis2>
-      explicit VariableSet( const Species<Law>            species,
-                            const VariableSet<Law,Basis2>      q0 );
-
-   // nonlinear transformation from a state
-   //    must be specialised for each {Law,Basis} pair
-      explicit VariableSet( const Species<Law>           species,
-                            const State<Law,Basis::nDim>  state ) = delete;
+   // copy/move assignment
+      VariableSet& operator=( const VariableSet&  ) = default;
+      VariableSet& operator=(       VariableSet&& ) = default;
 
    // accessors
-            Types::Real& operator[]( const int i );
-      const Types::Real& operator[]( const int i ) const;
+      inline       Types::Real& operator[]( const int i )       { return var[i]; }
+      inline const Types::Real& operator[]( const int i ) const { return var[i]; }
 
    // in-place arithmetic
-      VariableSet& operator+=( const VariableDelta<Law,Basis> dq0 );
-      VariableSet& operator-=( const VariableDelta<Law,Basis> dq0 );
+      VariableSet& operator+=( const VariableDelta& dq0 );
+      VariableSet& operator-=( const VariableDelta& dq0 );
       VariableSet& operator =( const Types::Real a );
   };
 
 /*
- * Vector of solution variable deltas for a hyperbolic conservation law (Law) in a particular variable set (Basis)
- *    Provides linear transformations between VariableDeltas with the same Law but different Basis, and arithmetic operations with other VariableSets and VariableDeltas of the same Law and Basis
- *       Law   must be an instantiated ConservationLaw template class
- *       Basis must be an instantiated PhaseSpaceBasis template class
+ * send each element of VariableSet to stream, seperated by a single space
  */
-   template<typename Law, typename Basis>
+   template<LawType Law, int nDim, BasisType<Law> Basis>
+   std::ostream& operator<<( std::ostream& os, const VariableSet<Law,nDim,Basis>& q );
+                                              
+/*
+ * Vector of displacements for a hyperbolic conservation law (Law) in a particular basis for the phase space (Basis) with (nDim) spatial dimensions
+ * VariableDelta is a displacement in an affine space, with VariableSet<Law,nDim,Basis> being points in this space
+ */
+   template<LawType Law, int nDim, BasisType<Law> Basis>
    struct VariableDelta
   {
+   // equivalent VariableDelta
+      using VariableSet = VariableSet<Law,nDim,Basis>;
+
    // variables
-      std::array<Types::Real,Basis::nVar> var;
+      std::array<Types::Real,nVar<Law,nDim>> var{0};
 
-   // default constructor
-      VariableDelta();
+   // default, copy and move constructors
+      VariableDelta() = default;
+      VariableDelta( const VariableDelta&  ) = default;
+      VariableDelta(       VariableDelta&& ) = default;
 
-   // copy constructor
-      VariableDelta( VariableDelta q0 );
+   // only explicit conversion from Delta
+      explicit VariableDelta( const VariableSet&  dq ) noexcept;
+      explicit VariableDelta(       VariableSet&& dq ) noexcept;
 
-   // convert q -> dq
-      explicit VariableDelta( const VariableSet<Law,Basis> q );
-
-   // linear transformation from another basis
-   //    this needs to be specialised for each {Law,Basis,Basis2} set
-      template<typename Basis2>
-      explicit VariableDelta( const Species<Law>              species,
-                              const State<Law,Basis::nDim>      state,
-                              const VariableDelta<Law,Basis2>     dq0 ) = delete;
+   // copy/move assignment
+      VariableDelta& operator=( const VariableDelta&  ) = default;
+      VariableDelta& operator=(       VariableDelta&& ) = default;
 
    // accessors
-            Types::Real& operator[]( const int i );
-      const Types::Real& operator[]( const int i ) const;
+      inline       Types::Real& operator[]( const int i )       { return var[i]; }
+      inline const Types::Real& operator[]( const int i ) const { return var[i]; }
 
    // in-place arithmetic
-      VariableDelta& operator+=( const VariableDelta dq0 );
-      VariableDelta& operator-=( const VariableDelta dq0 );
+      VariableDelta& operator+=( const VariableDelta& dq0 );
+      VariableDelta& operator-=( const VariableDelta& dq0 );
       VariableDelta& operator*=( const Types::Real a );
       VariableDelta& operator/=( const Types::Real a );
       VariableDelta& operator =( const Types::Real a );
   };
 
 /*
- * Flux returns a delta of conserved values, and a spectral radius
- *       Law  must be an instantiated ConservationLaw template class
- *       NDIM is the dimension of the physical space: {1,2,3}
+ * send each element of VariableDelta to stream, seperated by a single space
  */
-   template<typename Law, int nDim>
+   template<LawType Law, int nDim, BasisType<Law> Basis>
+   std::ostream& operator<<( std::ostream& os, const VariableDelta<Law,nDim,Basis>& dq );
+                                              
+/*
+ * A flux, and associated spectral radius in the phase space of conservation law Law in nDim spatial dimensions
+ * flux is a VariableDelta in Conserved variables to ensure correct shock speeds
+ * spectral radius is the largest eigenvalue of the flux jacobian, scaled by the area of the cell face the flux is over
+ */
+   template<LawType Law, int nDim>
    struct FluxResult
   {
-      typedef typename Law::ConservedDelta<nDim> FluxType;
+      using FluxType = VariableDelta<Law,nDim,BasisType<Law>::Conserved>;
 
       FluxType      flux;
       Types::Real lambda;
+
+   // default, copy and move constructors
+      FluxResult() = default;
+      FluxResult( const FluxResult&  ) = default
+      FluxResult( const FluxResult&& ) = default
+
+   // copy/move assignment
+      FluxResult& operator=( const FluxResult&  ) = default;
+      FluxResult& operator=( const FluxResult&& ) = default;
+
+   // construct from flux and spectral radius
+      FluxResult( FluxType f, Types::Real l ) : flux(f) lambda(l) {};
   };
 
+
+// ---------- exact physical flux ----------
+
 /*
- * face flux interface
- *       Law  must be an instantiated ConservationLaw template class
- *       Flux must have a method named flux with the call signature Species, Quad, State, State
+ * calculating exactFlux from a (minimally implemented) VariableSet just wraps calculating exactFlux from a State
+ * this means that only calculation from a State needs implementing for each LawType
  */
-   template<typename Law>
+   template<LawType Law, ImplementedVarSet VarT>
+      requires   SameLaw<VarT,Law>
+              && ImplementedLawType<Law>
+   fluxresult_t<VarT> exactFlux( Species<Law> species, Geometry::Surface<dim_of_v<VarT>> face, VarT q0 )
+  {
+      using StateT = state_t<SrcT>;
+      return exactFlux( species, face, transform<StateT>( species, q0 ) );
+  }
+
+// ---------- transformation functions ----------
+
+/*
+ * transformations between two VariableSets of different bases (SrcT & DstT) defaults to transforming SrcT->State->DstT
+ * this means that only transformations to/from a State needs implementing for each (Law,Basis) pair
+ */
+   template<ImplementedVarSet DstT, ImplementedVarSet SrcT, LawType Law>
+      requires   SameLaw<DstT,SrcT,Law>
+              && SameDim<DstT,SrcT>
+              && ImplementedLawType<Law>
+   DstT transform( Species<Law> species, SrcT q0 )
+  {
+      using StateT = state_t<SrcT>;
+      return transform<DstT>( species, transform<StateT>( species, q0 ) );
+  }
+
+/*
+ * transformations between two VariableDeltas of different bases must be around a particular point in the phase space. If this point is defined by a VariableSet, it will be transformed to a State before transforming the VariableDeltas.
+ * this means that Delta transformations only need defining around a State for each Basis pair
+ */
+   template<ImplementedVarDelta DstT, ImplementedVarDelta SrcT, ImplementedVarSet VarT, LawType Law>
+      requires   SameLaw<DstT,SrcT,VarT,Law>
+              && SameDim<DstT,SrcT,VarT>
+              && ImplementedLawType<Law>
+   DstT transform( Species<Law> species, VarT q0, SrcT dq0, Geometry::Metric<dim_of<DstT> n )
+  {
+      using StateT = state_t<SrcT>;
+      return transform<DstT>( species, transform<StateT>( species, q0 ), dq0, n );
+  }
+
+
+// ---------- generic flux functions ----------
+
+/*
+ * Base class for CRTP to give the same interface for all flux functions.
+ *    provides interface to call flux with any variable set basis. This automatically transforms to State
+ *    this allows each flux function to be implemented only with State argument, but called with any VariableSet
+ */
+   template<typename Flux, LawType Law>
+      requires   ImplementedLawType<Law>
+              && FluxImplementation<Flux,Law>
    struct FluxInterface
   {
-      template<typename Basis>
-      FluxResult<Law,Basis::nDim> operator()( const Species<Law>                species,
-                                              const Geometry::Quad<Basis::nDim>    face,
-                                              const VariableSet<Basis>               ql,
-                                              const VariableSet<Basis>               qr );
+      template<ImplementedVarSet VarSetT, int nDim>
+         requires   SameLaw<Law,VarSetT>
+                 && SameDim<nDim,VarSetT>
+      FluxResult<Law,nDim> operator()( const Species<Law>          species,
+                                       const Geometry::Surface<nDim>& face,
+                                       const VarSetT                    ql,
+                                       const VarSetT                    qr ) const
+     {
+         return static_cast<Flux*>(this)->flux( species, face,
+                                                transform<State<Law,nDim>( species, ql ),
+                                                transform<State<Law,nDim>( species, qr ) );
+     };
 
       template<int nDim>
-      FluxResult<Law,nDim> operator()( const Species<Law>         species,
-                                       const Geometry::Quad<nDim>    face,
-                                       const State<Law,nDim>           sl,
-                                       const State<Law,nDim>           sr );
+      FluxResult<Law,nDim> operator()( const Species<Law>          species,
+                                       const Geometry::Surface<nDim>& face,
+                                       const State<Law,nDim>            sl,
+                                       const State<Law,nDim>            sr ) const
+     {
+         return static_cast<Flux*>(this)->flux( species, face, sl, sr );
+     };
   };
 
 /*
- * Interface flux using a central average
- *       Law  must be an instantiated ConservationLaw template class
+ * Interface flux using a central average of the left/right exact fluxes
+ *    Uses CRTP to provide interface to call flux with any VariableSet basis
  */
-   template<typename Law>
-   struct CentralFlux : FluxInterface<Law>
+   template<LawType Law>
+      requires ImplementedLawType<Law>
+   struct CentralFlux : FluxInterface<CentralFlux,Law>
   {
       template<int nDim>
-      static FluxResult<Law,nDim> flux( const Species<Law>         species,
-                                        const Geometry::Quad<nDim>    face,
-                                        const State<Law,nDim>           sl,
-                                        const State<Law,nDim>           sr );
+      static FluxResult<Law,nDim> flux( const Species<Law>&         species,
+                                        const Geometry::Surface<nDim>& face,
+                                        const State<Law,nDim>&           sl,
+                                        const State<Law,nDim>&           sr ) const;
   };
 
 /*
- * Interface using a Rusanov flux with scalar dissipation
- *       Law  must be an instantiated ConservationLaw template class
+ * Interface flux using a central average of the exact fluxes with scalar dissipation proportional to the spectral radius of the central flux
+ *    Uses CRTP to provide interface to call flux with any VariableSet basis
  */
-   template<typename Law>
-   struct RusanovFlux : FluxInterface<Law>
+   template<LawType Law>
+      requires ImplementedLawType<Law>
+   struct RusanovFlux : FluxInterface<RusanovFlux,Law>
   {
+   // types needed for upwind diffusion calculation
+      using ConservedSet   = VariableSet<  Law,nDim,BasisType<Law>::Conserved>;
+      using ConservedDelta = VariableDelta<Law,nDim,BasisType<Law>::Conserved>;
+
       template<int nDim>
-      static FluxResult<Law,nDim> flux( const Species<Law>         species,
-                                        const Geometry::Quad<nDim>    face,
-                                        const State<Law,nDim>           sl,
-                                        const State<Law,nDim>           sr );
+      static FluxResult<Law,nDim> flux( const Species<Law>&         species,
+                                        const Geometry::Surface<nDim>& face,
+                                        const State<Law,nDim>&           sl,
+                                        const State<Law,nDim>&           sr ) const;
   };
 
-# include <conservationLaws/base/fluxes/exactFlux.ipp>
+
+// ---------- implementation files ----------
+
+# include <conservationLaws/base/variables/variableSet.ipp>
+# include <conservationLaws/base/variables/variableDelta.ipp>
+# include <conservationLaws/base/variables/variableArithmetic.ipp>
+# include <conservationLaws/base/variables/variableArrays.ipp>
+
 # include <conservationLaws/base/fluxes/centralFlux.ipp>
-# include <conservationLaws/base/fluxes/RusanovFlux.ipp>
+# include <conservationLaws/base/fluxes/rusanovFlux.ipp>
 
-# endif
+
+// ---------- example specialisations ----------
+
+/*
+// must define overload for each LawType
+   template<int nDim>
+   FluxResult<Euler,nDim> exactFlux( Species<Euler>, Geometry::Surface<nDim>, State<Euler,nDim> );
+
+// must define pair of function overloads for transforming each set to/from a state
+   template< EulerConservedVariables DstT, EulerState SrcT >
+      requires SameDim<DstT,SrcT>
+   DstT transform( Species<Euler>, SrcT );
+
+   template< EulerState DstT, EulerConservedVariables SrcT >
+      requires SameDim<DstT,SrcT>
+   DstT transform( Species<Euler>, SrcT );
+
+// must define pair of transformations between deltas at particular state
+   template< EulerConservedDelta DstT, EulerPrimitiveDelta SrcT >
+      requires SameDim<DstT,SrcT>
+   DstT transform( Species<Euler>, State<Euler,SrcT::nDim>, SrcT, Geometry::Metric<SrcT::nDim> );
+
+   template< EulerPrimitiveDelta DstT, EulerConservedDelta SrcT >
+      requires SameDim<DstT,SrcT>
+   DstT transform( Species<Euler>, State<Euler,SrcT::nDim>, SrcT, Geometry::Metric<SrcT::nDim> );
+
+// can define function overloads for transforming directly between sets for improved performance
+   template< EulerConservedVariables DstT, EulerPrimitiveVariables SrcT >
+      requires SameDim<DstT,SrcT>
+   DstT transform( Species<Euler>, SrcT );
+
+   template< EulerConservedVariables DstT, EulerPrimitiveVariables SrcT >
+      requires SameDim<DstT,SrcT>
+   DstT transform( Species<Euler>, SrcT );
+*/
+

@@ -45,6 +45,12 @@
    template<>
    void CharTemplate<'a'>::cout(){ std::cout << "I am an a!" << std::endl; }
 
+// not allowed
+// template<char C>
+// template<>
+// CharTemplate<C>::add( CharTemplate<'b'> source ){ std::cout << "member function specialization of class template" << std::endl; }
+
+
 // method with templated arguments
    template< char C >
    template< char D >
@@ -64,6 +70,7 @@
 
    int main()
   {
+
       CharTemplate<'a'> aTemplate;
       CharTemplate<'b'> bTemplate;
 

@@ -4,3 +4,4 @@
 *.log
 progrm/*
 tests/progrm/*
+.todo
