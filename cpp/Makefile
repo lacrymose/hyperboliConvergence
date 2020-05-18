@@ -8,9 +8,7 @@ SCRIPTDIR = script/#		main() function source files
 PROGRMDIR = progrm/#		executables
 
 # Class / function definition source files
-CSOURCE = idealGas2D/species.cpp \
-	idealGas2D/ausm.cpp \
-	idealGas2D/slau.cpp
+CSOURCE = 
 
 
 # main() function files
@@ -20,12 +18,17 @@ CSCRIPT = test.cpp \
 	testSmooth.cpp \
 	sodsExplicitEuler1.cpp \
 	sodsDualTime.cpp \
-	sods.cpp
+	sods.cpp \
+	testGenericVariableSet.cpp \
+	scalarAdvection.cpp \
+	testScalarAdvection.cpp
 
-CCMP = g++
+CCMP = g++-8
 
-#COPT = -g -D_GLIBCXX_DEBUG  -Wall
-COPT = -O3 -Wall
+COPT = -g -D_GLIBCXX_DEBUG  -Wall
+#COPT = -O3 -Wall
+
+CSTD = -std=c++17 -fconcepts
 
 LIBS =
 
@@ -57,12 +60,12 @@ OBJS = $(SOURCEOBJ) $(SCRIPTOBJ)
 
 # default
 %.o : %.cpp
-	$(CCMP) $(COPT) $(INCLDE) -o $@ -c $<
+	$(CCMP) $(COPT) $(CSTD) $(INCLDE) -o $@ -c $<
 
 # each executable depends on its own object file, and all source objects
 
 $(PROGRM) : $(PROGRMDIR)%.out : $(SCRIPTDIR)%.o $(SOURCEOBJ)
-	$(CCMP) $(COPT) $(INCLDE) -o $@ $^ $(LIBS)
+	$(CCMP) $(COPT) $(CSTD) $(INCLDE) -o $@ $^ $(LIBS)
 
 
 #-------------------------------------
