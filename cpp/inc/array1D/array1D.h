@@ -54,18 +54,11 @@ namespace Array
 
 // Arithmetic operations
 
-   template<typename T>
-   inline Array1D<T> operator+( const Array1D<T>& a0, const Array1D<T>& a1 );
-   template<typename T>
-   inline Array1D<T> operator-( const Array1D<T>& a0, const Array1D<T>& a1 );
-
-   template<typename T>
-   inline Array1D<T> operator*( const Array1D<T>& a0,            Types::Real   d );
-   template<typename T>
-   inline Array1D<T> operator*(            Types::Real   d, const Array1D<T>& a1 );
-
-   template<typename T>
-   inline Array1D<T> operator/( const Array1D<T>& a0,            Types::Real   d );
+   template<typename T> Array1D<T> operator+( const Array1D<T>& a0, const Array1D<T>& a1 );
+   template<typename T> Array1D<T> operator-( const Array1D<T>& a0, const Array1D<T>& a1 );
+   template<typename T> Array1D<T> operator*( const Array1D<T>& a0, const Types::Real  d );
+   template<typename T> Array1D<T> operator*( const Types::Real  d, const Array1D<T>& a1 );
+   template<typename T> Array1D<T> operator/( const Array1D<T>& a0, const Types::Real  d );
 }
 
 # include <array1D/array1D.ipp>

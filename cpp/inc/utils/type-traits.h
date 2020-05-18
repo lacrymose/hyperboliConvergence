@@ -13,17 +13,18 @@
 
    template<typename T> using  remove_cvref_t = typename remove_cvref<T>::type;
 
-// -------- test if two class templates are the same --------
+// -------- test if two type templates are the same --------
 
+   // mirrors std::is_same<T,U> but for type templates not types
    template<template<typename...> typename T, template<typename...> typename U>
-   struct is_same_template : std::false_type {}:
+   struct is_same_template : std::false_type {};
 
    template<template<typename...> typename T>
-   struct is_same_template<T,T> : std::true_type {}:
+   struct is_same_template<T,T> : std::true_type {};
 
    // helper
    template<template<typename...> typename T, template<typename...> typename U>
-   constexpr bool is_same_template_v = is_same_template_v<T,U>::value;
+   constexpr bool is_same_template_v = is_same_template<T,U>::value;
 
 // -------- test if value member is of bool type --------
 

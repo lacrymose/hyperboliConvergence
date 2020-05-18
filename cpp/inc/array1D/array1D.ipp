@@ -4,7 +4,7 @@ namespace Array
    template<typename T>
    inline Array1D<T>& Array1D<T>::operator =( Types::Real d )
   {
-      for( T& t : data ){ t=d; }
+      for( T& t : data ){ t=T(d); }
       return *this;
   }
 
@@ -49,33 +49,33 @@ namespace Array
       return *this;
   }
 
-   template<typename T>
-   template<typename T2>
-   inline Array1D<T>& Array1D<T>::operator+=( const Array1D<T2>& da )
-  {
-      int n=size();
-      assert( n=da.size() );
+// template<typename T>
+// template<typename T2>
+// inline Array1D<T>& Array1D<T>::operator+=( const Array1D<T2>& da )
+//{
+//    int n=size();
+//    assert( n=da.size() );
 
-      for( int i=0; i<n; i++ )
-     {
-         data[i]+=da[i];
-     }
-      return *this;
-  }
+//    for( int i=0; i<n; i++ )
+//   {
+//       data[i]+=da[i];
+//   }
+//    return *this;
+//}
 
-   template<typename T>
-   template<typename T2>
-   inline Array1D<T>& Array1D<T>::operator-=( const Array1D<T2>& da )
-  {
-      int n=size();
-      assert( n=da.size() );
+// template<typename T>
+// template<typename T2>
+// inline Array1D<T>& Array1D<T>::operator-=( const Array1D<T2>& da )
+//{
+//    int n=size();
+//    assert( n=da.size() );
 
-      for( int i=0; i<n; i++ )
-     {
-         data[i]-=da[i];
-     }
-      return *this;
-  }
+//    for( int i=0; i<n; i++ )
+//   {
+//       data[i]-=da[i];
+//   }
+//    return *this;
+//}
 
    template<typename T>
    inline Array1D<T> operator+( const Array1D<T>& a0, const Array1D<T>& a1 )

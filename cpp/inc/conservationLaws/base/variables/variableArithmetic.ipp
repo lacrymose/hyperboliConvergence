@@ -24,8 +24,7 @@
                                                    const VariableSet<Law,nDim,Basis>& q1 )
   {
       using Delta = VariableDelta<Law,nDim,Basis>;
-      Delta dq = Delta(q0) - Delta(q1);
-      return dq;
+      return Delta(q0) - Delta(q1);
   }
 
    template<LawType Law, int nDim, BasisType<Law> Basis>     //  q=q+dq

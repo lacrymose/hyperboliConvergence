@@ -3,12 +3,13 @@
 
 // Arithmetic operations for arrays of VariableSets and VariableDeltas
 
+/*
 // dq=q-q
    template<LawType Law, int nDim, BasisType<Law> Basis>
    inline Array::Array1D<VariableDelta<Law,nDim,Basis>> operator-( const Array::Array1D<VariableSet<Law,nDim,Basis>>& q0,
                                                                    const Array::Array1D<VariableSet<Law,nDim,Basis>>& q1 )
   {
-      size_t n=q0.size();
+      const size_t n=q0.size();
       assert( n==q1.size() );
 
       Array::Array1D<VariableDelta<Law,nDim,Basis>> dq(n);
@@ -24,7 +25,7 @@
    inline Array::Array1D<VariableSet<Law,nDim,Basis>> operator+( const Array::Array1D<VariableSet<  Law,nDim,Basis>>& q0,
                                                                  const Array::Array1D<VariableDelta<Law,nDim,Basis>>& dq )
   {
-      size_t n=q0.size();
+      const size_t n=q0.size();
       assert( n==dq.size() );
 
       Array::Array1D<VariableSet<Law,nDim,Basis>> q1(q0);
@@ -40,7 +41,7 @@
    inline Array::Array1D<VariableSet<Law,nDim,Basis>> operator-( const Array::Array1D<VariableSet<  Law,nDim,Basis>>& q0,
                                                                  const Array::Array1D<VariableDelta<Law,nDim,Basis>>& dq )
   {
-      size_t n=q0.size();
+      const size_t n=q0.size();
       assert( n==dq.size() );
 
       Array::Array1D<VariableSet<Law,nDim,Basis>> q1(q0);
@@ -56,7 +57,7 @@
    inline Array::Array1D<VariableSet<Law,nDim,Basis>>& operator+=(       Array::Array1D<VariableSet<  Law,nDim,Basis>>& q,
                                                                    const Array::Array1D<VariableDelta<Law,nDim,Basis>>& dq )
   {
-      size_t n=q.size();
+      const size_t n=q.size();
       assert( n==dq.size() );
 
       for( size_t i=0; i<n; i++ )
@@ -71,7 +72,7 @@
    inline Array::Array1D<VariableSet<Law,nDim,Basis>>& operator-=(       Array::Array1D<VariableSet<  Law,nDim,Basis>>& q,
                                                                    const Array::Array1D<VariableDelta<Law,nDim,Basis>>& dq )
   {
-      size_t n=q.size();
+      const size_t n=q.size();
       assert( n==dq.size() );
 
       for( size_t i=0; i<n; i++ )
@@ -81,3 +82,4 @@
       return q;
   }
 
+*/

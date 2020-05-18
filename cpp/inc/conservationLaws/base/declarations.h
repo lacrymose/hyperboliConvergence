@@ -2,23 +2,31 @@
 # pragma once
 
 // unique identifier for each conservation law
-   enum struct LawType;
+   enum struct LawType { NoLaw,
+                         ArtificialCompressibility,
+                         Burgers,
+                         Euler,
+                         IsothermalGas,
+                         Maxwell,
+                         ScalarAdvection,
+                         ShallowWater,
+                         TrafficFlow };
 
 
 // number of scalar, vector or total variables required for each law
    template<LawType Law>
-   constexpr int nScalarQuantities;
+   constexpr int nScalarQuantities{0};
 
    template<LawType Law>
-   constexpr int nVectorQuantities;
+   constexpr int nVectorQuantities{0};
 
    template<LawType Law, int nDim>
-   constexpr int nVar;
+   constexpr int nVar = nScalarQuantities<Law> + nDim*nVectorQuantities<Law>;
 
 
 // typetraits to retrieve phase space basis enum for each law
    template<LawType Law> struct BasisTypeHelper;
-   template<LawType Law> using BasisType = typename BasisTypeHelper<Law>::type;
+   template<LawType Law> using  BasisType = typename BasisTypeHelper<Law>::type;
 
 
 // physical constants for each conservation law
@@ -36,4 +44,17 @@
 // increment in (affine) phase space with particular basis
    template<LawType Law, int nDim, BasisType<Law> Basis> struct VariableDelta;
 
+
+// transformations between variable sets and states
+   template<typename DstT, typename SrcT, typename SpeciesT>
+   DstT set2Set( const SpeciesT&, const SrcT& )=delete;
+
+   template<typename DstT, typename StateT, typename SrcT, typename SpeciesT>
+   DstT delta2Delta( const SpeciesT&, const StateT&, const SrcT& )=delete;
+
+   template<typename DstT, typename SrcT, typename SpeciesT>
+   auto set2State( const SpeciesT&, const SrcT& )=delete;
+
+   template<typename DstT, typename SrcT, typename SpeciesT>
+   DstT state2Set( const SpeciesT&, const SrcT& )=delete;
 

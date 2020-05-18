@@ -4,7 +4,7 @@
 # include <conservationLaws/base/type-traits.h>
 # include <conservationLaws/base/declarations.h>
 
-# include <utils/concepts.h>
+# include <geometry/geometry.h>
 
 // concepts
 
@@ -24,7 +24,8 @@
  * dimension is physically realistic (1, 2 or 3)
  */
    template<typename T>
-   concept HasValidDim = has_valid_dim_v<T>;
+   concept bool HasValidDim = has_valid_dim_v<T>;
+
 
 /*
  * The minimal functionality has been implemented for this VariableSet<LawType,int,Basis>
@@ -32,12 +33,12 @@
  */
    template<typename T>
    concept bool ImplementedVarSet = 
-      same_template_as<T,VariableSet>
+      is_VariableSet_v<T>
    && HasValidDim<T>
    && requires( T q, species_t<T> species, state_t<T> state )
      {
-         { transform<state_t<T>>( species,     q ) } -> state_t<T>;
-         { transform<T>(          species, state ) } -> T;
+         { set2State(    species,     q ) } -> state_t<T>;
+         { state2Set<T>( species, state ) } -> T;
      };
 
 /*
@@ -46,7 +47,7 @@
  */
    template<typename T>
    concept bool ImplementedVarDelta = 
-      same_template_as<T,VariableDelta>
+      is_VariableDelta_v<T>
    && HasValidDim<T>;
 
 /*
@@ -60,7 +61,7 @@
    concept bool ImplementedLawType = 
       ImplementedVarSet<  VariableSet<  Law,2,BasisType<Law>::Conserved>>
    && ImplementedVarDelta<VariableDelta<Law,2,BasisType<Law>::Conserved>>
-   && requires( Species<Law> species, State<Law,2> state, Geometry::Surface<2> face )
+   && requires( Species<Law> species, State<Law,2> state, Geometry::Direction<2> normal, int ns, int nv )
      {
          ns = nScalarQuantities<Law>;
          nv = nVectorQuantities<Law>;
@@ -68,20 +69,7 @@
          species;
          state;
 
-         { exactFlux( species, face, state ) } -> FluxResult<Law,2>;
-     };
-
-/*
- * A FluxImplementation provides the minimum functionality to be used as an interface flux.
- *    Generally a type satisfying FluxImplementation will be used with the CRTP class FluxInterface, together satisfying the FluxFunctor concept
- */
-   template<typename T, LawType Law>
-   concept bool FluxImplementation =
-      ImplementedLawType<Law>
-   && requires( T Flux, Species<Law> species,  Geometry::Surface<2> face,
-                State<Law,2> sl, State<Law,2> sr )
-     {
-         { Flux.flux( species, face, sl, sr ) } ->  FluxResult<Law,2>;
+         { exactFlux( species, normal, state ) } -> FluxResult<Law,2>;
      };
 
 /*
