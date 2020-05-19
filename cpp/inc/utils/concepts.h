@@ -3,6 +3,8 @@
 
 # include <utils/type-traits.h>
 
+# include <type_traits>
+
 /*
  * The concept same_template_as<T,U> is satisfied if and only if T and U denote the same type template
  *    shadows std::same_as<T,U> concept, but for type templates not types
@@ -18,4 +20,12 @@
 
    template<typename T, typename... Us>
    concept bool Same = ( std::is_same_v<T,Us> && ... );
+
+
+/*
+ * checks whether T is a floating point type i.e. is one of: float, double, long double
+ */
+
+   template<typename T>
+   concept bool floating_point = std::is_floating_point_v<T>;
 
