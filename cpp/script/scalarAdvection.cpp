@@ -2,6 +2,8 @@
 # include <conservationLaws/scalarAdvection/scalarAdvection.h>
 # include <conservationLaws/euler/euler.h>
 
+# include <geometry/geometry.h>
+
 # include <vector>
 # include <iostream>
 # include <fstream>
@@ -107,21 +109,19 @@ using Volume  = Geometry::Volume<nDim>;
       const Species<Law> species = get_species( SolutionBasis );
       const Flux         flux{};
 
-   // mesh arrays
-      std::vector<Point>  nodes(nx+1);
-      std::vector<Volume> cells(nx);
-
    // solutions arrays
       std::vector<SolutionVarSet>  q(nx);
       std::vector<SolutionVarSet> q1(nx);
       std::vector<FluxRes>       res(nx);
 
    // initialise mesh
-      for( int i=0; i<nx+1; i++ )
+      const std::vector<Point> nodes = [&]()
      {
-         nodes[i]=i;
-     }
-      cells = Geometry::dual( nodes );
+         std::vector<Point> nds(nx+1);
+         for( int i=0; i<nx+1; i++ ){ nds[i][0]=i; }
+         return nds;
+     }();
+      const std::vector<Volume> cells = Geometry::dual( nodes );
 
    // initialise solution to left/right states
       const SolutionVarSet ql0 = initialLeft(  SolutionBasis );
@@ -144,9 +144,7 @@ using Volume  = Geometry::Volume<nDim>;
             const SolutionVarSet qr=q[i+1];
 
             const Surface face = surface( nodes[i] );
-//          const Geometry::Surface<2> face2{};
 
-//          const FluxRes fr = flux( species, face2, ql, qr );
             const FluxRes fr = flux( species, face,  ql, qr );
 
             res[i]  -=fr;

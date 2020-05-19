@@ -1,28 +1,34 @@
 
-   template<int nDim>
-   Types::Real length2( const Direction<nDim>& d )
+# include <cmath>
+
+namespace Geometry
+{
+   template<int nDim, floating_point Real>
+   Real length2( const Direction<nDim,Real>& d )
   {
-      Types::Real l=0;
-      for( const Types::Real& x : d.x ){ l+=x*x; }
+      Real l=0;
+      for( const Real& x : d.v ){ l+=x*x; }
       return l;
   }
 
-   template<int nDim>
-   Types::Real length( const Direction<nDim>& d )
+   template<int nDim, floating_point Real>
+   Real length( const Direction<nDim,Real>& d )
   {
       return std::sqrt(length2(d));
   }
 
-   Direction<2> cross( const Direction<2>& a )
+   template<floating_point Real>
+   Direction<2,Real> cross( const Direction<2,Real>& a )
   {
-      return Direction<2>{-a[1],a[0]};
+      return Direction<2,Real>{-a[1],a[0]};
   }
 
-   Direction<3> cross( const Direction<3>& a,
-                       const Direction<3>& b )
+   template<floating_point Real>
+   Direction<3,Real> cross( const Direction<3,Real>& a,
+                            const Direction<3,Real>& b )
   {
-      return Direction<3>{ a[1]*b[2] - a[2]*b[1],
-                           a[2]*b[0] - a[0]*b[2],
-                           a[0]*b[1] - a[1]*b[0] };
+      return Direction<3,Real>{ a[1]*b[2] - a[2]*b[1],
+                                a[2]*b[0] - a[0]*b[2],
+                                a[0]*b[1] - a[1]*b[0] };
   }
-
+}

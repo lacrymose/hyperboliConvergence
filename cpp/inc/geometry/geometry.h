@@ -1,183 +1,126 @@
 
 # pragma once
 
+# include <utils/maths/affineSpace.h>
+
 # include <utils/concepts.h>
-# include <types.h>
 
 # include <array>
 # include <vector>
-# include <ostream>
-
-# include <cmath>
 
 namespace Geometry
 {
-// declarations
-   template<int nDim> struct Point;
-   template<int nDim> struct Direction;
-   template<int nDim> struct Metric;
-   template<int nDim> struct Volume;
-   template<int nDim> struct Surface;
+// forward declarations
+   template<int nDim, floating_point Real=double> struct Point;
+   template<int nDim, floating_point Real=double> struct Direction;
+   template<int nDim, floating_point Real=double> struct Metric;
+   template<int nDim, floating_point Real=double> struct Volume;
+   template<int nDim, floating_point Real=double> struct Surface;
 
 /*
- * {Point,Direction} form an affine space
+ * {Point,Direction} form an affine space.
+ *    affine space behaviour is inherited from CRTP base classes
  */
-   template<int nDim>
-   struct Point
+   template<int nDim, floating_point Real>
+   struct Point : AffinePointBase<nDim,
+                                  Point<nDim,Real>,
+                                  Direction<nDim,Real>,
+                                  Real>
   {
-      using Direction = Geometry::Direction<nDim>;
-
-      std::array<Types::Real,nDim>  x{};
-
-   // default, copy and move constructors
-      Point() = default;
-      Point( const Point&  ) = default;
-      Point(       Point&& ) = default;
-
-   // only explicit construction from VariableDelta
-      explicit Point( const Direction&  d ) noexcept : x(d.x) {}
-      explicit Point(       Direction&& d ) noexcept : x(std::move(d.x)) {}
-
-   // copy/move assignment
-      Point& operator=( const Point&  ) = default;
-      Point& operator=(       Point&& ) = default;
-
-   // initialiser list constructor, must be a length nDim list of Types::Real
-      template<typename... T>
-         requires   Same<Types::Real,T...>
-                 && is_pack_of_n<nDim,T...>::value
-      Point( T... r ) noexcept : x{r...} {}
-
-   // accessors
-            Types::Real& operator[]( const int i )       { return x[i]; }
-      const Types::Real& operator[]( const int i ) const { return x[i]; }
-
-   // in-place arithmetic
-      Point& operator+=( const Direction&  d );
-      Point& operator-=( const Direction&  d );
-      Point& operator =( const Types::Real a );
+      using AffinePointBase<nDim,
+                            Point<nDim,Real>,
+                            Direction<nDim,Real>,
+                            Real>::AffinePointBase;
   };
 
-/*
- * send each element of Point to stream, seperated by a single space
- */
-   template<int nDim>
-   std::ostream& operator<<( std::ostream& os, const Point<nDim>& p );
-
-   template<int nDim>
-   struct Direction
+   template<int nDim, floating_point Real>
+   struct Direction : AffineDeltaBase<nDim,
+                                      Point<nDim,Real>,
+                                      Direction<nDim,Real>,
+                                      Real>
   {
-      using Point = Geometry::Point<nDim>;
-
-      std::array<Types::Real,nDim>  x{};
-
-   // default, copy and move constructors
-      Direction() = default;
-      Direction( const Direction&  ) = default;
-      Direction(       Direction&& ) = default;
-
-   // only explicit construction from VariableDelta
-      explicit Direction( const Point&  d ) noexcept : x(d.x) {}
-      explicit Direction(       Point&& d ) noexcept : x(std::move(d.x)) {}
-
-   // copy/move assignment
-      Direction& operator=( const Direction&  ) = default;
-      Direction& operator=(       Direction&& ) = default;
-
-   // initialiser list constructor, must be a length nDim list of Types::Real
-      template<typename... T>
-         requires   Same<Types::Real,T...>
-                 && is_pack_of_n<nDim,T...>::value
-      Direction( T... r ) noexcept : x{r...} {}
-
-   // accessors
-            Types::Real& operator[]( const int i )       { return x[i]; };
-      const Types::Real& operator[]( const int i ) const { return x[i]; }
-
-   // in-place arithmetic
-      Direction& operator+=( const Direction&  d );
-      Direction& operator-=( const Direction&  d );
-      Direction& operator*=( const Types::Real a );
-      Direction& operator/=( const Types::Real a );
-      Direction& operator =( const Types::Real a );
+      using AffineDeltaBase<nDim,
+                            Point<nDim,Real>,
+                            Direction<nDim,Real>,
+                            Real>::AffineDeltaBase;
   };
-
-/*
- * send each element of Direction to stream, seperated by a single space
- */
-   template<int nDim>
-   std::ostream& operator<<( std::ostream& os, const Direction<nDim>& d );
 
 /*
  * Metric for a surface in nDim dimensions. Direction m[0] is surface normal, m[1...] are surface tangents
  */
-   template<int nDim>
+   template<int nDim, floating_point Real>
    struct Metric
   {
-      std::array<Direction<nDim>,nDim>  m{};
+      std::array<Direction<nDim,Real>,nDim>  m;
 
-            Direction<nDim>& operator[](       int i )       { return m[i]; };
-      const Direction<nDim>& operator[]( const int i ) const { return m[i]; };
+            Direction<nDim,Real>& operator[](       int i )       { return m[i]; };
+      const Direction<nDim,Real>& operator[]( const int i ) const { return m[i]; };
   };
 
 // used to represent hypersurfaces in a space
-   template<int nDim>
+   template<int nDim, floating_point Real>
    struct Surface
   {
-      Types::Real     area{};
-      Point<nDim>   centre{};
-      Metric<nDim>  metric{};
+      Real                area;
+      Point<nDim,Real>  centre;
+      Metric<nDim,Real> metric;
   };
 
 // used to represent sections of a space of the same # of dimensions as the space
-   template<int nDim>
+   template<int nDim, floating_point Real>
    struct Volume
   {
-      Types::Real  volume{};
-      Point<nDim>  centre{};
+      Real             volume;
+      Point<nDim,Real> centre;
   };
 
-   template<int nDim>
-   Types::Real length2( const Direction<nDim>& );
+   template<int nDim, floating_point Real>
+   Real length2( const Direction<nDim,Real>& );
 
-   template<int nDim>
-   Types::Real length(  const Direction<nDim>& );
+   template<int nDim, floating_point Real>
+   Real length(  const Direction<nDim,Real>& );
 
-   Direction<2> cross( const Direction<2>& );
+   template<floating_point Real>
+   Direction<2,Real> cross( const Direction<2,Real>& );
 
-   Direction<3> cross( const Direction<3>&,
-                       const Direction<3>& );
+   template<floating_point Real>
+   Direction<3,Real> cross( const Direction<3,Real>&,
+                            const Direction<3,Real>& );
 
-   Surface<1> surface( const Point<1>& );
+   template<floating_point Real>
+   Surface<1,Real> surface( const Point<1,Real>& );
 
-   Surface<2> surface( const Point<2>&,
-                       const Point<2>& );
+   template<floating_point Real>
+   Surface<2,Real> surface( const Point<2,Real>&,
+                            const Point<2,Real>& );
 
-   Surface<3> surface( const Point<3>&,
-                       const Point<3>&,
-                       const Point<3>&,
-                       const Point<3>& );
+   template<floating_point Real>
+   Surface<3,Real> surface( const Point<3,Real>&,
+                            const Point<3,Real>&,
+                            const Point<3,Real>&,
+                            const Point<3,Real>& );
 
-   Volume<1> volume( const Point<1>&, const Point<1>& );
+   template<floating_point Real>
+   Volume<1,Real> volume( const Point<1,Real>&, const Point<1,Real>& );
 
-   Volume<2> volume( const Point<2>&, const Point<2>&,
-                     const Point<2>&, const Point<2>& );
+   template<floating_point Real>
+   Volume<2,Real> volume( const Point<2,Real>&, const Point<2,Real>&,
+                          const Point<2,Real>&, const Point<2,Real>& );
 
-   Volume<3> volume( const Point<3>&, const Point<3>&,
-                     const Point<3>&, const Point<3>&,
-                     const Point<3>&, const Point<3>& );
+   template<floating_point Real>
+   Volume<3,Real> volume( const Point<3,Real>&, const Point<3,Real>&,
+                          const Point<3,Real>&, const Point<3,Real>&,
+                          const Point<3,Real>&, const Point<3,Real>& );
 
-   std::vector<Volume<1>> dual( const std::vector<Point<1>>&  nodes );
-   std::vector<Point<1>>  dual( const std::vector<Volume<1>>& cells );
+   template<floating_point Real>
+   std::vector<Volume<1,Real>> dual( const std::vector<Point<1,Real>>& nodes );
 
+   template<floating_point Real>
+   std::vector<Point<1,Real>> dual( const std::vector<Volume<1,Real>>& cells );
+}
 
-# include <geometry/direction.ipp>
-# include <geometry/point.ipp>
-# include <geometry/affine.ipp>
 # include <geometry/operations.ipp>
 # include <geometry/surface.ipp>
 # include <geometry/volume.ipp>
 # include <geometry/dual.ipp>
-
-}
 
