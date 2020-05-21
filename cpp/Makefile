@@ -30,7 +30,7 @@ CCMP = g++-8
 COPT = -Og -D_GLIBCXX_DEBUG
 #COPT = -O3
 
-CWARN = -Wall -Wextra -Wpedantic
+CWARN = -Wall -Wextra -Wpedantic -Wno-unused-parameter
 
 CSTD = -std=c++17 -fconcepts
 

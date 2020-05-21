@@ -1,17 +1,18 @@
 
-   template<EulerConservedVariables ConsVarT, EulerState StateT>
-      requires SameDim<ConsVarT,StateT>
-   ConsVarT state2Set( const Species<LawType::Euler>& species, const StateT& state )
+   template<EulerConservedVariables ConsVarT, EulerState StateT, floating_point Real>
+      requires   SameDim<ConsVarT,StateT>
+              && SameFPType<ConsVarT,StateT,Real>
+   ConsVarT state2Set( const Species<LawType::Euler,Real>& species, const StateT& state )
   {
       constexpr int nd = dim_of_v<StateT>;
 
    // unpack state
-      const Types::Real r = state.density();
-      const Types::Real p = state.pressure();
-      const Types::Real h = state.specificTotalEnthalpy();
+      const Real r = state.density();
+      const Real p = state.pressure();
+      const Real h = state.specificTotalEnthalpy();
 
    // total energy
-      const Types::Real re = r*h - p;
+      const Real re = r*h - p;
 
    // assemble conserved variables
       // { momentum, density, total energy }
@@ -27,21 +28,22 @@
       return qc;
   }
 
-   template<EulerConservedVariables ConsVarT>
-   state_t<ConsVarT> set2State( const Species<LawType::Euler>& species, const ConsVarT& qc )
+   template<EulerConservedVariables ConsVarT, floating_point Real>
+      requires SameFPType<ConsVarT,Real>
+   state_t<ConsVarT> set2State( const Species<LawType::Euler,Real>& species, const ConsVarT& qc )
   {
       using StateT = state_t<ConsVarT>;
       constexpr int nd = dim_of_v<StateT>;
 
-      const Types::Real gam  = species.gamma;
-      const Types::Real R    = species.R;
-      const Types::Real gam1 = 1./( gam - 1. );
+      const Real gam  = species.gamma;
+      const Real R    = species.R;
+      const Real gam1 = species.gamma1;
 
    // unpack conserved variables
       // density and total energy
-      const Types::Real r = qc[nd];
-      const Types::Real re= qc[nd+1];
-      const Types::Real r1= 1./r;
+      const Real r = qc[nd];
+      const Real re= qc[nd+1];
+      const Real r1= 1./r;
 
    // velocities
       StateT state;
@@ -54,13 +56,13 @@
      {
          state.velocity2() += state.velocity(i)*state.velocity(i);
      }
-      const Types::Real k = 0.5*state.velocity2();
+      const Real k = 0.5*state.velocity2();
 
    // thermodynamic quantities
-      const Types::Real p = ( gam-1. )*( re - r*k );
-      const Types::Real t = p / ( R*r );
-      const Types::Real a2= gam*R*t;
-      const Types::Real h = a2*gam1 + k;
+      const Real p = ( gam-1. )*( re - r*k );
+      const Real t = p / ( R*r );
+      const Real a2= gam*R*t;
+      const Real h = a2*gam1 + k;
 
    // assemble state
 

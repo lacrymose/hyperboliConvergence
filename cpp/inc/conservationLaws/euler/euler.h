@@ -5,7 +5,7 @@
 
 # include <geometry/geometry.h>
 
-# include <types.h>
+# include <utils/concepts.h>
 
 // ---------- integral values ----------
 
@@ -14,9 +14,9 @@
  *    Conserved: velocity, scalar
  */
    enum struct EulerBases { Conserved,       // { momentum, density,     total energy }
-                            Characteristic,  // { entropy,  vorticity,   left/right acoustic }
-                            Viscous,         // { velocity, temperature, pressure }
-                            Primitive };     // { velocity, density,     pressure }
+//                          Characteristic,  // { entropy,  vorticity,   left/right acoustic }
+//                          Primitive,       // { velocity, density,     pressure }
+                            Viscous };       // { velocity, temperature, pressure }
 
    template<>
    struct BasisTypeHelper<LawType::Euler> { using type = EulerBases; };
@@ -27,38 +27,40 @@
 
 // ---------- Law specific types ----------
 
-   template<>
-   struct Species<LawType::Euler>
+   template<floating_point Real>
+   struct Species<LawType::Euler,Real>
   {
-      Types::Real gamma;   // ratio of specific heats
-      Types::Real  minf;   // background mach number
-      Types::Real    nu;   // kinematic viscosity
-      Types::Real    pr;   // prandtl number
-      Types::Real    dt;   // simulation timescale
-      Types::Real     R;   // gas constant
+      Real gamma;   // ratio of specific heats
+      Real  minf;   // background mach number
+      Real    nu;   // kinematic viscosity
+      Real    pr;   // prandtl number
+      Real    dt;   // simulation timescale
+      Real     R;   // gas constant
+
+      Real gamma1;   // 1. / ( gamma-1. )
   };
 
-   template<int nDim>
-   struct State<LawType::Euler,nDim>
+   template<int nDim, floating_point Real>
+   struct State<LawType::Euler,nDim,Real>
   {
-      std::array<Types::Real,
+      std::array<Real,
                  nDim+6> state{0};
 
-      Types::Real& pressure()              { return state[0]; }
-      Types::Real& density()               { return state[1]; }
-      Types::Real& temperature()           { return state[2]; }
-      Types::Real& specificTotalEnthalpy() { return state[3]; }
-      Types::Real& velocity2()             { return state[4]; }
-      Types::Real& speedOfSound2()         { return state[5]; }
-      Types::Real& velocity( const int i ) { return state[6+i]; }
+      Real& pressure()              { return state[0]; }
+      Real& density()               { return state[1]; }
+      Real& temperature()           { return state[2]; }
+      Real& specificTotalEnthalpy() { return state[3]; }
+      Real& velocity2()             { return state[4]; }
+      Real& speedOfSound2()         { return state[5]; }
+      Real& velocity( const int i ) { return state[6+i]; }
 
-      const Types::Real& pressure()              const { return state[0]; }
-      const Types::Real& density()               const { return state[1]; }
-      const Types::Real& temperature()           const { return state[2]; }
-      const Types::Real& specificTotalEnthalpy() const { return state[3]; }
-      const Types::Real& velocity2()             const { return state[4]; }
-      const Types::Real& speedOfSound2()         const { return state[5]; }
-      const Types::Real& velocity( const int i ) const { return state[6+i]; }
+      const Real& pressure()              const { return state[0]; }
+      const Real& density()               const { return state[1]; }
+      const Real& temperature()           const { return state[2]; }
+      const Real& specificTotalEnthalpy() const { return state[3]; }
+      const Real& velocity2()             const { return state[4]; }
+      const Real& speedOfSound2()         const { return state[5]; }
+      const Real& velocity( const int i ) const { return state[6+i]; }
   };
 
 
@@ -83,31 +85,38 @@
 
 // ---------- exact physical flux ----------
 
-   template<int nDim>
-   FluxResult<LawType::Euler,nDim> exactFlux( const Species<LawType::Euler>&   species,
-                                              const Geometry::Direction<nDim>&  normal,
-                                              const State<LawType::Euler,nDim>&  state );
+   template<int nDim, floating_point Real>
+   FluxResult<LawType::Euler,nDim,Real> exactFlux( const Species<LawType::Euler,Real>&   species,
+                                                   const Geometry::Direction<nDim,Real>&  normal,
+                                                   const State<LawType::Euler,nDim,Real>&  state );
 
 
 // ---------- transformation functions ----------
 
 // conserved variables
-   template<EulerConservedVariables ConsVarT, EulerState StateT>
-      requires SameDim<ConsVarT,StateT>
-   ConsVarT state2Set( const Species<LawType::Euler>& species, const StateT& state );
+   template<EulerConservedVariables ConsVarT, EulerState StateT, floating_point Real>
+      requires   SameDim<ConsVarT,StateT>
+              && SameFPType<ConsVarT,StateT,Real>
+   ConsVarT state2Set( const Species<LawType::Euler,Real>& species, const StateT& state );
 
-   template<EulerConservedVariables ConsVarT>
-   state_t<ConsVarT> set2State( const Species<LawType::Euler>& species, const ConsVarT& qc );
+   template<EulerConservedVariables ConsVarT, floating_point Real>
+      requires SameFPType<ConsVarT,Real>
+   state_t<ConsVarT> set2State( const Species<LawType::Euler,Real>& species, const ConsVarT& qc );
 
 // viscous variables
-   template<EulerViscousVariables ViscVarT, EulerState StateT>
-      requires SameDim<ViscVarT,StateT>
-   ViscVarT state2Set( const Species<LawType::Euler>& species, const StateT& state );
+   template<EulerViscousVariables ViscVarT, EulerState StateT, floating_point Real>
+      requires   SameDim<ViscVarT,StateT>
+              && SameFPType<ViscVarT,StateT,Real>
+   ViscVarT state2Set( const Species<LawType::Euler,Real>& species, const StateT& state );
 
-   template<EulerViscousVariables ViscVarT>
-   state_t<ViscVarT> set2State( const Species<LawType::Euler>& species, const ViscVarT& qv );
+   template<EulerViscousVariables ViscVarT, floating_point Real>
+      requires SameFPType<ViscVarT,Real>
+   state_t<ViscVarT> set2State( const Species<LawType::Euler,Real>& species, const ViscVarT& qv );
 
+// ---------- standard ideal gas species ----------
 
+   template<floating_point Real>
+   Species<LawType::Euler,Real> get_air_species();
 
 # include <conservationLaws/euler/fluxes/exactFlux.ipp>
 

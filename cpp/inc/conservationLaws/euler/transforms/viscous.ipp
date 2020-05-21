@@ -1,7 +1,8 @@
 
-   template<EulerViscousVariables ViscVarT, EulerState StateT>
-      requires SameDim<ViscVarT,StateT>
-   ViscVarT state2Set( const Species<LawType::Euler>& species, const StateT& state )
+   template<EulerViscousVariables ViscVarT, EulerState StateT, floating_point Real>
+      requires   SameDim<ViscVarT,StateT>
+              && SameFPType<ViscVarT,StateT,Real>
+   ViscVarT state2Set( const Species<LawType::Euler,Real>& species, const StateT& state )
   {
       ViscVarT qv;
 
@@ -14,15 +15,16 @@
       qv[nd+1]=state.pressure();
   }
 
-   template<EulerViscousVariables ViscVarT>
-   state_t<ViscVarT> set2State( const Species<LawType::Euler>& species, const ViscVarT& qv )
+   template<EulerViscousVariables ViscVarT, floating_point Real>
+      requires SameFPType<ViscVarT,Real>
+   state_t<ViscVarT> set2State( const Species<LawType::Euler,Real>& species, const ViscVarT& qv )
   {
+      using StateT = state_t<ViscVarT>;
       constexpr int nd = dim_of_v<ViscVarT>;
-      using StateT = State<LawType::Euler,nd>;
 
-      const Types::Real gam  = species.gamma;
-      const Types::Real R    = species.R;
-      const Types::Real gam1 = 1./ ( gam-1. );
+      const Real gam  = species.gamma;
+      const Real R    = species.R;
+      const Real gam1 = species.gamma1;
 
    // velocities
       StateT state;
@@ -30,24 +32,21 @@
       for( int i=0; i<nd; i++ )
      {
          state.velocity(i) = qv[i];
-     }
-      for( int i=0; i<nd; i++ )
-     {
          state.velocity2()+= qv[i]*qv[i];
      }
-      const Types::Real k = 0.5*state.velocity2();
+      const Real k = 0.5*state.velocity2();
 
    // thermodynamic quantities
-      const Types::Real t = qv[nd];
-      const Types::Real p = qv[nd+1];
-      const Types::Real r = p/( species.R*t );
-      const Types::Real a2= gam*R*t;
-      const Types::Real h = a2*gam1 + k;
+      const Real t = qv[nd];
+      const Real p = qv[nd+1];
+      const Real r = p/( R*t );
+      const Real a2= gam*R*t;
+      const Real h = a2*gam1 + k;
 
+      state.specificTotalEnthalpy() = h;
       state.pressure()      = p;
       state.density()       = r;
       state.temperature()   = t;
-      state.specificTotalEnthalpy() = h;
       state.speedOfSound2() = a2;
 
       return state;

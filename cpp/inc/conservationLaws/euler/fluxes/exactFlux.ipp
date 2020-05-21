@@ -1,23 +1,23 @@
 
 # include <cmath>
 
-   template<int nDim>
-   FluxResult<LawType::Euler,nDim> exactFlux( const Species<LawType::Euler>&   species,
-                                              const Geometry::Direction<nDim>&  normal,
-                                              const State<LawType::Euler,nDim>&  state )
+   template<int nDim, floating_point Real>
+   FluxResult<LawType::Euler,nDim,Real> exactFlux( const Species<LawType::Euler,Real>&   species,
+                                                   const Geometry::Direction<nDim,Real>&  normal,
+                                                   const State<LawType::Euler,nDim,Real>&  state )
   {
    // unpack state
-      const Types::Real r = state.density();
-      const Types::Real p = state.pressure();
-      const Types::Real h = state.specificTotalEnthalpy();
-      const Types::Real a = std::sqrt( state.speedOfSound2() );
+      const Real r = state.density();
+      const Real p = state.pressure();
+      const Real h = state.specificTotalEnthalpy();
+      const Real a = std::sqrt( state.speedOfSound2() );
 
    // face normal velocity and mass flux
-      const Types::Real un = projectedVelocity( normal, state );
-      const Types::Real mn = r*un;
+      const Real un = projectedVelocity( normal, state );
+      const Real mn = r*un;
 
    // assemble flux
-      FluxResult<LawType::Euler,nDim> fr;
+      FluxResult<LawType::Euler,nDim,Real> fr;
 
    // momentum flux
       for( int i=0; i<nDim; i++ )
@@ -30,7 +30,7 @@
       fr.flux[nDim+1] = mn*h;
 
    // max wavespeed
-      fr.lambda= std::abs( un ) + a;
+      fr.lambda = std::abs( un ) + a;
 
       return fr;
   }

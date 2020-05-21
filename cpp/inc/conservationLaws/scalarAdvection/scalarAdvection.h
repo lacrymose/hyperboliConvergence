@@ -5,7 +5,7 @@
 
 # include <geometry/geometry.h>
 
-# include <types.h>
+# include <utils/concepts.h>
 
 // ---------- integral values ----------
 
@@ -26,10 +26,7 @@
 // ---------- Law specific types ----------
 
    template<floating_point Real>
-   struct Species<LawType::ScalarAdvection,Real>
-  {
-      Real scale=1;
-  };
+   struct Species<LawType::ScalarAdvection,Real> {};
 
    template<int nDim, floating_point Real>
    struct State<LawType::ScalarAdvection,nDim,Real>
@@ -54,7 +51,6 @@
 
    template<typename T>
    concept bool ScalarConservedVariables =
-//    ImplementedVarSet<T>
       is_specialised_VarSet_v<T,
                               LawType::ScalarAdvection,
                               ScalarAdvectionBases::Conserved>;

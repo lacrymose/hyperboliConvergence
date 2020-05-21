@@ -1,6 +1,6 @@
 
 # include <conservationLaws/scalarAdvection/scalarAdvection.h>
-//# include <conservationLaws/euler/euler.h>
+# include <conservationLaws/euler/euler.h>
 
 # include <geometry/geometry.h>
 
@@ -10,11 +10,11 @@
 
 // ------- Inputs ------- 
 
-constexpr LawType Law = LawType::ScalarAdvection;
+constexpr LawType Law = LawType::Euler;
 constexpr int nDim = 1;
 
-constexpr int nx = 64;
-constexpr int nt = 32;
+constexpr int nx = 256;
+constexpr int nt = 384;
 
 using FPType = double;
 
@@ -41,14 +41,12 @@ using Volume  = Geometry::Volume< nDim,FPType>;
       return Species<LawType::ScalarAdvection,FPType>{};
   }
 
-/*
    auto get_species( EulerBases Basis )
   {
       assert( Basis == EulerBases::Conserved );
 
-      return get_air_species();
+      return get_air_species<FPType>();
   }
-*/
 
    auto initialLeft( ScalarAdvectionBases Basis )
   {
@@ -76,7 +74,6 @@ using Volume  = Geometry::Volume< nDim,FPType>;
       return VarSet{u,q};
   }
 
-/*
    auto initialLeft( EulerBases Basis )
   {
       assert( Basis == EulerBases::Conserved );
@@ -104,7 +101,6 @@ using Volume  = Geometry::Volume< nDim,FPType>;
       constexpr FPType re=0.25;
       return VarSet{ru,r,re};
   }
-*/
 
    void writeState( std::ofstream& os, const State<LawType::ScalarAdvection,1,FPType>& s )
   {
@@ -113,15 +109,14 @@ using Volume  = Geometry::Volume< nDim,FPType>;
       return;
   }
    
-/*
    void writeState( std::ofstream& os, const State<LawType::Euler,1,FPType>& s )
   {
       os << s.density()   << " "
          << s.velocity(0) << " "
-         << s.pressure()  << std::endl;
+         << s.pressure()  << " "
+         << s.specificTotalEnthalpy()  << std::endl;
       return;
   }
-*/
    
 
    int main()
