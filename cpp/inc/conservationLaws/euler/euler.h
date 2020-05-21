@@ -30,12 +30,12 @@
    template<>
    struct Species<LawType::Euler>
   {
-      Types::Real gamma{};   // ratio of specific heats
-      Types::Real  minf{};   // background mach number
-      Types::Real    nu{};   // kinematic viscosity
-      Types::Real    pr{};   // prandtl number
-      Types::Real    dt{};   // simulation timescale
-      Types::Real     R{};   // gas constant
+      Types::Real gamma;   // ratio of specific heats
+      Types::Real  minf;   // background mach number
+      Types::Real    nu;   // kinematic viscosity
+      Types::Real    pr;   // prandtl number
+      Types::Real    dt;   // simulation timescale
+      Types::Real     R;   // gas constant
   };
 
    template<int nDim>

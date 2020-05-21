@@ -23,13 +23,18 @@ CSCRIPT = test.cpp \
 	scalarAdvection.cpp \
 	testScalarAdvection.cpp
 
+# compiler
 CCMP = g++-8
 
-COPT = -g -D_GLIBCXX_DEBUG  -Wall
-#COPT = -O3 -Wall
+# debug/optimisation, warning and language standard flags
+COPT = -Og -D_GLIBCXX_DEBUG
+#COPT = -O3
+
+CWARN = -Wall -Wextra -Wpedantic
 
 CSTD = -std=c++17 -fconcepts
 
+# external libraries, eg lapack, blas, openmp ...
 LIBS =
 
 
@@ -60,12 +65,12 @@ OBJS = $(SOURCEOBJ) $(SCRIPTOBJ)
 
 # default
 %.o : %.cpp
-	$(CCMP) $(COPT) $(CSTD) $(INCLDE) -o $@ -c $<
+	$(CCMP) $(COPT) $(CSTD) $(CWARN) $(INCLDE) -o $@ -c $<
 
 # each executable depends on its own object file, and all source objects
 
 $(PROGRM) : $(PROGRMDIR)%.out : $(SCRIPTDIR)%.o $(SOURCEOBJ)
-	$(CCMP) $(COPT) $(CSTD) $(INCLDE) -o $@ $^ $(LIBS)
+	$(CCMP) $(COPT) $(CSTD) $(CWARN) $(INCLDE) -o $@ $^ $(LIBS)
 
 
 #-------------------------------------

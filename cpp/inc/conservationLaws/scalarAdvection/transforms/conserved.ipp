@@ -10,7 +10,7 @@
      {
          qc[i]=state.velocity(i);
      }
-      qc[nd]=state.scalar();
+      qc[nd]=species.scale*state.scalar();
 
       return qc;
   }
@@ -26,7 +26,7 @@
      {
          state.velocity(i)=qc[i];
      }
-      state.scalar()=qc[nd];
+      state.scalar()=qc[nd]/species.scale;
 
       return state;
   }

@@ -26,7 +26,10 @@
 // ---------- Law specific types ----------
 
    template<>
-   struct Species<LawType::ScalarAdvection> {};
+   struct Species<LawType::ScalarAdvection>
+  {
+      Types::Real scale=1;
+  };
 
    template<int nDim>
    struct State<LawType::ScalarAdvection,nDim>

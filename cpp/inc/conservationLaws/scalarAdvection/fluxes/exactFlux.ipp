@@ -11,7 +11,7 @@
                                                         const State<LawType::ScalarAdvection,nDim>& state )
   {
       const Types::Real un = projectedVelocity( normal, state );
-      const Types::Real q = state.scalar();
+      const Types::Real q  = species.scale*state.scalar();
 
       FluxResult<LawType::ScalarAdvection,nDim> result;
       result.flux[nDim]=un*q;

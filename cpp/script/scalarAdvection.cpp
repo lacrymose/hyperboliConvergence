@@ -28,16 +28,22 @@ using Volume  = Geometry::Volume<nDim>;
 
    auto get_species( ScalarAdvectionBases Basis )
   {
+      assert( Basis == ScalarAdvectionBases::Conserved );
+
       return Species<LawType::ScalarAdvection>{};
   }
 
    auto get_species( EulerBases Basis )
   {
+      assert( Basis == EulerBases::Conserved );
+
       return get_air_species();
   }
 
    auto initialLeft( ScalarAdvectionBases Basis )
   {
+      assert( Basis == ScalarAdvectionBases::Conserved );
+
       using VarSet = VariableSet<LawType::ScalarAdvection,
                                  1,
                                  ScalarAdvectionBases::Conserved>;
@@ -48,6 +54,8 @@ using Volume  = Geometry::Volume<nDim>;
 
    auto initialRight( ScalarAdvectionBases Basis )
   {
+      assert( Basis == ScalarAdvectionBases::Conserved );
+
       using VarSet = VariableSet<LawType::ScalarAdvection,
                                  1,
                                  ScalarAdvectionBases::Conserved>;
@@ -58,6 +66,8 @@ using Volume  = Geometry::Volume<nDim>;
 
    auto initialLeft( EulerBases Basis )
   {
+      assert( Basis == EulerBases::Conserved );
+
       using VarSet = VariableSet<LawType::Euler,
                                  1,
                                  EulerBases::Conserved>;
@@ -69,6 +79,8 @@ using Volume  = Geometry::Volume<nDim>;
    
    auto initialRight( EulerBases Basis )
   {
+      assert( Basis == EulerBases::Conserved );
+
       using VarSet = VariableSet<LawType::Euler,
                                  1,
                                  EulerBases::Conserved>;
