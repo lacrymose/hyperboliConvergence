@@ -1,6 +1,8 @@
 
 # pragma once
 
+# include <utils/concepts.h>
+
 // unique identifier for each conservation law
    enum struct LawType { NoLaw,
                          ArtificialCompressibility,
@@ -30,19 +32,19 @@
 
 
 // physical constants for each conservation law
-   template<LawType Law > struct Species;
+   template<LawType Law, floating_point Real> struct Species;
 
 // unique point in phase space, agnostic to base
-   template<LawType Law, int nDim> struct State;
+   template<LawType Law, int nDim, floating_point Real> struct State;
 
 // flux in conserved basis, and spectral radius
-   template<LawType Law, int nDim> struct FluxResult;
+   template<LawType Law, int nDim, floating_point Real> struct FluxResult;
 
 // point in (affine) phase space with particular basis
-   template<LawType Law, int nDim, BasisType<Law> Basis> struct VariableSet;
+   template<LawType Law, int nDim, BasisType<Law> Basis, floating_point Real> struct VariableSet;
 
 // increment in (affine) phase space with particular basis
-   template<LawType Law, int nDim, BasisType<Law> Basis> struct VariableDelta;
+   template<LawType Law, int nDim, BasisType<Law> Basis, floating_point Real> struct VariableDelta;
 
 
 // transformations between variable sets and states

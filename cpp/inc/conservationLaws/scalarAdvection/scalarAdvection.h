@@ -25,23 +25,23 @@
 
 // ---------- Law specific types ----------
 
-   template<>
-   struct Species<LawType::ScalarAdvection>
+   template<floating_point Real>
+   struct Species<LawType::ScalarAdvection,Real>
   {
-      Types::Real scale=1;
+      Real scale=1;
   };
 
-   template<int nDim>
-   struct State<LawType::ScalarAdvection,nDim>
+   template<int nDim, floating_point Real>
+   struct State<LawType::ScalarAdvection,nDim,Real>
   {
-      std::array<Types::Real,
+      std::array<Real,
                  nVar<LawType::ScalarAdvection,nDim>> state{0};
 
-            Types::Real& scalar()       { return state[0]; }
-      const Types::Real& scalar() const { return state[0]; }
+            Real& scalar()       { return state[0]; }
+      const Real& scalar() const { return state[0]; }
 
-            Types::Real& velocity( const int i )       { return state[1+i]; }
-      const Types::Real& velocity( const int i ) const { return state[1+i]; }
+            Real& velocity( const int i )       { return state[1+i]; }
+      const Real& velocity( const int i ) const { return state[1+i]; }
   };
 
 
@@ -62,20 +62,22 @@
 
 // ---------- exact physical flux ----------
 
-   template<int nDim>
-   FluxResult<LawType::ScalarAdvection,nDim> exactFlux( const Species<LawType::ScalarAdvection>&  species,
-                                                        const Geometry::Direction<nDim>&           normal,
-                                                        const State<LawType::ScalarAdvection,nDim>& state );
+   template<int nDim, floating_point Real>
+   FluxResult<LawType::ScalarAdvection,nDim,Real> exactFlux( const Species<LawType::ScalarAdvection,Real>&    species,
+                                                             const Geometry::Direction<nDim,Real>&             normal,
+                                                             const State<LawType::ScalarAdvection,nDim,Real>&   state );
 
 
 // ---------- transformation functions ----------
 
-   template<ScalarConservedVariables ConsVarT, ScalarState StateT>
-      requires SameDim<ConsVarT,StateT>
-   ConsVarT state2Set( const Species<LawType::ScalarAdvection>& species, const StateT& state );
+   template<ScalarConservedVariables ConsVarT, ScalarState StateT, floating_point Real>
+      requires   SameDim<ConsVarT,StateT>
+              && SameFPType<ConsVarT,StateT,Real>
+   ConsVarT state2Set( const Species<LawType::ScalarAdvection,Real>& species, const StateT& state );
 
-   template<ScalarConservedVariables ConsVarT>
-   state_t<ConsVarT> set2State( const Species<LawType::ScalarAdvection>& species, const ConsVarT& qc );
+   template<ScalarConservedVariables ConsVarT, floating_point Real>
+      requires SameFPType<ConsVarT,Real>
+   state_t<ConsVarT> set2State( const Species<LawType::ScalarAdvection,Real>& species, const ConsVarT& qc );
 
 
 # include <conservationLaws/scalarAdvection/fluxes/exactFlux.ipp>

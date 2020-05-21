@@ -60,8 +60,8 @@
    template<typename BasisType, BasisType Basis>
    struct basis_of<std::integral_constant<BasisType,Basis>> : std::integral_constant<BasisType,Basis> {};
 
-   template<LawType Law, int nDim, BasisType<Law> Basis, template<LawType, int, BasisType<Law>> typename T>
-   struct basis_of<T<Law,nDim,Basis>> : std::integral_constant<BasisType<Law>,Basis> {};
+   template<LawType Law, int nDim, BasisType<Law> Basis, floating_point Real, template<LawType, int, BasisType<Law>, floating_point> typename T>
+   struct basis_of<T<Law,nDim,Basis,Real>> : std::integral_constant<BasisType<Law>,Basis> {};
 
 
 

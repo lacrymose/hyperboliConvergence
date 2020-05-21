@@ -70,11 +70,11 @@
    struct dim_of<dim_constant<nDim>> : dim_constant<nDim> {};
 
    // covers all current use cases, and probably many future ones?
-   template<LawType Law, int nDim, template<LawType, int> typename T>
-   struct dim_of<T<Law,nDim>> : dim_constant<nDim> {};
+   template<LawType Law, int nDim, floating_point Real, template<LawType, int, floating_point> typename T>
+   struct dim_of<T<Law,nDim,Real>> : dim_constant<nDim> {};
 
-   template<LawType Law, int nDim, BasisType<Law> Basis, template<LawType, int, BasisType<Law>> typename T>
-   struct dim_of<T<Law,nDim,Basis>> : dim_constant<nDim> {};
+   template<LawType Law, int nDim, BasisType<Law> Basis, floating_point Real, template<LawType, int, BasisType<Law>, floating_point> typename T>
+   struct dim_of<T<Law,nDim,Basis,Real>> : dim_constant<nDim> {};
 
 /*
  * is dimension of type in {1,2,3}?

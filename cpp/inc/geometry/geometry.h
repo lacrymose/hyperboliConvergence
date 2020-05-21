@@ -11,11 +11,11 @@
 namespace Geometry
 {
 // forward declarations
-   template<int nDim, floating_point Real=double> struct Point;
-   template<int nDim, floating_point Real=double> struct Direction;
-   template<int nDim, floating_point Real=double> struct Metric;
-   template<int nDim, floating_point Real=double> struct Volume;
-   template<int nDim, floating_point Real=double> struct Surface;
+   template<int nDim, floating_point Real> struct Point;
+   template<int nDim, floating_point Real> struct Direction;
+   template<int nDim, floating_point Real> struct Metric;
+   template<int nDim, floating_point Real> struct Volume;
+   template<int nDim, floating_point Real> struct Surface;
 
 /*
  * {Point,Direction} form an affine space.

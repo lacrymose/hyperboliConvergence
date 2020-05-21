@@ -5,6 +5,16 @@
 
 // type trait utilities
 
+// -------- returns type of argument --------
+
+   // to be replaced by std::type_identity in C++20
+   template<typename T>
+   struct type_identity { using type=T; };
+
+   // helper
+   template<typename T>
+   using type_identity_t = typename type_identity<T>::type;
+
 // -------- remove const/volative qualifiers and references --------
 
    // these will be replaced by std::remove_cvref in C++20

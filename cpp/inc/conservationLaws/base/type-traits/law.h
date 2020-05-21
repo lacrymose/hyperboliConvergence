@@ -3,6 +3,7 @@
 
 # include <conservationLaws/base/declarations.h>
 
+# include <utils/concepts.h>
 # include <utils/type-traits.h>
 
 # include <type_traits>
@@ -42,11 +43,6 @@
                                         std::false_type,
                                         std::true_type> {};
 
-// template<typename T>
-// struct has_law : std::conditional_t< (law_of_v<T>==LawType::NoLaw),
-//                                      std::false_type,
-//                                      std::true_type> {};
-
    // helpers
    template<typename T> constexpr bool has_law_v = has_law<T>::value;
 // template<typename T> using has_law_t = typename has_law<T>::type;
@@ -76,14 +72,14 @@
    struct law_of<law_constant<Law>> : law_constant<Law> {};
 
    // covers all current use cases, and probably many future ones?
-   template<LawType Law, template<LawType> typename T>
-   struct law_of<T<Law>> : law_constant<Law> {};
+   template<LawType Law, floating_point Real, template<LawType, floating_point> typename T>
+   struct law_of<T<Law,Real>> : law_constant<Law> {};
 
-   template<LawType Law, int nDim, template<LawType, int> typename T>
-   struct law_of<T<Law,nDim>> : law_constant<Law> {};
+   template<LawType Law, int nDim, floating_point Real, template<LawType, int, floating_point> typename T>
+   struct law_of<T<Law,nDim,Real>> : law_constant<Law> {};
 
-   template<LawType Law, int nDim, BasisType<Law> Basis, template<LawType, int, BasisType<Law>> typename T>
-   struct law_of<T<Law,nDim,Basis>> : law_constant<Law> {};
+   template<LawType Law, int nDim, BasisType<Law> Basis, floating_point Real, template<LawType, int, BasisType<Law>, floating_point> typename T>
+   struct law_of<T<Law,nDim,Basis,Real>> : law_constant<Law> {};
 
 
 

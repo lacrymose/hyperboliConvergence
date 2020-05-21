@@ -21,6 +21,12 @@
    concept bool SameLaw = has_same_law_v<Ts...>;
 
 /*
+ * use the same floating point precision
+ */
+   template<typename... Ts>
+   concept bool SameFPType = has_same_fptype_v<Ts...>;
+
+/*
  * dimension is physically realistic (1, 2 or 3)
  */
    template<typename T>
@@ -59,9 +65,9 @@
  */
    template<LawType Law>
    concept bool ImplementedLawType = 
-      ImplementedVarSet<  VariableSet<  Law,2,BasisType<Law>::Conserved>>
-   && ImplementedVarDelta<VariableDelta<Law,2,BasisType<Law>::Conserved>>
-   && requires( Species<Law> species, State<Law,2> state, Geometry::Direction<2> normal, int ns, int nv )
+      ImplementedVarSet<  VariableSet<  Law,2,BasisType<Law>::Conserved,double>>
+   && ImplementedVarDelta<VariableDelta<Law,2,BasisType<Law>::Conserved,double>>
+   && requires( Species<Law,double> species, State<Law,2,double> state, Geometry::Direction<2,double> normal, int ns, int nv )
      {
          ns = nScalarQuantities<Law>;
          nv = nVectorQuantities<Law>;
@@ -69,7 +75,7 @@
          species;
          state;
 
-         { exactFlux( species, normal, state ) } -> FluxResult<Law,2>;
+         { exactFlux( species, normal, state ) } -> FluxResult<Law,2,double>;
      };
 
 /*
@@ -79,13 +85,13 @@
    template<typename T, LawType Law>
    concept bool FluxFunctor =
       ImplementedLawType<Law>
-   && requires( T Flux, Species<Law> species,  Geometry::Surface<2> face,
-                State<Law,2> sl, State<Law,2> sr,
-                VariableSet<Law,2,BasisType<Law>::Conserved> ql,
-                VariableSet<Law,2,BasisType<Law>::Conserved> qr )
+   && requires( T Flux, Species<Law,double> species,  Geometry::Surface<2,double> face,
+                State<Law,2,double> sl, State<Law,2,double> sr,
+                VariableSet<Law,2,BasisType<Law>::Conserved,double> ql,
+                VariableSet<Law,2,BasisType<Law>::Conserved,double> qr )
      {
-         { Flux( species, face, sl, sr ) } ->  FluxResult<Law,2>;
-         { Flux( species, face, ql, qr ) } ->  FluxResult<Law,2>;
+         { Flux( species, face, sl, sr ) } ->  FluxResult<Law,2,double>;
+         { Flux( species, face, ql, qr ) } ->  FluxResult<Law,2,double>;
      };
 
 

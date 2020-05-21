@@ -1,6 +1,6 @@
 
 # include <conservationLaws/scalarAdvection/scalarAdvection.h>
-# include <conservationLaws/euler/euler.h>
+//# include <conservationLaws/euler/euler.h>
 
 # include <geometry/geometry.h>
 
@@ -8,47 +8,58 @@
 # include <iostream>
 # include <fstream>
 
+// ------- Inputs ------- 
+
 constexpr LawType Law = LawType::ScalarAdvection;
 constexpr int nDim = 1;
 
-using BasisT = BasisType<Law>;
+constexpr int nx = 64;
+constexpr int nt = 32;
 
+using FPType = double;
+
+using BasisT = BasisType<Law>;
 constexpr BasisT SolutionBasis = BasisT::Conserved;
 
-using SolutionVarSet   = VariableSet<  Law,nDim,SolutionBasis>;
-using SolutionVarDelta = VariableDelta<Law,nDim,SolutionBasis>;
+// -----------------------------------
 
-using FluxRes = FluxResult<Law,nDim>;
+using SolutionVarSet   = VariableSet<  Law,nDim,SolutionBasis,FPType>;
+using SolutionVarDelta = VariableDelta<Law,nDim,SolutionBasis,FPType>;
+
+using FluxRes = FluxResult<Law,nDim,FPType>;
 
 using Flux = RusanovFlux<Law>;
 
-using Point   = Geometry::Point<nDim>;
-using Surface = Geometry::Surface<nDim>;
-using Volume  = Geometry::Volume<nDim>;
+using Point   = Geometry::Point<  nDim,FPType>;
+using Surface = Geometry::Surface<nDim,FPType>;
+using Volume  = Geometry::Volume< nDim,FPType>;
 
    auto get_species( ScalarAdvectionBases Basis )
   {
       assert( Basis == ScalarAdvectionBases::Conserved );
 
-      return Species<LawType::ScalarAdvection>{};
+      return Species<LawType::ScalarAdvection,FPType>{};
   }
 
+/*
    auto get_species( EulerBases Basis )
   {
       assert( Basis == EulerBases::Conserved );
 
       return get_air_species();
   }
+*/
 
    auto initialLeft( ScalarAdvectionBases Basis )
   {
       assert( Basis == ScalarAdvectionBases::Conserved );
 
       using VarSet = VariableSet<LawType::ScalarAdvection,
-                                 1,
-                                 ScalarAdvectionBases::Conserved>;
-      constexpr Types::Real u=1.;
-      constexpr Types::Real q=2.;
+                                 nDim,
+                                 ScalarAdvectionBases::Conserved,
+                                 FPType>;
+      constexpr FPType u=1.;
+      constexpr FPType q=2.;
       return VarSet{u,q};
   }
 
@@ -57,23 +68,26 @@ using Volume  = Geometry::Volume<nDim>;
       assert( Basis == ScalarAdvectionBases::Conserved );
 
       using VarSet = VariableSet<LawType::ScalarAdvection,
-                                 1,
-                                 ScalarAdvectionBases::Conserved>;
-      constexpr Types::Real u=1.;
-      constexpr Types::Real q=1.;
+                                 nDim,
+                                 ScalarAdvectionBases::Conserved,
+                                 FPType>;
+      constexpr FPType u=1.;
+      constexpr FPType q=1.;
       return VarSet{u,q};
   }
 
+/*
    auto initialLeft( EulerBases Basis )
   {
       assert( Basis == EulerBases::Conserved );
 
       using VarSet = VariableSet<LawType::Euler,
-                                 1,
-                                 EulerBases::Conserved>;
-      constexpr Types::Real r =1.0;
-      constexpr Types::Real ru=0.0;
-      constexpr Types::Real re=2.5;
+                                 nDim,
+                                 EulerBases::Conserved,
+                                 FPType>;
+      constexpr FPType r =1.0;
+      constexpr FPType ru=0.0;
+      constexpr FPType re=2.5;
       return VarSet{ru,r,re};
   }
    
@@ -82,44 +96,44 @@ using Volume  = Geometry::Volume<nDim>;
       assert( Basis == EulerBases::Conserved );
 
       using VarSet = VariableSet<LawType::Euler,
-                                 1,
-                                 EulerBases::Conserved>;
-      constexpr Types::Real r =0.125;
-      constexpr Types::Real ru=0.0;
-      constexpr Types::Real re=0.25;
+                                 nDim,
+                                 EulerBases::Conserved,
+                                 FPType>;
+      constexpr FPType r =0.125;
+      constexpr FPType ru=0.0;
+      constexpr FPType re=0.25;
       return VarSet{ru,r,re};
   }
+*/
 
-   void writeState( std::ofstream& os, const State<LawType::ScalarAdvection,1>& s )
+   void writeState( std::ofstream& os, const State<LawType::ScalarAdvection,1,FPType>& s )
   {
       os << s.velocity(0) << " "
          << s.scalar()    << std::endl;
       return;
   }
    
-   void writeState( std::ofstream& os, const State<LawType::Euler,1>& s )
+/*
+   void writeState( std::ofstream& os, const State<LawType::Euler,1,FPType>& s )
   {
       os << s.density()   << " "
          << s.velocity(0) << " "
          << s.pressure()  << std::endl;
       return;
   }
+*/
    
 
    int main()
   {
    // parameters
 
-      // number of cells and timesteps
-      const int nx=64;
-      const int nt=64;
-
       // courant-friedrichs-lewy number
-      const Types::Real cfl=0.5;
+      const FPType cfl=0.5;
 
    // setup
-      const Species<Law> species = get_species( SolutionBasis );
-      const Flux         flux{};
+      const Species<Law,FPType> species = get_species( SolutionBasis );
+      const Flux flux{};
 
    // solutions arrays
       std::vector<SolutionVarSet>  q(nx);
@@ -147,7 +161,7 @@ using Volume  = Geometry::Volume<nDim>;
       for( int t=0; t<nt; t++ )
      {
       // reset residual
-         for( FluxRes& q0 : res ){ q0 = FluxRes{}; }
+         for( FluxRes& fr : res ){ fr = FluxRes{}; }
 
       // accumulate cell residual contributions from the flux across each face
          for( int i=0; i<nx-1; i++ )
@@ -182,12 +196,12 @@ using Volume  = Geometry::Volume<nDim>;
         }
 
       // calculate maximum stable timestep
-         const Types::Real dt = [&]()
+         const FPType dt = [&]()
         {
-            Types::Real dmin = std::numeric_limits<Types::Real>::max();
+            FPType dmin = std::numeric_limits<FPType>::max();
             for( int i=0; i<nx; i++ )
            {
-               const Types::Real d = cells[i].volume
+               const FPType d = cells[i].volume
                                     /res[i].lambda;
                dmin = std::min( dmin, d );
            }
@@ -197,7 +211,7 @@ using Volume  = Geometry::Volume<nDim>;
       // integrate cell residuals forward by dt and average over cell volume
          for( int i=0; i<nx; i++ )
         {
-            const Types::Real d = dt/cells[i].volume;
+            const FPType d = dt/cells[i].volume;
 
             const SolutionVarDelta dq = d*res[i].flux;
 
@@ -229,7 +243,7 @@ using Volume  = Geometry::Volume<nDim>;
          res = fluxResidual(        nodes, flux,          species,       q );
          res = fluxResidual( cells, nodes, flux, limiter, species, grad, q );
 
-         const Types::Real dt = timestep( cells, res, cfl );
+         const FPType dt = timestep( cells, res, cfl );
 
          q1 = eulerForwardUpdate( cells, species, dt, q, res );
          std::swap( q,q1 );

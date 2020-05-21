@@ -7,7 +7,7 @@ namespace Geometry
       Surface<1,Real> surf;
       surf.area   = 1;
       surf.centre = p;
-      surf.metric = Metric<1,Real>{Direction<1,Real>{1.}};
+      surf.metric = Metric<1,Real>{Direction<1,Real>{Real(1.)}};
       return surf;
   }
 

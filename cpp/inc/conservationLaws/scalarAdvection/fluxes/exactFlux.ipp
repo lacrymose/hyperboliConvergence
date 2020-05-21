@@ -5,15 +5,15 @@
  *       flux[0:nDim-1] is zero (the advecting velocity) 
  *       flux[nDim] is the projection of uq onto the flux direction
  */
-   template<int nDim>
-   FluxResult<LawType::ScalarAdvection,nDim> exactFlux( const Species<LawType::ScalarAdvection>&  species,
-                                                        const Geometry::Direction<nDim>&           normal,
-                                                        const State<LawType::ScalarAdvection,nDim>& state )
+   template<int nDim, floating_point Real>
+   FluxResult<LawType::ScalarAdvection,nDim,Real> exactFlux( const Species<LawType::ScalarAdvection,Real>&       species,
+                                                             const Geometry::Direction<nDim,Real>&                normal,
+                                                             const State<LawType::ScalarAdvection,nDim,Real>&      state )
   {
-      const Types::Real un = projectedVelocity( normal, state );
-      const Types::Real q  = species.scale*state.scalar();
+      const Real un = projectedVelocity( normal, state );
+      const Real q  = species.scale*state.scalar();
 
-      FluxResult<LawType::ScalarAdvection,nDim> result;
+      FluxResult<LawType::ScalarAdvection,nDim,Real> result{};
       result.flux[nDim]=un*q;
       result.lambda=un;
 

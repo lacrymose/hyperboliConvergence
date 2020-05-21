@@ -3,7 +3,8 @@
 
 # include <conservationLaws/base/type-traits/dim.h>
 # include <conservationLaws/base/type-traits/law.h>
-# include <conservationLaws/base/type-traits/base.h>
+# include <conservationLaws/base/type-traits/basis.h>
+# include <conservationLaws/base/type-traits/floating_point.h>
 
 # include <conservationLaws/base/declarations.h>
 
@@ -13,9 +14,9 @@
 
 // ---------- return types of same law and spatial dimension ----------
 
-   template<typename T> using    species_t =    Species< law_of_v<T> >;
-   template<typename T> using      state_t =      State< law_of_v<T>, dim_of_v<T> >;
-   template<typename T> using fluxresult_t = FluxResult< law_of_v<T>, dim_of_v<T> >;
+   template<typename T> using    species_t =    Species< law_of_v<T>,              fptype_of_t<T> >;
+   template<typename T> using      state_t =      State< law_of_v<T>, dim_of_v<T>, fptype_of_t<T> >;
+   template<typename T> using fluxresult_t = FluxResult< law_of_v<T>, dim_of_v<T>, fptype_of_t<T> >;
 
 
 // ---------- is type an instantiation of a particular type template? ----------
@@ -25,8 +26,8 @@
    template<typename T>
    struct is_Species : std::false_type {};
 
-   template<LawType Law>
-   struct is_Species<Species<Law>> : std::true_type {};
+   template<LawType Law, floating_point Real>
+   struct is_Species<Species<Law,Real>> : std::true_type {};
 
    // helper
    template<typename T>
@@ -38,8 +39,8 @@
    template<typename T>
    struct is_State : std::false_type {};
 
-   template<LawType Law, int nDim>
-   struct is_State<State<Law,nDim>> : std::true_type {};
+   template<LawType Law, int nDim, floating_point Real>
+   struct is_State<State<Law,nDim,Real>> : std::true_type {};
 
    // helper
    template<typename T>
@@ -51,8 +52,8 @@
    template<typename T>
    struct is_FluxResult : std::false_type {};
 
-   template<LawType Law, int nDim>
-   struct is_FluxResult<FluxResult<Law,nDim>> : std::true_type {};
+   template<LawType Law, int nDim, floating_point Real>
+   struct is_FluxResult<FluxResult<Law,nDim,Real>> : std::true_type {};
 
    // helper
    template<typename T>
@@ -64,8 +65,8 @@
    template<typename T>
    struct is_VariableSet : std::false_type {};
 
-   template<LawType Law, int nDim, BasisType<Law> Basis>
-   struct is_VariableSet<VariableSet<Law,nDim,Basis>> : std::true_type {};
+   template<LawType Law, int nDim, BasisType<Law> Basis, floating_point Real>
+   struct is_VariableSet<VariableSet<Law,nDim,Basis,Real>> : std::true_type {};
 
    // helper
    template<typename T>
@@ -77,8 +78,8 @@
    template<typename T>
    struct is_VariableDelta : std::false_type {};
 
-   template<LawType Law, int nDim, BasisType<Law> Basis>
-   struct is_VariableDelta<VariableDelta<Law,nDim,Basis>> : std::true_type {};
+   template<LawType Law, int nDim, BasisType<Law> Basis, floating_point Real>
+   struct is_VariableDelta<VariableDelta<Law,nDim,Basis,Real>> : std::true_type {};
 
    // helper
    template<typename T>
@@ -90,8 +91,8 @@
    template<typename T, LawType Law, BasisType<Law> Basis>
    struct is_specialised_VarSet : std::false_type {};
 
-   template<LawType Law, int nDim, BasisType<Law> Basis>
-   struct is_specialised_VarSet<VariableSet<Law,nDim,Basis>,Law,Basis> : std::true_type{};
+   template<LawType Law, int nDim, BasisType<Law> Basis, floating_point Real>
+   struct is_specialised_VarSet<VariableSet<Law,nDim,Basis,Real>,Law,Basis> : std::true_type{};
 
    // helper
    template<typename T, LawType Law, BasisType<Law> Basis>
@@ -103,8 +104,8 @@
    template<typename T, LawType Law, BasisType<Law> Basis>
    struct is_specialised_VarDelta : std::false_type {};
 
-   template<LawType Law, int nDim, BasisType<Law> Basis>
-   struct is_specialised_VarDelta<VariableDelta<Law,nDim,Basis>,Law,Basis> : std::true_type{};
+   template<LawType Law, int nDim, BasisType<Law> Basis, floating_point Real>
+   struct is_specialised_VarDelta<VariableDelta<Law,nDim,Basis,Real>,Law,Basis> : std::true_type{};
 
    // helper
    template<typename T, LawType Law, BasisType<Law> Basis>

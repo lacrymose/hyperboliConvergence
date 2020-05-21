@@ -1,18 +1,18 @@
 
    template<LawType Law>
-   template<int nDim>
-   inline FluxResult<Law,nDim> RusanovFlux<Law>::flux( const Species<Law>&         species,
-                                                       const Geometry::Surface<nDim>& face,
-                                                       const State<Law,nDim>&           sl,
-                                                       const State<Law,nDim>&           sr )
+   template<int nDim, floating_point Real>
+   inline FluxResult<Law,nDim,Real> RusanovFlux<Law>::flux( const Species<Law,Real>&         species,
+                                                            const Geometry::Surface<nDim,Real>& face,
+                                                            const State<Law,nDim,Real>&           sl,
+                                                            const State<Law,nDim,Real>&           sr )
   {
 
    // types needed for upwind diffusion calculation
-      using ConservedSet   = VariableSet<  Law,nDim,BasisType<Law>::Conserved>;
-      using ConservedDelta = VariableDelta<Law,nDim,BasisType<Law>::Conserved>;
+      using ConservedSet   = VariableSet<  Law,nDim,BasisType<Law>::Conserved,Real>;
+      using ConservedDelta = VariableDelta<Law,nDim,BasisType<Law>::Conserved,Real>;
 
    // central flux
-      FluxResult<Law,nDim> result = CentralFlux<Law>::flux( species, face, sl,sr );
+      FluxResult<Law,nDim,Real> result = CentralFlux<Law>::flux( species, face, sl,sr );
       
    // scalar upwind diffusion
 
@@ -21,7 +21,7 @@
                                -state2Set<ConservedSet>( species, sl );
 
       // spectral radius diffusion coefficient
-      const Types::Real la = result.lambda*face.area;
+      const Real la = result.lambda*face.area;
 
       result.flux-=0.5*la*dq;
 

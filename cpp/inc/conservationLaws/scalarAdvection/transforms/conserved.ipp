@@ -1,7 +1,8 @@
 
-   template<ScalarConservedVariables ConsVarT, ScalarState StateT>
-      requires SameDim<ConsVarT,StateT>
-   ConsVarT state2Set( const Species<LawType::ScalarAdvection>& species, const StateT& state )
+   template<ScalarConservedVariables ConsVarT, ScalarState StateT, floating_point Real>
+      requires   SameDim<ConsVarT,StateT>
+              && SameFPType<ConsVarT,StateT,Real>
+   ConsVarT state2Set( const Species<LawType::ScalarAdvection,Real>& species, const StateT& state )
   {
       constexpr int nd = dim_of_v<StateT>;
 
@@ -15,8 +16,9 @@
       return qc;
   }
 
-   template<ScalarConservedVariables ConsVarT>
-   state_t<ConsVarT> set2State( const Species<LawType::ScalarAdvection>& species, const ConsVarT& qc )
+   template<ScalarConservedVariables ConsVarT, floating_point Real>
+      requires SameFPType<ConsVarT,Real>
+   state_t<ConsVarT> set2State( const Species<LawType::ScalarAdvection,Real>& species, const ConsVarT& qc )
   {
       constexpr int nd = dim_of_v<ConsVarT>;
       using StateT = state_t<ConsVarT>;
