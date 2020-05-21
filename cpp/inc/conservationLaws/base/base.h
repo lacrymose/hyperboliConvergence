@@ -13,8 +13,6 @@
 # include <type_traits>
 # include <ostream>
 
-// template<size_t N, typename... Ts>
-// concept bool PackOfN = is_pack
 
 // ---------- types for variables in conservation law phase space ----------
 
@@ -23,99 +21,35 @@
  * VariableSet is a point in an affine space, with VariableDelta<Law,nDim,Basis> being displacements in this space
  */
    template<LawType Law, int nDim, BasisType<Law> Basis>
-   struct VariableSet
+   struct VariableSet : AffinePointBase<nVar<Law,nDim>,
+                                        VariableSet<  Law,nDim,Basis>,
+                                        VariableDelta<Law,nDim,Basis>,
+                                        Types::Real>
   {
-   // equivalent VariableDelta
-      using VariableDelta = ::VariableDelta<Law,nDim,Basis>;
-
-   // variables
-      std::array<Types::Real,nVar<Law,nDim>> var{};
-
-   // default, copy and move constructors
-      VariableSet() = default;
-      VariableSet( const VariableSet&  ) = default;
-      VariableSet(       VariableSet&& ) = default;
-
-   // only explicit construction from VariableDelta
-      explicit VariableSet( const VariableDelta&  dq ) noexcept : var(dq.var) {}
-      explicit VariableSet(       VariableDelta&& dq ) noexcept : var(std::move(dq.var)) {}
-
-   // initialiser list constructor, must be a length nVar list of Types::Real
-      template<typename... T>
-         requires   Same<Types::Real,T...>
-                 && is_pack_of_n<nVar<Law,nDim>,T...>::value
-      VariableSet( T... r ) noexcept : var{r...} {}
-
-   // copy/move assignment
-      VariableSet& operator=( const VariableSet&  ) = default;
-      VariableSet& operator=(       VariableSet&& ) = default;
-
-   // accessors
-            Types::Real& operator[]( const int i )       { return var[i]; }
-      const Types::Real& operator[]( const int i ) const { return var[i]; }
-
-   // in-place arithmetic
-      VariableSet& operator+=( const VariableDelta& dq0 );
-      VariableSet& operator-=( const VariableDelta& dq0 );
-      VariableSet& operator =( const Types::Real a );
+   using AffinePointBase<nVar<Law,nDim>,
+                         VariableSet<  Law,nDim,Basis>,
+                         VariableDelta<Law,nDim,Basis>,
+                         Types::Real>::AffinePointBase;
   };
 
-/*
- * send each element of VariableSet to stream, seperated by a single space
- */
-   template<LawType Law, int nDim, BasisType<Law> Basis>
-   std::ostream& operator<<( std::ostream& os, const VariableSet<Law,nDim,Basis>& q );
-                                              
+
 /*
  * Vector of displacements for a hyperbolic conservation law (Law) in a particular basis for the phase space (Basis) with (nDim) spatial dimensions
  * VariableDelta is a displacement in an affine space, with VariableSet<Law,nDim,Basis> being points in this space
  */
    template<LawType Law, int nDim, BasisType<Law> Basis>
-   struct VariableDelta
+   struct VariableDelta : AffineDeltaBase<nVar<Law,nDim>,
+                                          VariableSet<  Law,nDim,Basis>,
+                                          VariableDelta<Law,nDim,Basis>,
+                                          Types::Real>
   {
-   // equivalent VariableDelta
-      using VariableSet = ::VariableSet<Law,nDim,Basis>;
-
-   // variables
-      std::array<Types::Real,nVar<Law,nDim>> var{};
-
-   // default, copy and move constructors
-      VariableDelta() = default;
-      VariableDelta( const VariableDelta&  ) = default;
-      VariableDelta(       VariableDelta&& ) = default;
-
-   // only explicit conversion from Delta
-      explicit VariableDelta( const VariableSet&  q ) noexcept : var(q.var) {};
-      explicit VariableDelta(       VariableSet&& q ) noexcept : var(std::move(q.var)) {};
-
-   // initialiser list constructor, must be a length nVar list of Types::Real
-      template<typename... T>
-         requires   Same<Types::Real,T...>
-                 && is_pack_of_n<nVar<Law,nDim>,T...>::value
-      VariableDelta( T... r ) noexcept : var{r...} {}
-
-   // copy/move assignment
-      VariableDelta& operator=( const VariableDelta&  ) = default;
-      VariableDelta& operator=(       VariableDelta&& ) = default;
-
-   // accessors
-            Types::Real& operator[]( const int i )       { return var[i]; }
-      const Types::Real& operator[]( const int i ) const { return var[i]; }
-
-   // in-place arithmetic
-      VariableDelta& operator+=( const VariableDelta& dq0 );
-      VariableDelta& operator-=( const VariableDelta& dq0 );
-      VariableDelta& operator*=( const Types::Real a );
-      VariableDelta& operator/=( const Types::Real a );
-      VariableDelta& operator =( const Types::Real a );
+   using AffineDeltaBase<nVar<Law,nDim>,
+                         VariableSet<  Law,nDim,Basis>,
+                         VariableDelta<Law,nDim,Basis>,
+                         Types::Real>::AffineDeltaBase;
   };
 
-/*
- * send each element of VariableDelta to stream, seperated by a single space
- */
-   template<LawType Law, int nDim, BasisType<Law> Basis>
-   std::ostream& operator<<( std::ostream& os, const VariableDelta<Law,nDim,Basis>& dq );
-                                              
+
 /*
  * A flux, and associated spectral radius in the phase space of conservation law Law in nDim spatial dimensions
  * flux is a VariableDelta in Conserved variables to ensure correct shock speeds
@@ -321,9 +255,6 @@
 
 // ---------- implementation files ----------
 
-# include <conservationLaws/base/variables/variableSet.ipp>
-# include <conservationLaws/base/variables/variableDelta.ipp>
-# include <conservationLaws/base/variables/variableArithmetic.ipp>
 # include <conservationLaws/base/variables/variableArrays.ipp>
 # include <conservationLaws/base/fluxResult.ipp>
 
