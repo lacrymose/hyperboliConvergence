@@ -86,9 +86,9 @@
 // ---------- exact physical flux ----------
 
    template<int nDim, floating_point Real>
-   FluxResult<LawType::Euler,nDim,Real> exactFlux( const Species<LawType::Euler,Real>&   species,
-                                                   const Geometry::Direction<nDim,Real>&  normal,
-                                                   const State<LawType::Euler,nDim,Real>&  state );
+   FluxResult<LawType::Euler,nDim,Real> exactFlux( const Species<LawType::Euler,Real>&  species,
+                                                   const geom::Direction<nDim,Real>&     normal,
+                                                   const State<LawType::Euler,nDim,Real>& state );
 
 
 // ---------- transformation functions ----------

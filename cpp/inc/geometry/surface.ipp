@@ -1,5 +1,5 @@
 
-namespace Geometry
+namespace geom
 {
    template<floating_point Real>
    Surface<1,Real> surface( const Point<1,Real>& p )

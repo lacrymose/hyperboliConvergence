@@ -20,15 +20,15 @@ CSCRIPT = test.cpp \
 	sodsDualTime.cpp \
 	sods.cpp \
 	testGenericVariableSet.cpp \
-	scalarAdvection.cpp \
+	riemannProblem.cpp \
 	testScalarAdvection.cpp
 
 # compiler
 CCMP = g++-8
 
 # debug/optimisation, warning and language standard flags
-COPT = -Og -D_GLIBCXX_DEBUG
-#COPT = -O3
+#COPT = -Og -D_GLIBCXX_DEBUG
+COPT = -O3
 
 CWARN = -Wall -Wextra -Wpedantic -Wno-unused-parameter
 

@@ -1,10 +1,10 @@
 
    template<LawType Law>
    template<int nDim, floating_point Real>
-   inline FluxResult<Law,nDim,Real> CentralFlux<Law>::flux( const Species<Law,Real>&         species,
-                                                            const Geometry::Surface<nDim,Real>& face,
-                                                            const State<Law,nDim,Real>&           sl,
-                                                            const State<Law,nDim,Real>&           sr )
+   inline FluxResult<Law,nDim,Real> CentralFlux<Law>::flux( const Species<Law,Real>&     species,
+                                                            const geom::Surface<nDim,Real>& face,
+                                                            const State<Law,nDim,Real>&       sl,
+                                                            const State<Law,nDim,Real>&       sr )
   {
       const FluxResult<Law,nDim,Real> fl = exactFlux( species, face.metric[0], sl );
       const FluxResult<Law,nDim,Real> fr = exactFlux( species, face.metric[0], sr );

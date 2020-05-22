@@ -1,11 +1,13 @@
 
+# include <iostream>
+
 // --------------- Vector in-place arithmetic ---------------
 
    // v+=v
    template<int N, typename Derived, floating_point Real>
    Derived& VectorSpaceBase<N,Derived,Real>::operator+=( const Derived& other )
   {
-      for( int i=0; i<N; i++ ){ v[i]+=other[i]; }
+      for( int i=0; i<N; i++ ){ elems[i]+=other[i]; }
       return static_cast<Derived&>(*this);
   };
 
@@ -13,7 +15,7 @@
    template<int N, typename Derived, floating_point Real>
    Derived& VectorSpaceBase<N,Derived,Real>::operator-=( const Derived& other )
   {
-      for( int i=0; i<N; i++ ){ v[i]-=other[i]; }
+      for( int i=0; i<N; i++ ){ elems[i]-=other[i]; }
       return static_cast<Derived&>(*this);
   };
 
@@ -21,7 +23,7 @@
    template<int N, typename Derived, floating_point Real>
    Derived& VectorSpaceBase<N,Derived,Real>::operator*=( const Real a )
   {
-      for( Real& w : v ){ w*=a; }
+      for( Real& w : elems ){ w*=a; }
       return static_cast<Derived&>(*this);
   };
 
@@ -30,7 +32,7 @@
    Derived& VectorSpaceBase<N,Derived,Real>::operator/=( const Real a )
   {
       const Real a1=1./a;
-      for( Real& w : v ){ w*=a1; }
+      for( Real& w : elems ){ w*=a1; }
       return static_cast<Derived&>(*this);
   };
 
@@ -108,4 +110,14 @@
       return os;
   }
 
+/*
+ * read each element of Vector from stream
+ */
+   template<typename Vec>
+      requires is_vectorspace_base<Vec>::value
+   std::istream& operator<<( std::istream& os, Vec& v )
+  {
+      for( auto& elem : v.elems ){ is >> elem; }
+      return is;
+  }
 

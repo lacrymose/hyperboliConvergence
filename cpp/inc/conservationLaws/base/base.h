@@ -8,7 +8,6 @@
 # include <geometry/geometry.h>
 
 # include <utils/concepts.h>
-# include <types.h> 
 
 # include <type_traits>
 # include <ostream>
@@ -94,7 +93,7 @@
       requires   SameLaw<VarT,law_constant<Law>>
               && SameFPType<VarT,Real>
               && ImplementedLawType<Law>
-   fluxresult_t<VarT> exactFlux( const Species<Law,Real>& species, const Geometry::Direction<dim_of_v<VarT>,Real>& normal, const VarT& q0 )
+   fluxresult_t<VarT> exactFlux( const Species<Law,Real>& species, const geom::Direction<dim_of_v<VarT>,Real>& normal, const VarT& q0 )
   {
       return exactFlux( species, normal, setToState( species, q0 ) );
   }
@@ -104,7 +103,7 @@
  *    assumes State<Law,nDim,Real> has a .velocity(int) member
  */
    template<LawType Law, int nDim, floating_point Real>
-   Real projectedVelocity( const Geometry::Direction<nDim,Real>& dir, const State<Law,nDim,Real>& state )
+   Real projectedVelocity( const geom::Direction<nDim,Real>& dir, const State<Law,nDim,Real>& state )
   {
       Real un=0;
       for( int i=0; i<nDim; i++ )
@@ -122,7 +121,7 @@
       requires   SameLaw<VarT,law_constant<Law>>
               && SameDim<VarT,dim_constant<nDim>>
               && SameFPType<VarT,Real>
-   VarT rotateToMetric( const Species<Law,Real>& species, const Geometry::Metric<nDim,Real>& metric, const VarT& q0 )
+   VarT rotateToMetric( const Species<Law,Real>& species, const geom::Metric<nDim,Real>& metric, const VarT& q0 )
   {
       constexpr int nVec = nVectorQuantities<Law>;
 
@@ -164,6 +163,7 @@
       requires   SameLaw<DstT,SrcT,law_constant<Law>>
               && SameDim<DstT,SrcT>
               && SameFPType<DstT,SrcT,Real>
+              && !(std::is_same_v<DstT,SrcT>)
    DstT set2Set( const Species<Law,Real>& species, const SrcT& q0 )
   {
       return state2Set<DstT>( species, set2State( species, q0 ) );
@@ -207,10 +207,10 @@
          requires   SameLaw<law_constant<Law>, VarSetT>
                  && SameDim<dim_constant<nDim>,VarSetT>
               && SameFPType<VarSetT,Real>
-      FluxResult<Law,nDim,Real> operator()( const Species<Law,Real>&         species,
-                                            const Geometry::Surface<nDim,Real>& face,
-                                            const VarSetT&                        ql,
-                                            const VarSetT&                        qr ) const
+      FluxResult<Law,nDim,Real> operator()( const Species<Law,Real>&     species,
+                                            const geom::Surface<nDim,Real>& face,
+                                            const VarSetT&                    ql,
+                                            const VarSetT&                    qr ) const
      {
          return static_cast<const Flux*>(this)->flux( species, face,
                                                 set2State( species, ql ),
@@ -218,10 +218,10 @@
      }
 
       template<int nDim, floating_point Real>
-      FluxResult<Law,nDim,Real> operator()( const Species<Law,Real>&         species,
-                                            const Geometry::Surface<nDim,Real>& face,
-                                            const State<Law,nDim,Real>&           sl,
-                                            const State<Law,nDim,Real>&           sr ) const
+      FluxResult<Law,nDim,Real> operator()( const Species<Law,Real>&     species,
+                                            const geom::Surface<nDim,Real>& face,
+                                            const State<Law,nDim,Real>&       sl,
+                                            const State<Law,nDim,Real>&       sr ) const
      {
          return static_cast<const Flux*>(this)->flux( species, face, sl, sr );
      }
@@ -236,10 +236,10 @@
    struct CentralFlux : FluxInterface<CentralFlux<Law>,Law>
   {
       template<int nDim, floating_point Real>
-      static FluxResult<Law,nDim,Real> flux( const Species<Law,Real>&         species,
-                                             const Geometry::Surface<nDim,Real>& face,
-                                             const State<Law,nDim,Real>&          sl,
-                                             const State<Law,nDim,Real>&          sr );
+      static FluxResult<Law,nDim,Real> flux( const Species<Law,Real>&     species,
+                                             const geom::Surface<nDim,Real>& face,
+                                             const State<Law,nDim,Real>&       sl,
+                                             const State<Law,nDim,Real>&       sr );
   };
 
 /*
@@ -251,54 +251,17 @@
    struct RusanovFlux : FluxInterface<RusanovFlux<Law>,Law>
   {
       template<int nDim, floating_point Real>
-      static FluxResult<Law,nDim,Real> flux( const Species<Law,Real>&         species,
-                                             const Geometry::Surface<nDim,Real>& face,
-                                             const State<Law,nDim,Real>&           sl,
-                                             const State<Law,nDim,Real>&           sr );
+      static FluxResult<Law,nDim,Real> flux( const Species<Law,Real>&     species,
+                                             const geom::Surface<nDim,Real>& face,
+                                             const State<Law,nDim,Real>&       sl,
+                                             const State<Law,nDim,Real>&       sr );
   };
 
 
 // ---------- implementation files ----------
 
-# include <conservationLaws/base/variables/variableArrays.ipp>
 # include <conservationLaws/base/fluxResult.ipp>
 
 # include <conservationLaws/base/fluxes/centralFlux.ipp>
 # include <conservationLaws/base/fluxes/rusanovFlux.ipp>
-
-
-// ---------- example specialisations ----------
-
-/*
-// must define overload for each LawType
-   template<int nDim>
-   FluxResult<Euler,nDim> exactFlux( Species<Euler>, Geometry::Surface<nDim>, State<Euler,nDim> );
-
-// must define pair of function overloads for transforming each set to/from a state
-   template< EulerConservedVariables DstT, EulerState SrcT >
-      requires SameDim<DstT,SrcT>
-   DstT transform( Species<Euler>, SrcT );
-
-   template< EulerState DstT, EulerConservedVariables SrcT >
-      requires SameDim<DstT,SrcT>
-   DstT transform( Species<Euler>, SrcT );
-
-// must define pair of transformations between deltas at particular state
-   template< EulerConservedDelta DstT, EulerPrimitiveDelta SrcT >
-      requires SameDim<DstT,SrcT>
-   DstT transform( Species<Euler>, State<Euler,SrcT::nDim>, SrcT, Geometry::Metric<SrcT::nDim> );
-
-   template< EulerPrimitiveDelta DstT, EulerConservedDelta SrcT >
-      requires SameDim<DstT,SrcT>
-   DstT transform( Species<Euler>, State<Euler,SrcT::nDim>, SrcT, Geometry::Metric<SrcT::nDim> );
-
-// can define function overloads for transforming directly between sets for improved performance
-   template< EulerConservedVariables DstT, EulerPrimitiveVariables SrcT >
-      requires SameDim<DstT,SrcT>
-   DstT transform( Species<Euler>, SrcT );
-
-   template< EulerConservedVariables DstT, EulerPrimitiveVariables SrcT >
-      requires SameDim<DstT,SrcT>
-   DstT transform( Species<Euler>, SrcT );
-*/
 

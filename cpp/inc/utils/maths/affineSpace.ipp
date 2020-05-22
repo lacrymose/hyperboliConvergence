@@ -5,7 +5,7 @@
    template<int NDIM, typename Point, typename Delta, floating_point Real>
    Point& AffinePointBase<NDIM,Point,Delta,Real>::operator+=( const Delta& d )
   {
-      for( int i=0; i<NDIM; i++ ){ v[i]+=d[i]; }
+      for( int i=0; i<NDIM; i++ ){ elems[i]+=d[i]; }
       return static_cast<Point&>(*this);
   }
 
@@ -13,7 +13,7 @@
    template<int NDIM, typename Point, typename Delta, floating_point Real>
    Point& AffinePointBase<NDIM,Point,Delta,Real>::operator-=( const Delta& d )
   {
-      for( int i=0; i<NDIM; i++ ){ v[i]-=d[i]; }
+      for( int i=0; i<NDIM; i++ ){ elems[i]-=d[i]; }
       return static_cast<Point&>(*this);
   }
 
@@ -24,7 +24,7 @@
    template<int NDIM, typename Point, typename Delta, floating_point Real>
    Delta& AffineDeltaBase<NDIM,Point,Delta,Real>::operator+=( const Delta& d )
   {
-      for( int i=0; i<NDIM; i++ ){ v[i]+=d[i]; }
+      for( int i=0; i<NDIM; i++ ){ elems[i]+=d[i]; }
       return static_cast<Delta&>(*this);
   }
 
@@ -32,7 +32,7 @@
    template<int NDIM, typename Point, typename Delta, floating_point Real>
    Delta& AffineDeltaBase<NDIM,Point,Delta,Real>::operator-=( const Delta& d )
   {
-      for( int i=0; i<NDIM; i++ ){ v[i]-=d[i]; }
+      for( int i=0; i<NDIM; i++ ){ elems[i]-=d[i]; }
       return static_cast<Delta&>(*this);
   }
 
@@ -40,7 +40,7 @@
    template<int NDIM, typename Point, typename Delta, floating_point Real>
    Delta& AffineDeltaBase<NDIM,Point,Delta,Real>::operator*=( const Real a )
   {
-      for( Real& w : v ){ w*=a; }
+      for( Real& w : elems ){ w*=a; }
       return static_cast<Delta&>(*this);
   }
 
@@ -49,7 +49,7 @@
    Delta& AffineDeltaBase<NDIM,Point,Delta,Real>::operator/=( const Real a )
   {
       const Real a1=1./a;
-      for( Real& w : v ){ w*=a1; }
+      for( Real& w : elems ){ w*=a1; }
       return static_cast<Delta&>(*this);
   }
 
@@ -162,7 +162,7 @@
   }
 
 /*
- * send each element of Direction to stream, seperated by a single space
+ * send each element of Delta to stream, seperated by a single space
  */
    template<typename Delta>
       requires has_affinedelta_base<Delta>::value
@@ -177,5 +177,28 @@
       os << d[N-1];
       return os;
   }
+
+/*
+ * read each element of Point from stream
+ */
+   template<typename Point>
+      requires has_affinepoint_base<Point>::value
+   std::istream& operator<<( std::istream& is, Point& p )
+  {
+      for( auto& elem : p.elems ){ is >> elem; }
+      return is;
+  }
+
+/*
+ * read each element of Delta from stream
+ */
+   template<typename Delta>
+      requires has_affinedelta_base<Delta>::value
+   std::istream& operator<<( std::istream& is, Delta& d )
+  {
+      for( auto& elem : d.elems ){ is >> elem; }
+      return is;
+  }
+
 
 

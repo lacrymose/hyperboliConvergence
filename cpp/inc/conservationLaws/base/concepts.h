@@ -27,6 +27,18 @@
    concept bool SameFPType = has_same_fptype_v<Ts...>;
 
 /*
+ * checks all types are consistently defined. checks all of:
+ *    dimension
+ *    law type
+ *    floating point precision
+ */
+   template<LawType Law, int nDim, typename FP, typename... Ts>
+   concept bool ConsistentTypes =
+      SameLaw<law_constant<Law>,Ts...>
+   && SameDim<dim_constant<nDim>,Ts...>
+   && SameFPType<FP,Ts...>;
+
+/*
  * dimension is physically realistic (1, 2 or 3)
  */
    template<typename T>
@@ -67,7 +79,7 @@
    concept bool ImplementedLawType = 
       ImplementedVarSet<  VariableSet<  Law,2,BasisType<Law>::Conserved,double>>
    && ImplementedVarDelta<VariableDelta<Law,2,BasisType<Law>::Conserved,double>>
-   && requires( Species<Law,double> species, State<Law,2,double> state, Geometry::Direction<2,double> normal, int ns, int nv )
+   && requires( Species<Law,double> species, State<Law,2,double> state, geom::Direction<2,double> normal, int ns, int nv )
      {
          ns = nScalarQuantities<Law>;
          nv = nVectorQuantities<Law>;
@@ -85,7 +97,7 @@
    template<typename T, LawType Law>
    concept bool FluxFunctor =
       ImplementedLawType<Law>
-   && requires( T Flux, Species<Law,double> species,  Geometry::Surface<2,double> face,
+   && requires( T Flux, Species<Law,double> species,  geom::Surface<2,double> face,
                 State<Law,2,double> sl, State<Law,2,double> sr,
                 VariableSet<Law,2,BasisType<Law>::Conserved,double> ql,
                 VariableSet<Law,2,BasisType<Law>::Conserved,double> qr )

@@ -59,9 +59,9 @@
 // ---------- exact physical flux ----------
 
    template<int nDim, floating_point Real>
-   FluxResult<LawType::ScalarAdvection,nDim,Real> exactFlux( const Species<LawType::ScalarAdvection,Real>&    species,
-                                                             const Geometry::Direction<nDim,Real>&             normal,
-                                                             const State<LawType::ScalarAdvection,nDim,Real>&   state );
+   FluxResult<LawType::ScalarAdvection,nDim,Real> exactFlux( const Species<LawType::ScalarAdvection,Real>&  species,
+                                                             const geom::Direction<nDim,Real>&               normal,
+                                                             const State<LawType::ScalarAdvection,nDim,Real>& state );
 
 
 // ---------- transformation functions ----------

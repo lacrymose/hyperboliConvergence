@@ -1,10 +1,10 @@
 
    template<LawType Law>
    template<int nDim, floating_point Real>
-   inline FluxResult<Law,nDim,Real> RusanovFlux<Law>::flux( const Species<Law,Real>&         species,
-                                                            const Geometry::Surface<nDim,Real>& face,
-                                                            const State<Law,nDim,Real>&           sl,
-                                                            const State<Law,nDim,Real>&           sr )
+   inline FluxResult<Law,nDim,Real> RusanovFlux<Law>::flux( const Species<Law,Real>&     species,
+                                                            const geom::Surface<nDim,Real>& face,
+                                                            const State<Law,nDim,Real>&       sl,
+                                                            const State<Law,nDim,Real>&       sr )
   {
 
    // types needed for upwind diffusion calculation

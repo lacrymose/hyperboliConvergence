@@ -13,6 +13,8 @@
      }
       qv[nd]=state.temperature();
       qv[nd+1]=state.pressure();
+
+      return qv;
   }
 
    template<EulerViscousVariables ViscVarT, floating_point Real>
@@ -50,6 +52,5 @@
       state.speedOfSound2() = a2;
 
       return state;
-
   }
 

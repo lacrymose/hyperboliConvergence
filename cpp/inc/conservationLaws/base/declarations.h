@@ -48,8 +48,8 @@
 
 
 // transformations between variable sets and states
-   template<typename DstT, typename SrcT, typename SpeciesT>
-   DstT set2Set( const SpeciesT&, const SrcT& )=delete;
+// template<typename DstT, typename SrcT, typename SpeciesT>
+// DstT set2Set( const SpeciesT&, const SrcT& )=delete;
 
    template<typename DstT, typename StateT, typename SrcT, typename SpeciesT>
    DstT delta2Delta( const SpeciesT&, const StateT&, const SrcT& )=delete;

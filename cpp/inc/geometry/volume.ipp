@@ -1,5 +1,5 @@
 
-namespace Geometry
+namespace geom
 {
    template<floating_point Real>
    Volume<1,Real> volume( const Point<1,Real>& p0, const Point<1,Real>& p1 )

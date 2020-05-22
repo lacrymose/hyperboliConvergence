@@ -1,13 +1,13 @@
 
 # include <cmath>
 
-namespace Geometry
+namespace geom
 {
    template<int nDim, floating_point Real>
    Real length2( const Direction<nDim,Real>& d )
   {
       Real l=0;
-      for( const Real& x : d.v ){ l+=x*x; }
+      for( const Real& x : d.elems ){ l+=x*x; }
       return l;
   }
 

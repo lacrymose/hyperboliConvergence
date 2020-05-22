@@ -41,7 +41,7 @@ namespace Limiters
 
    inline Types::Real NoLimit3::operator()( Types::Real a, Types::Real b ) const
   {
-      return 0.333333333333333*(2.*a + b );
+      return 0.33333333333333333*(2.*a + b );
   }
 
    inline Types::Real VanAlbada2::operator()( Types::Real a, Types::Real b ) const

@@ -8,7 +8,7 @@
 # include <array>
 # include <vector>
 
-namespace Geometry
+namespace geom
 {
 // forward declarations
    template<int nDim, floating_point Real> struct Point;
@@ -116,7 +116,15 @@ namespace Geometry
    std::vector<Volume<1,Real>> dual( const std::vector<Point<1,Real>>& nodes );
 
    template<floating_point Real>
+   void dual( const std::vector<Point< 1,Real>>& nodes,
+                    std::vector<Volume<1,Real>>& cells );
+
+   template<floating_point Real>
    std::vector<Point<1,Real>> dual( const std::vector<Volume<1,Real>>& cells );
+
+   template<floating_point Real>
+   void dual( const std::vector<Volume<1,Real>>& cells,
+                    std::vector<Point< 1,Real>>& nodes );
 }
 
 # include <geometry/operations.ipp>

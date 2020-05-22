@@ -85,11 +85,11 @@
   {
       using value_type = Real;
       constexpr static int N=NDIM;
-      std::array<Real,N> v;
+      std::array<Real,N> elems;
 
    // accessors
-            Real& operator[]( const int i )       { return v[i]; }
-      const Real& operator[]( const int i ) const { return v[i]; }
+            Real& operator[]( const int i )       { return elems[i]; }
+      const Real& operator[]( const int i ) const { return elems[i]; }
 
    // in-place arithmetic
       Derived& operator+=( const Derived& other );

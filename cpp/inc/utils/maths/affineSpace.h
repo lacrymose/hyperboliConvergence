@@ -168,7 +168,7 @@
       using point_type = Point;
       using delta_type = Delta;
       constexpr static int N=NDIM;
-      std::array<Real,N> v;
+      std::array<Real,N> elems;
 
    // default, copy and move constructors
       AffinePointBase() = default;
@@ -179,22 +179,22 @@
       // using AffinePointBase<NDIM,Point,Delta>::AffinePointBase
 
    // only allow explicit copy/move construction from Delta
-      explicit AffinePointBase( const Delta&  d ) noexcept : v(d.v) {}
-      explicit AffinePointBase(       Delta&& d ) noexcept : v(std::move(d.v)) {}
+      explicit AffinePointBase( const Delta&  d ) noexcept : elems(d.elems) {}
+      explicit AffinePointBase(       Delta&& d ) noexcept : elems(std::move(d.elems)) {}
 
    // initialiser list constructor, must be of length NDIM list of type Real
       template<typename... Ts>
       requires   (sizeof...(Ts)==NDIM)
               && (std::is_same_v<Real,Ts> && ...)
-      AffinePointBase( Ts... t ) noexcept : v{t...} {}
+      AffinePointBase( Ts... t ) noexcept : elems{t...} {}
 
    // copy/move assignment
       AffinePointBase& operator=( const AffinePointBase&  ) = default;
       AffinePointBase& operator=(       AffinePointBase&& ) = default;
 
    // accessors
-            Real& operator[]( const int i )       { return v[i]; }
-      const Real& operator[]( const int i ) const { return v[i]; }
+            Real& operator[]( const int i )       { return elems[i]; }
+      const Real& operator[]( const int i ) const { return elems[i]; }
 
    // in-place arithmetic
       Point& operator+=( const Delta& d );
@@ -211,7 +211,7 @@
       using point_type = Point;
       using delta_type = Delta;
       constexpr static int N=NDIM;
-      std::array<Real,N> v;
+      std::array<Real,N> elems;
 
    // default, copy and move constructors
       AffineDeltaBase() = default;
@@ -222,22 +222,22 @@
       // using AffineDeltaBase<NDIM,Point,Delta>::AffineDeltaBase
 
    // only allow explicit copy/move constructor from Point
-      explicit AffineDeltaBase( const Point&  p ) noexcept : v(p.v) {}
-      explicit AffineDeltaBase(       Point&& p ) noexcept : v(std::move(p.v)) {}
+      explicit AffineDeltaBase( const Point&  p ) noexcept : elems(p.elems) {}
+      explicit AffineDeltaBase(       Point&& p ) noexcept : elems(std::move(p.elems)) {}
 
    // initialiser list constructor, must be of length NDIM list of type Real
       template<typename... Ts>
       requires   (sizeof...(Ts)==NDIM)
               && (std::is_same_v<Real,Ts> && ...)
-      AffineDeltaBase( Ts... t ) noexcept : v{t...} {}
+      AffineDeltaBase( Ts... t ) noexcept : elems{t...} {}
 
    // copy/move assignment
       AffineDeltaBase& operator=( const AffineDeltaBase&  ) = default;
       AffineDeltaBase& operator=(       AffineDeltaBase&& ) = default;
 
    // accessors
-            Real& operator[]( const int i )       { return v[i]; }
-      const Real& operator[]( const int i ) const { return v[i]; }
+            Real& operator[]( const int i )       { return elems[i]; }
+      const Real& operator[]( const int i ) const { return elems[i]; }
 
    // in-place arithmetic
       Delta& operator+=( const Delta& d );
