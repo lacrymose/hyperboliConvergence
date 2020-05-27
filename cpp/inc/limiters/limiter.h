@@ -1,46 +1,17 @@
-# ifndef LIMITER_H
-# define LIMITER_H
 
-# include <idealGas2D/idealGas2D.h>
+# pragma once
 
-# include <types.h>
-
-# include <cmath>
+# include <utils/concepts.h>
 
 namespace Limiters
 {
-/*
- * Limits left and right extrapolation across face
- */
-   template<typename Limiter>
-   struct ScalarFaceLimiter
-  {
-      Limiter  limiter;
-      inline void operator()( Types::Real  dl,    Types::Real dc, Types::Real  dr,
-                              Types::Real& dl_lim,                Types::Real& dr_lim ) const;
-  };
-
-/*
- * Limits left and right vector extrapolation across face
- */
-   template<typename Limiter>
-   struct VectorFaceLimiter
-  {
-      ScalarFaceLimiter<Limiter>  limiter;
-      template<typename DeltaType>
-      inline void operator()( const IdealGas2D::VariableDelta<DeltaType>& dl,
-                              const IdealGas2D::VariableDelta<DeltaType>& dc,
-                              const IdealGas2D::VariableDelta<DeltaType>& dr,
-                                    IdealGas2D::VariableDelta<DeltaType>& dl_lim,
-                                    IdealGas2D::VariableDelta<DeltaType>& dr_lim ) const;
-  };
-
 /*
  * Piecewise Constant Method - 1st order extrapolation
  */
    struct NoLimit1
   {
-      inline Types::Real operator()( Types::Real a, Types::Real b ) const;
+      template<floating_point Real>
+      Real operator()( const Real a, const Real b ) const;
   };
 
 /*
@@ -48,7 +19,8 @@ namespace Limiters
  */
    struct NoLimit2
   {
-      inline Types::Real operator()( Types::Real a, Types::Real b ) const;
+      template<floating_point Real>
+      Real operator()( const Real a, const Real b ) const;
   };
 
 /*
@@ -56,7 +28,8 @@ namespace Limiters
  */
    struct NoLimit3
   {
-      inline Types::Real operator()( Types::Real a, Types::Real b ) const;
+      template<floating_point Real>
+      Real operator()( const Real a, const Real b ) const;
   };
 
 /*
@@ -64,7 +37,8 @@ namespace Limiters
  */
    struct VanAlbada2
   {
-      inline Types::Real operator()( Types::Real a, Types::Real b ) const;
+      template<floating_point Real>
+      Real operator()( const Real a, const Real b ) const;
   };
 
 /*
@@ -72,7 +46,8 @@ namespace Limiters
  */
    struct MinMod2
   {
-      inline Types::Real operator()( Types::Real a, Types::Real b ) const;
+      template<floating_point Real>
+      Real operator()( const Real a, const Real b ) const;
   };
 
 /*
@@ -80,7 +55,8 @@ namespace Limiters
  */
    struct VanLeer2
   {
-      inline Types::Real operator()( Types::Real a, Types::Real b ) const;
+      template<floating_point Real>
+      Real operator()( const Real a, const Real b ) const;
   };
 
 /*
@@ -88,13 +64,10 @@ namespace Limiters
  */
    struct Cada3
   {
-      Types::Real alpha;
-      Types::Real  beta;
-
-      inline Types::Real operator()( Types::Real a, Types::Real b ) const;
+      template<floating_point Real>
+      Real operator()( const Real a, const Real b ) const;
   };
 }
 
-# include <limiter.ipp>
+# include <limiters/limiter.ipp>
 
-# endif

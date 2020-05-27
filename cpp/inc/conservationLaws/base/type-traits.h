@@ -18,6 +18,9 @@
    template<typename T> using      state_t =      State< law_of_v<T>, dim_of_v<T>, fptype_of_t<T> >;
    template<typename T> using fluxresult_t = FluxResult< law_of_v<T>, dim_of_v<T>, fptype_of_t<T> >;
 
+   template<typename T> using varset_t   = VariableSet<   law_of_v<T>, dim_of_v<T>, basis_of_v<T>, fptype_of_t<T> >;
+   template<typename T> using vardelta_t = VariableDelta< law_of_v<T>, dim_of_v<T>, basis_of_v<T>, fptype_of_t<T> >;
+
 
 // ---------- is type an instantiation of a particular type template? ----------
 

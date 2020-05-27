@@ -1,7 +1,10 @@
 
+# include <spatial/gradientCalc.h>
 # include <spatial/residualCalc.h>
 # include <spatial/spectralRadius.h>
 # include <spatial/eulerForwardUpdate.h>
+
+# include <limiters/limiter.h>
 
 # include <conservationLaws/scalarAdvection/scalarAdvection.h>
 # include <conservationLaws/euler/euler.h>
@@ -16,18 +19,22 @@
 
 
 // ------- Inputs ------- 
-using Real = float;
+using Real = double;
 
-constexpr LawType Law = LawType::Euler;
+//constexpr LawType Law = LawType::Euler;
+constexpr LawType Law = LawType::ScalarAdvection;
 constexpr int nDim = 1;
 
-constexpr int  nx  = 2048;
-constexpr int  nt  = 2048;
+constexpr int  nx  = 128;
+constexpr int  nt  = 128;
 constexpr Real cfl = 0.5;
 
 using BasisT = BasisType<Law>;
-//constexpr BasisT SolutionBasis = BasisT::Conserved;
-constexpr BasisT SolutionBasis = BasisT::Viscous;
+constexpr BasisT SolutionBasis = BasisT::Conserved;
+//constexpr BasisT SolutionBasis = BasisT::Viscous;
+
+using Flux = RusanovFlux<Law>;
+using Limiter = Limiters::Cada3;
 
 constexpr bool print=false;
 
@@ -41,7 +48,6 @@ using ConservedVarDelta = VariableDelta<Law,nDim,ConservedBasis,Real>;
 
 using FluxRes = FluxResult<Law,nDim,Real>;
 
-using Flux = RusanovFlux<Law>;
 
 using Point   = geom::Point<  nDim,Real>;
 using Surface = geom::Surface<nDim,Real>;
@@ -59,11 +65,13 @@ using Volume  = geom::Volume< nDim,Real>;
    // setup
       const Species<Law,Real> species = get_species( ConservedBasis );
       const Flux flux{};
+      const Limiter limiter{};
 
    // solutions arrays
-      std::vector<SolutionVarSet>  q(nx);
-      std::vector<SolutionVarSet> q1(nx);
-      std::vector<FluxRes>       res(nx);
+      std::vector<SolutionVarSet>    q(nx);
+      std::vector<SolutionVarSet>   q1(nx);
+      std::vector<SolutionVarDelta> dq(nx);
+      std::vector<FluxRes>         res(nx);
 
    // initialise mesh
       const std::vector<Point> nodes = []()
@@ -88,8 +96,13 @@ using Volume  = geom::Volume< nDim,Real>;
    // integrate forward in time
       for( int t=0; t<nt; t++ )
      {
+      // calculate differences
+         gradientCalc( cells, q, dq );
+
       // accumulate flux residual
-         residualCalc( cells, nodes, flux, species, ql0, q, res );
+//       residualCalc( cells, nodes, flux,          species, ql0, q,     res );
+         residualCalc( cells, nodes, flux, limiter, species, ql0, q, dq, res );
+//       residualCalc( cells, nodes, hoflux,        species, ql0, q, dq, res );
 
       // calculate maximum stable timestep
          const Real lmax = spectralRadius( cells, res );

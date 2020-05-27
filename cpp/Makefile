@@ -27,10 +27,10 @@ CSCRIPT = test.cpp \
 CCMP = g++-8
 
 # debug/optimisation, warning and language standard flags
-#COPT = -Og -D_GLIBCXX_DEBUG
-COPT = -O3
+#COPT = -Og -D_GLIBCXX_DEBUG -fsanitize=address -fno-omit-frame-pointer
+COPT = -O3 -flto -fno-exceptions
 
-CWARN = -Wall -Wextra -Wpedantic -Wno-unused-parameter
+CWARN = -Wall -Wextra -Wpedantic -Wno-unused-parameter -Wshadow
 
 CSTD = -std=c++17 -fconcepts
 

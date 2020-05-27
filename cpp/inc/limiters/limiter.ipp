@@ -1,88 +1,73 @@
 
+# include <limits>
+
+# include <cmath>
+
 namespace Limiters
 {
-   template<typename Limiter>
-   inline void ScalarFaceLimiter<Limiter>::operator()( Types::Real  dl,
-                                                       Types::Real  dc,
-                                                       Types::Real  dr,
-                                                       Types::Real& dl_lim,
-                                                       Types::Real& dr_lim ) const
-  {
-      dl_lim = limiter( dc, dl );
-      dr_lim = limiter( dc, dr );
-      return;
-  }
-
-
-   template<typename Limiter>
-   template<typename DeltaType>
-   inline void VectorFaceLimiter<Limiter>::operator()( const IdealGas2D::VariableDelta<DeltaType>& dl,
-                                                       const IdealGas2D::VariableDelta<DeltaType>& dc,
-                                                       const IdealGas2D::VariableDelta<DeltaType>& dr,
-                                                             IdealGas2D::VariableDelta<DeltaType>& dl_lim,
-                                                             IdealGas2D::VariableDelta<DeltaType>& dr_lim ) const
-  {
-      for( int i=0; i<4; i++ )
-     {
-         limiter( dl[i],dc[i],dr[i], dl_lim[i],dr_lim[i] );
-     }
-      return;
-  }
-
-   inline Types::Real NoLimit1::operator()( Types::Real a, Types::Real b ) const
+   template<floating_point Real>
+   Real NoLimit1::operator()( const Real a, const Real b ) const
   {
       return 0;
   }
 
-   inline Types::Real NoLimit2::operator()( Types::Real a, Types::Real b ) const
+   template<floating_point Real>
+   Real NoLimit2::operator()( const Real a, const Real b ) const
   {
       return 0.5*(a+b);
   }
 
-   inline Types::Real NoLimit3::operator()( Types::Real a, Types::Real b ) const
+   template<floating_point Real>
+   Real NoLimit3::operator()( const Real a, const Real b ) const
   {
       return 0.33333333333333333*(2.*a + b );
   }
 
-   inline Types::Real VanAlbada2::operator()( Types::Real a, Types::Real b ) const
+   template<floating_point Real>
+   Real VanAlbada2::operator()( const Real a, const Real b ) const
   {
-      Types::Real z;
+      Real z;
 
-      z= ( b*(a*a) + a*(b*b) )/( a*a + b*b + Types::EPS );
+      const Real eps = std::numeric_limits<Real>::min();
 
-      z*= a*b>0 ? 1:0;
+   // do not evaluate division if unnecessary
+      z = a*b<0 ?  0
+                 : ( b*(a*a) + a*(b*b) )
+                  /(    a*a  +    b*b + eps );
 
       return z;
-  };
-
-   inline Types::Real MinMod2::operator()( Types::Real a, Types::Real b ) const
-  {
-      Types::Real       z;
-      int           gt,lt;
-
-      gt = a>0 ? 1:0;
-      lt = a<0 ? 1:0;
-
-      z =  gt*fmin( a, fmax( b, 0. ) )
-         + lt*fmax( a, fmin( b, 0. ) );
-
-      return z;
-  };
-
-   inline Types::Real VanLeer2::operator()( Types::Real a, Types::Real b ) const
-  {
-      return (b+fabs(b))/(a+fabs(b)+Types::EPS);
   }
 
-   inline Types::Real Cada3::operator()( Types::Real a, Types::Real b ) const
+   template<floating_point Real>
+   Real MinMod2::operator()( const Real a, const Real b ) const
+  {
+      Real       z;
+
+   // do not evaluate extra min/max if unnecessary
+      z = a>0 ?  fmin( a, fmax( b, 0. ) )
+               : fmax( a, fmin( b, 0. ) );
+
+      return z;
+  }
+
+   template<floating_point Real>
+   Real VanLeer2::operator()( const Real a, const Real b ) const
+  {
+      const Real eps = std::numeric_limits<Real>::min();
+      return ( b + fabs(b) )
+            /( a + fabs(b) + eps );
+  }
+
+   template<floating_point Real>
+   Real Cada3::operator()( const Real a, const Real b ) const
   {
 
-      Types::Real t =  0.0;
-      Types::Real gam= 1.5;
-      Types::Real c1= -2./7.;
-      Types::Real c2=  0.4;
-      Types::Real c3=  3*gam-2;
-      Types::Real u,v,w,p,q;
+      Real t =  0.0;
+      Real gam= 1.5;
+      Real c1= -2./7.;
+      Real c2=  0.4;
+      Real c3=  3*gam-2;
+      Real u,v,w,p,q;
 
       if( a > 0 )
      {
