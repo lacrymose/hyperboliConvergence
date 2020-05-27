@@ -34,13 +34,13 @@
                             const std::vector<SolVarT>& q0,
                                   std::vector<SolVarT>& q1 )
   {
+   // conserved variables/deltas needed for correct shock speeds
       constexpr BasisType<Law> ConservedBasis = BasisType<Law>::Conserved;
       using ConsVarT = VariableSet<  Law,nDim,ConservedBasis,Real>;
       using ConsDelT = VariableDelta<Law,nDim,ConservedBasis,Real>;
 
    // check mesh sizes match
       const size_t nc = cells.size();
-
       assert( nc == q1.size() );
       assert( nc == q0.size() );
       assert( nc ==  r.size() );
@@ -48,16 +48,26 @@
    // timestep
       const Real dt = cfl/lmax;
 
+   // transformation to conservative variables
+      const auto consv = [&species]( const SolVarT& qs ) -> ConsVarT
+     {
+         return set2Set<ConsVarT>( species, qs );
+     };
+
+   // transformation to solution variables
+      const auto solv = [&species]( const ConsVarT& qc ) -> SolVarT
+     {
+         return set2Set<SolVarT>( species, qc );
+     };
+
+   // sol -> consv + increment -> sol
       for( size_t i=0; i<nc; i++ )
      {
          const Real d = dt/cells[i].volume;
 
          const ConsDelT dqc = d*r[i].flux;
 
-      // transform to conserved variables, increment, and transform back
-         q1[i] = set2Set<SolVarT>( species,
-                                   set2Set<ConsVarT>( species,
-                                                      q0[i] ) + dqc );
+         q1[i] = solv( consv( q0[i] ) + dqc );
      }
       return;
   }

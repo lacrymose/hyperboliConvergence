@@ -1,12 +1,15 @@
-# ifndef ODE_H
-# define ODE_H
 
-# include <types.h>
+# pragma once
+
+# include <utils/concepts.h>
+
+# include <array>
 
 namespace ODE
 {
    namespace Implicit
   {
+      template<floating_point Real>
       struct MultiStep
      {
    // du/dt = R(u)
@@ -24,51 +27,64 @@ namespace ODE
          int nresid;
 
       // coefficients
-         Types::Real  beta[3]={0,0,0};
-         Types::Real gamma[2]={0,0};
-
-         inline void eulerBackward1()
-        {
-            order=1;
-            nsteps=2;
-            nresid=1;
-
-            beta[0]= 1.;
-            beta[1]=-1.;
-
-            gamma[0]=1.;
-        }
-
-         inline void backwardDifference2()
-        {
-            order=2;
-            nsteps=3;
-            nresid=1;
-
-            beta[0]= 1.5;
-            beta[1]=-2.0;
-            beta[2]= 0.5;
-
-            gamma[0]=1.;
-        }
-
-         inline void trapeziumRule2()
-        {
-            order=2;
-            nsteps=2;
-            nresid=2;
-
-            beta[0]= 1.;
-            beta[1]=-1.;
-
-            gamma[0]=0.5;
-            gamma[1]=0.5;
-        }
+         std::array<Real,3>  beta;
+         std::array<Real,3> gamma;
      };
+
+      template<floating_point Real>
+      MultiStep<Real> backwardDifference1()
+     {
+         MultiStep<Real> ms{};
+         ms.order  = 1;
+         ms.nsteps = 2;
+         ms.nresid = 1;
+
+         ms.beta[0] = 1.0;
+         ms.beta[1] =-1.0;
+
+         ms.gamma[0]=1.0;
+
+         return ms;
+     }
+
+      template<floating_point Real>
+      MultiStep<Real> backwardDifference2()
+     {
+         MultiStep<Real> ms{};
+         ms.order  = 2;
+         ms.nsteps = 3;
+         ms.nresid = 1;
+
+         ms.beta[0] = 1.5;
+         ms.beta[1] =-2.0;
+         ms.beta[2] = 0.5;
+
+         ms.gamma[0]=1.0;
+
+         return ms;
+     }
+
+      template<floating_point Real>
+      MultiStep<Real> trapeziumRule2()
+     {
+         MultiStep<Real> ms{};
+         ms.order  = 2;
+         ms.nsteps = 2;
+         ms.nresid = 2;
+
+         ms.beta[0] = 1.0;
+         ms.beta[1] =-1.0;
+
+         ms.gamma[0]=0.5;
+         ms.gamma[1]=0.5;
+
+         return ms;
+     }
   }
 
    namespace Explicit
   {
+      template<floating_point Real>
       struct RungeKutta
      {
       // order of accuracy
@@ -78,93 +94,107 @@ namespace ODE
          int nstages;
 
       // maximum allowable cfl
-         Types::Real maxCFL;
+         Real maxCFL;
 
       // coefficients
       // alpha[s][t] is coefficient of residual t at stage s
-         Types::Real alpha[6][6]= {{0,0,0,0,0,0},
-                             {0,0,0,0,0,0},
-                             {0,0,0,0,0,0},
-                             {0,0,0,0,0,0},
-                             {0,0,0,0,0,0},
-                             {0,0,0,0,0,0}};
+         std::array<std::array<Real,6>,6> alpha;
 
       // beta[s] is the size of the timestep of stage s
-         Types::Real beta[6]={0,0,0,0,0,0};
-
-         inline void ssp11()
-        {
-            order=1;
-            nstages=1;
-            maxCFL=1.;
-
-            beta[0]=1.0;
-
-            alpha[0][0]=1.0;
-        }
-
-         inline void ssp22()
-        {
-            order=2;
-            nstages=2;
-            maxCFL=1.;
-
-            beta[0]=1.0;
-            beta[1]=1.0;
-
-            alpha[0][0]=1.0;
-
-            alpha[1][0]=0.5;
-            alpha[1][1]=0.5;
-        }
-
-         inline void ssp33()
-        {
-            order=3;
-            nstages=3;
-            maxCFL=1.;
-
-            beta[0]=1.0;
-            beta[1]=0.5;
-            beta[2]=1.0;
-
-            alpha[0][0]=1.;
-
-            alpha[1][0]=0.5;
-            alpha[1][1]=0.5;
-
-            alpha[2][0]=1./6.;
-            alpha[2][1]=1./6.;
-            alpha[2][2]=2./3.;
-        }
-
-         inline void ssp34()
-        {
-            order=3;
-            nstages=4;
-            maxCFL=2.;
-
-            beta[0]=0.5;
-            beta[1]=1.0;
-            beta[2]=0.5;
-            beta[3]=1.0;
-
-            alpha[0][0]=1.0;
-
-            alpha[1][0]=0.5;
-            alpha[1][1]=0.5;
-
-            alpha[2][0]=1./3.;
-            alpha[2][1]=1./3.;
-            alpha[2][2]=1./3.;
-
-            alpha[3][0]=1./6.;
-            alpha[3][1]=1./6.;
-            alpha[3][2]=1./6.;
-            alpha[3][3]=1./2.;
-        }
+         std::array<Real,6> beta;
      };
+
+      template<floating_point Real>
+      RungeKutta<Real> ssp11()
+     {
+         RungeKutta<Real> rk{};
+
+         rk.order  =1;
+         rk.nstages=1;
+         rk.maxCFL =1.;
+
+         rk.beta[0]=1.0;
+
+         rk.alpha[0][0]=1.0;
+
+         return rk;
+     }
+
+      template<floating_point Real>
+      RungeKutta<Real> ssp22()
+     {
+         RungeKutta<Real> rk{};
+
+         rk.order=2;
+         rk.nstages=2;
+         rk.maxCFL=1.;
+
+         rk.beta[0]=1.0;
+         rk.beta[1]=1.0;
+
+         rk.alpha[0][0]=1.0;
+
+         rk.alpha[1][0]=0.5;
+         rk.alpha[1][1]=0.5;
+
+         return rk;
+     }
+
+      template<floating_point Real>
+      RungeKutta<Real> ssp33()
+     {
+         RungeKutta<Real> rk{};
+
+         rk.order=3;
+         rk.nstages=3;
+         rk.maxCFL=1.;
+
+         rk.beta[0]=1.0;
+         rk.beta[1]=0.5;
+         rk.beta[2]=1.0;
+
+         rk.alpha[0][0]=1.;
+
+         rk.alpha[1][0]=0.5;
+         rk.alpha[1][1]=0.5;
+
+         rk.alpha[2][0]=1./6.;
+         rk.alpha[2][1]=1./6.;
+         rk.alpha[2][2]=2./3.;
+
+         return rk;
+     }
+
+      template<floating_point Real>
+      RungeKutta<Real> ssp34()
+     {
+         RungeKutta<Real> rk{};
+
+         rk.order=3;
+         rk.nstages=4;
+         rk.maxCFL=2.;
+
+         rk.beta[0]=0.5;
+         rk.beta[1]=1.0;
+         rk.beta[2]=0.5;
+         rk.beta[3]=1.0;
+
+         rk.alpha[0][0]=1.0;
+
+         rk.alpha[1][0]=0.5;
+         rk.alpha[1][1]=0.5;
+
+         rk.alpha[2][0]=1./3.;
+         rk.alpha[2][1]=1./3.;
+         rk.alpha[2][2]=1./3.;
+
+         rk.alpha[3][0]=1./6.;
+         rk.alpha[3][1]=1./6.;
+         rk.alpha[3][2]=1./6.;
+         rk.alpha[3][3]=1./2.;
+
+         return rk;
+     }
   }
 }
 
-# endif

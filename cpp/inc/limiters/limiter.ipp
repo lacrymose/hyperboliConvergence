@@ -6,25 +6,25 @@
 namespace Limiters
 {
    template<floating_point Real>
-   Real NoLimit1::operator()( const Real a, const Real b ) const
+   Real NoLimit1::limit( const Real a, const Real b ) const
   {
       return 0;
   }
 
    template<floating_point Real>
-   Real NoLimit2::operator()( const Real a, const Real b ) const
+   Real NoLimit2::limit( const Real a, const Real b ) const
   {
       return 0.5*(a+b);
   }
 
    template<floating_point Real>
-   Real NoLimit3::operator()( const Real a, const Real b ) const
+   Real NoLimit3::limit( const Real a, const Real b ) const
   {
       return 0.33333333333333333*(2.*a + b );
   }
 
    template<floating_point Real>
-   Real VanAlbada2::operator()( const Real a, const Real b ) const
+   Real VanAlbada2::limit( const Real a, const Real b ) const
   {
       Real z;
 
@@ -39,7 +39,7 @@ namespace Limiters
   }
 
    template<floating_point Real>
-   Real MinMod2::operator()( const Real a, const Real b ) const
+   Real MinMod2::limit( const Real a, const Real b ) const
   {
       Real       z;
 
@@ -51,7 +51,7 @@ namespace Limiters
   }
 
    template<floating_point Real>
-   Real VanLeer2::operator()( const Real a, const Real b ) const
+   Real VanLeer2::limit( const Real a, const Real b ) const
   {
       const Real eps = std::numeric_limits<Real>::min();
       return ( b + fabs(b) )
@@ -59,7 +59,7 @@ namespace Limiters
   }
 
    template<floating_point Real>
-   Real Cada3::operator()( const Real a, const Real b ) const
+   Real Cada3::limit( const Real a, const Real b ) const
   {
 
       Real t =  0.0;

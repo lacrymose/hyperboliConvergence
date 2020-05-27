@@ -15,7 +15,7 @@
 
       FluxResult<LawType::ScalarAdvection,nDim,Real> result{};
       result.flux[nDim]=un*q;
-      result.lambda=un;
+      result.lambda=std::abs( un );
 
       return result;
   }

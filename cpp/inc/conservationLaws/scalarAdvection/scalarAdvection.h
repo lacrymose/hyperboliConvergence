@@ -56,12 +56,19 @@
                               ScalarAdvectionBases::Conserved>;
 
 
-// ---------- exact physical flux ----------
+// ---------- exact physical flux and spectral radius ----------
 
    template<int nDim, floating_point Real>
    FluxResult<LawType::ScalarAdvection,nDim,Real> exactFlux( const Species<LawType::ScalarAdvection,Real>&  species,
                                                              const geom::Direction<nDim,Real>&               normal,
                                                              const State<LawType::ScalarAdvection,nDim,Real>& state );
+
+   template<int nDim, floating_point Real>
+   Real spectralRadius( const geom::Direction<nDim,Real>&               normal,
+                        const State<LawType::ScalarAdvection,nDim,Real>& state )
+  {
+      return std::abs( projectedVelocity( normal, state ) );
+  }
 
 
 // ---------- transformation functions ----------

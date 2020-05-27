@@ -243,7 +243,7 @@
   };
 
 /*
- * Interface flux using a central average of the exact fluxes with scalar dissipation proportional to the spectral radius of the central flux
+ * Interface flux using a central average of the exact fluxes with scalar upwind dissipation proportional to the spectral radius of the central flux
  *    Uses CRTP to provide interface to call flux with any VariableSet basis
  */
    template<LawType Law>
@@ -256,6 +256,22 @@
                                              const State<Law,nDim,Real>&       sl,
                                              const State<Law,nDim,Real>&       sr );
   };
+
+/*
+ * Interface dissipative flux of scalar dissipation proportional to the spectral radius of the central flux
+ *    Uses CRTP to provide interface to call flux with any VariableSet basis
+ */
+   template<LawType Law>
+      requires ImplementedLawType<Law>
+   struct RusanovDissipation : FluxInterface<RusanovDissipation<Law>,Law>
+  {
+      template<int nDim, floating_point Real>
+      static FluxResult<Law,nDim,Real> flux( const Species<Law,Real>&     species,
+                                             const geom::Surface<nDim,Real>& face,
+                                             const State<Law,nDim,Real>&       sl,
+                                             const State<Law,nDim,Real>&       sr );
+  };
+
 
 
 // ---------- implementation files ----------

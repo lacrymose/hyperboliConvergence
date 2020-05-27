@@ -83,12 +83,19 @@
                               EulerBases::Viscous>;
 
 
-// ---------- exact physical flux ----------
+// ---------- exact physical flux and spectral radius ----------
 
    template<int nDim, floating_point Real>
    FluxResult<LawType::Euler,nDim,Real> exactFlux( const Species<LawType::Euler,Real>&  species,
                                                    const geom::Direction<nDim,Real>&     normal,
                                                    const State<LawType::Euler,nDim,Real>& state );
+
+   template<int nDim, floating_point Real>
+   Real spectralRadius( const geom::Direction<nDim,Real>&     normal,
+                        const State<LawType::Euler,nDim,Real>& state )
+  {
+      return std::abs( projectedVelocity( normal, state ) ) + std::sqrt( state.speedOfSound2() );
+  }
 
 
 // ---------- transformation functions ----------

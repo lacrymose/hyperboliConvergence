@@ -19,14 +19,14 @@
 
 
 // ------- Inputs ------- 
-using Real = double;
+using Real = float;
 
-//constexpr LawType Law = LawType::Euler;
-constexpr LawType Law = LawType::ScalarAdvection;
+constexpr LawType Law = LawType::Euler;
+//constexpr LawType Law = LawType::ScalarAdvection;
 constexpr int nDim = 1;
 
 constexpr int  nx  = 128;
-constexpr int  nt  = 128;
+constexpr int  nt  = 192;
 constexpr Real cfl = 0.5;
 
 using BasisT = BasisType<Law>;
@@ -34,7 +34,7 @@ constexpr BasisT SolutionBasis = BasisT::Conserved;
 //constexpr BasisT SolutionBasis = BasisT::Viscous;
 
 using Flux = RusanovFlux<Law>;
-using Limiter = Limiters::Cada3;
+using Limiter = Limiters::MinMod2;
 
 constexpr bool print=false;
 
@@ -58,7 +58,6 @@ using Volume  = geom::Volume< nDim,Real>;
 
    int main()
   {
-
       std::cout << std::scientific;
       std::cout.precision(3);
 
@@ -100,9 +99,7 @@ using Volume  = geom::Volume< nDim,Real>;
          gradientCalc( cells, q, dq );
 
       // accumulate flux residual
-//       residualCalc( cells, nodes, flux,          species, ql0, q,     res );
          residualCalc( cells, nodes, flux, limiter, species, ql0, q, dq, res );
-//       residualCalc( cells, nodes, hoflux,        species, ql0, q, dq, res );
 
       // calculate maximum stable timestep
          const Real lmax = spectralRadius( cells, res );

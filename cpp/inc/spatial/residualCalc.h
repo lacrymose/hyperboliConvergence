@@ -11,7 +11,7 @@
 
 # include <cassert>
 
-// overload with return value (must be used to construct vector to use RVO)
+// overload with return value
    template<LawType Law, ImplementedVarSet SolVarT, FluxFunctor<Law> Flux, floating_point Real>
       requires ConsistentTypes<Law,1,Real,SolVarT>
    std::vector<FluxResult<Law,1,Real>> residualCalc( const std::vector<geom::Volume<1,Real>>& cells,
@@ -87,10 +87,27 @@
       return;
   }
 
+// overload with return value
+   template<LawType Law, ImplementedVarSet SolVarT, ImplementedVarDelta SolDelT, typename Limiter, FluxFunctor<Law> Flux, floating_point Real>
+      requires ConsistentTypes<Law,1,Real,SolVarT,SolDelT>
+   std::vector<FluxResult<Law,1,Real>> residualCalc( const std::vector<geom::Volume<1,Real>>& cells,
+                                                     const std::vector<geom::Point< 1,Real>>& nodes,
+                                                     const Flux                    flux,
+                                                     const Limiter              limiter,
+                                                     const Species<Law,Real>&   species,
+                                                     const SolVarT&                 qlb,
+                                                     const std::vector<SolVarT>&      q,
+                                                     const std::vector<SolDelT>&     dq )
+  {
+      using FluxRes = FluxResult<Law,1,Real>;
+      std::vector<FluxRes> res(q.size());
+      residualCalc( cells, nodes, flux, limiter, species, qlb, q,dq, res );
+      return res;
+  }
+
 /*
  * Higher order flux evaluation
  */
-
    template<LawType Law, ImplementedVarSet SolVarT, ImplementedVarDelta SolDelT, typename Limiter, FluxFunctor<Law> Flux, floating_point Real>
       requires ConsistentTypes<Law,1,Real,SolVarT,SolDelT>
    void residualCalc( const std::vector<geom::Volume<1,Real>>& cells,
@@ -114,6 +131,17 @@
       assert( nc   ==  dq.size() );
       assert( nc   ==   q.size() );
 
+   // limit all elements in vardelta
+      const auto limvar = [&limiter]( const SolDelT& dq0, const SolDelT& dq1 ) -> SolDelT
+     {
+         SolDelT dqlim;
+         for( int i=0; i<SolDelT::N; i++ )
+        {
+            dqlim[i] = limiter( dq0[i],dq1[i] );
+        }
+         return dqlim;
+     };
+
    // reset residual
       for( FluxRes& fr : res ){ fr = FluxRes{}; }
 
@@ -124,19 +152,13 @@
          const SolVarT ql0=q[i];
          const SolVarT qr0=q[i+1];
 
-      // left,right and central bias differences
+      // central, and left/right bias differences
          const SolDelT dqc = qr0 - ql0;
          const SolDelT dql = dq[i  ] - dqc;
          const SolDelT dqr = dq[i+1] - dqc;
 
-      // slope limiting
-         SolDelT slopel, sloper;
-
-         for( int j=0; j<SolDelT::N; j++ )
-        {
-            slopel[j] = limiter( dqc[j], dql[j] );
-            sloper[j] = limiter( dqc[j], dqr[j] );
-        }
+         const SolDelT slopel = limvar( dqc, dql );
+         const SolDelT sloper = limvar( dqc, dqr );
 
       // interface values
          const SolVarT ql1 = ql0 + 0.5*slopel;
@@ -181,7 +203,6 @@
    void residualCalc( const std::vector<geom::Volume<1,Real>>& cells,
                       const std::vector<geom::Point< 1,Real>>& nodes,
                       const HighOrderFlux         hoflux,
-                      const Species<Law,Real>&   species,
                       const SolVarT&                 qlb,
                       const std::vector<SolVarT>&      q,
                       const std::vector<SolDelT>&     dq,
@@ -215,7 +236,7 @@
 
          const Surface face = surface( nodes[i] );
 
-         const FluxRes fr = hoflux( species, face, dql,dqc,dqr, ql,qr );
+         const FluxRes fr = hoflux( face, dql,dqc,dqr, ql,qr );
 
          res[i]  -=fr;
          res[i+1]+=fr;
@@ -234,7 +255,7 @@
          const SolDelT dqr = SolDelT{};
 
          const Surface face = surface( nodes[i] );
-         const FluxRes fr = hoflux( species, face, dql,dqc,dqr, ql,qr );
+         const FluxRes fr = hoflux( face, dql,dqc,dqr, ql,qr );
          res[i]+=fr;
      }
 
@@ -250,7 +271,7 @@
          const SolDelT dqr = SolDelT{};
 
          const Surface face = surface( nodes[i] );
-         const FluxRes fr = hoflux( species, face, dql,dqc,dqr, ql,qr );
+         const FluxRes fr = hoflux( face, dql,dqc,dqr, ql,qr );
          res[i]-=fr;
      }
 

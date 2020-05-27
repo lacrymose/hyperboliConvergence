@@ -21,6 +21,7 @@ CSCRIPT = test.cpp \
 	sods.cpp \
 	testGenericVariableSet.cpp \
 	riemannProblem.cpp \
+	riemannProblemRK.cpp \
 	testScalarAdvection.cpp
 
 # compiler

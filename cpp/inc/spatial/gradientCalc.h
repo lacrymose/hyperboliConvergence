@@ -9,7 +9,7 @@
 
 # include <cassert>
 
-   template<ImplementedVarSet VarSetT, ImplementedVarDelta VarDelT, floating_point Real>
+   template<ImplementedVarSet VarSetT, floating_point Real>
       requires ConsistentTypes<law_of_v<VarSetT>,1,Real,VarSetT>
    std::vector<vardelta_t<VarSetT>> gradientCalc( const std::vector<geom::Volume<1,Real>>& cells,
                                                   const std::vector<VarSetT>& q )
