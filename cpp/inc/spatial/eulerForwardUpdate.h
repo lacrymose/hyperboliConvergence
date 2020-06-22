@@ -49,25 +49,26 @@
       const Real dt = cfl/lmax;
 
    // transformation to conservative variables
-      const auto consv = [&species]( const SolVarT& qs ) -> ConsVarT
+      const auto consvar [&species]( const SolVarT& qs ) -> ConsVarT
      {
          return set2Set<ConsVarT>( species, qs );
      };
 
    // transformation to solution variables
-      const auto solv = [&species]( const ConsVarT& qc ) -> SolVarT
+      const auto solvar [&species]( const ConsVarT& qc ) -> SolVarT
      {
          return set2Set<SolVarT>( species, qc );
      };
 
-   // sol -> consv + increment -> sol
+   // new = old + dt*residual/vol
       for( size_t i=0; i<nc; i++ )
      {
          const Real d = dt/cells[i].volume;
 
          const ConsDelT dqc = d*r[i].flux;
 
-         q1[i] = solv( consv( q0[i] ) + dqc );
+      // solv -> consv + increment -> solv
+         q1[i] = solvar( consvar( q0[i] ) + dqc );
      }
       return;
   }

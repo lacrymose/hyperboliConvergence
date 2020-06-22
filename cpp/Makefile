@@ -22,7 +22,8 @@ CSCRIPT = test.cpp \
 	testGenericVariableSet.cpp \
 	riemannProblem.cpp \
 	riemannProblemRK.cpp \
-	testScalarAdvection.cpp
+	testScalarAdvection.cpp \
+	testArray.cpp
 
 # compiler
 CCMP = g++-8

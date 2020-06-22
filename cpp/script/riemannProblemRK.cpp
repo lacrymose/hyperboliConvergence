@@ -152,7 +152,7 @@ using Volume  = geom::Volume< nDim,Real>;
             if( j==0 ){ lmax = spectralRadius( cells, resStage[j] ); }
 
          // accumulate stage residual
-            for( auto& r : resTotal ){ r = FluxRes{}; }
+            for( FluxRes& r : resTotal ){ r = FluxRes{}; }
             for( int i=0; i<nx; i++ )
            {
                for( int k=0; k<=j; k++ )

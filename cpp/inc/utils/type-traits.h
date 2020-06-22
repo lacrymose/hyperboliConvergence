@@ -3,6 +3,8 @@
 
 # include <type_traits>
 
+# include <cstddef>
+
 // type trait utilities
 
 // -------- returns type of argument --------
@@ -14,6 +16,25 @@
    // helper
    template<typename T>
    using type_identity_t = typename type_identity<T>::type;
+
+// -------- returns whether type is an integer representaion --------
+
+   template<typename T>
+   struct is_integer : std::false_type {};
+
+   template<> struct is_integer<          int> : std::true_type {};
+   template<> struct is_integer<    short int> : std::true_type {};
+   template<> struct is_integer<     long int> : std::true_type {};
+   template<> struct is_integer<long long int> : std::true_type {};
+
+   template<> struct is_integer<unsigned           int> : std::true_type {};
+   template<> struct is_integer<unsigned     short int> : std::true_type {};
+   template<> struct is_integer<unsigned      long int> : std::true_type {};
+   template<> struct is_integer<unsigned long long int> : std::true_type {};
+
+   // helper
+   template<typename T>
+   constexpr bool is_integer_v = is_integer<T>::value;
 
 // -------- remove const/volative qualifiers and references --------
 
