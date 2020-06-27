@@ -11,6 +11,8 @@
 
 # include <geometry/geometry.h>
 
+# include <mdarray/mdarray.h>
+
 # include <vector>
 # include <iostream>
 # include <fstream>
@@ -63,7 +65,7 @@ using Volume  = geom::Volume< nDim,Real>;
 
    // setup
       const Species<Law,Real> species = get_species( ConservedBasis );
-      const Flux flux{};
+      const Flux    flux{};
       const Limiter limiter{};
 
    // solutions arrays

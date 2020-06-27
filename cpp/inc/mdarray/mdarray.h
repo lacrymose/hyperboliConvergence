@@ -14,7 +14,7 @@
    template<int nDim>
    struct Idx
   {
-      const std::array<size_t,nDim> idxs;
+      std::array<size_t,nDim> idxs;
       const size_t& operator[]( const int i ) const { return idxs[i]; }
   };
 
@@ -25,7 +25,7 @@
    template<int nDim>
    struct Offset
   {
-      const std::array<int,nDim> offsets;
+      std::array<int,nDim> offsets;
       const int& operator[]( const int i ) const { return offsets[i]; }
   };
 
@@ -46,7 +46,7 @@
  * helper function to implement addition of Idx and Offset
  *    uses integer sequence to brace-initialise new Idx. This avoids having to construct
  */
-   template<int nDim, int... Is>
+   template<int nDim, size_t... Is>
       requires (sizeof...(Is)==nDim)
    Idx<nDim> idx_add_offset( const Idx<nDim> idx, const Offset<nDim> off, std::index_sequence<Is...> )
   {
@@ -60,9 +60,20 @@
    template<int nDim>
    struct Dims
   {
-      const std::array<size_t,nDim> dims;
+      std::array<size_t,nDim> dims;
       const size_t& operator[]( const int i ) const { return dims[i]; }
   };
+
+/*
+ * check if all elements of Dims are equal
+ */
+   template<int nDim>
+   bool operator==( const Dims<nDim> lhs, const Dims<nDim> rhs )
+  {
+      bool isSame=true;
+      for( int i=0; i<nDim; i++ ){ isSame = isSame && (lhs[i]==rhs[i]); }
+      return isSame;
+  }
 
 
 /*
@@ -99,7 +110,7 @@
    template<int nDim>
    struct Stride
   {
-      const std::array<size_t,nDim> strides;
+      std::array<size_t,nDim> strides;
 
       Stride( const Dims<nDim>& dims ) : strides(make_strides(dims)) {}
 
@@ -133,10 +144,10 @@
    struct MDArray
   {
    // shape of multi-dimensional array
-      const Dims<nDim>   dims;
+      Dims<nDim>   dims;
 
    // place-values for flattening a multi-dimensional index to a 1D index
-      const Stride<nDim> stride;
+      Stride<nDim> stride;
 
    // the flattened 1D array in memory
       std::vector<ElemT> elems;
@@ -162,4 +173,5 @@
       const ElemT& operator[]( const Idx<nDim>& idx ) const { return elems[ stride*idx ]; }
             ElemT& operator[]( const Idx<nDim>& idx )       { return elems[ stride*idx ]; }
   };
+
 

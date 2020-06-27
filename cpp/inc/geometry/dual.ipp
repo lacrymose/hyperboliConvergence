@@ -7,23 +7,23 @@ namespace geom
 {
 
    template<floating_point Real>
-   std::vector<Volume<1,Real>> dual( const std::vector<Point<1,Real>>& nodes )
+   MDArray<Volume<1,Real>,1> dual( const MDArray<Point<1,Real>,1>& nodes )
   {
-      std::vector<Volume<1,Real>> cells(nodes.size()-1);
+      MDArray<Volume<1,Real>,1> cells(nodes.dims[0]-1);
       dual( nodes, cells );
       return cells;
   }
 
    template<floating_point Real>
-   void dual( const std::vector<Point< 1,Real>>& nodes,
-                    std::vector<Volume<1,Real>>& cells )
+   void dual( const MDArray<Point< 1,Real>,1>& nodes,
+                    MDArray<Volume<1,Real>,1>& cells )
   {
-      const auto n=cells.size();
-      assert( n+1 == nodes.size() );
+      const auto n=cells.dims[0];
+      assert( n+1 == nodes.dims[0] );
 
       for( size_t i=0; i<n; i++ )
      {
-         cells[i] = volume( nodes[i], nodes[i+1] );
+         cells[{i}] = volume( nodes[{i}], nodes[{i+1}] );
      }
       return;
   }

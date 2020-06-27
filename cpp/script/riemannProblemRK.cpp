@@ -13,6 +13,8 @@
 
 # include <geometry/geometry.h>
 
+# include <mdarray/mdarray.h>
+
 # include <vector>
 # include <iostream>
 # include <fstream>
@@ -28,7 +30,7 @@ constexpr LawType Law = LawType::Euler;
 constexpr int nDim = 1;
 
 constexpr int  nx  = 128;
-constexpr int  nt  = 48;
+constexpr int  nt  = 64;
 constexpr Real cfl = 1.60;
 
 using BasisT = BasisType<Law>;
@@ -62,6 +64,9 @@ using Volume  = geom::Volume< nDim,Real>;
 
    int main()
   {
+      const Dims<nDim> cellDims{nx};
+      const Dims<nDim> nodeDims{nx+1};
+
       const ODE::Explicit::RungeKutta<Real> rk = ODE::Explicit::ssp34<Real>();
 
       std::cout << std::scientific;
@@ -76,25 +81,26 @@ using Volume  = geom::Volume< nDim,Real>;
       const DissipativeLimiter dLimiter{};
 
    // solutions arrays
-      std::vector<SolutionVarSet>    q(nx);
-      std::vector<SolutionVarSet>   q1(nx);
-      std::vector<SolutionVarSet>   q2(nx);
-      std::vector<SolutionVarDelta> dq(nx);
+      MDArray<SolutionVarSet,  nDim>    q(cellDims);
+      MDArray<SolutionVarSet,  nDim>   q1(cellDims);
+      MDArray<SolutionVarSet,  nDim>   q2(cellDims);
+      MDArray<SolutionVarDelta,nDim>   dq(cellDims);
 
    // residual evaluated and accumulated at each runge-kutta stage
-      std::vector<FluxRes>               resTotal(nx);
-      std::vector<std::vector<FluxRes>>  resStage(rk.nstages);
-      for( auto& r : resStage ){ r.resize(nx); }
+      // MDArray has no copy constructor so must construct in-place
+      MDArray<FluxRes,nDim>               resTotal(cellDims);
+      std::vector<MDArray<FluxRes,nDim>>  resStage;
+      for( int i=0; i<rk.nstages; i++ ){ resStage.emplace_back(cellDims); }
 
    // initialise mesh
-      const std::vector<Point> nodes = []()
+      const MDArray<Point,nDim> nodes = [nodeDims]()
      {
-         std::vector<Point> nds(nx+1);
+         MDArray<Point,nDim> nds(nodeDims);
          int i=0;
-         for( Point& p : nds ){ p = Point{ Real(i++) }; };
+         for( Point& p : nds.elems ){ p = Point{ Real(i++) }; };
          return nds;
      }();
-      const std::vector<Volume> cells = geom::dual( nodes );
+      const MDArray<Volume,1> cells = geom::dual( nodes );
 
    // initialise solution to left/right states
       const SolutionVarSet ql0 = set2Set<SolutionVarSet>( species, initialLeft(  SolutionBasis ) );
@@ -103,8 +109,8 @@ using Volume  = geom::Volume< nDim,Real>;
       std::cout << "left  state: " << ql0 << std::endl;
       std::cout << "right state: " << qr0 << std::endl;
 
-      for( int i=0;    i<nx/2; i++ ){ q[i]=ql0; }
-      for( int i=nx/2; i<nx;   i++ ){ q[i]=qr0; }
+      for( size_t i=0;    i<nx/2; i++ ){ q[{i}]=ql0; q1[{i}]=ql0; q2[{i}]=ql0; }
+      for( size_t i=nx/2; i<nx;   i++ ){ q[{i}]=qr0; q1[{i}]=qr0; q2[{i}]=qr0; }
 
    // high order reconstruction and flux functions
       const auto hoflux = [&species, &cLimiter, &cFlux, &dLimiter, &dFlux]
@@ -135,8 +141,6 @@ using Volume  = geom::Volume< nDim,Real>;
      };
 
    // integrate forward in time
-      q1=q;
-      q2=q;
       for( int t=0; t<nt; t++ )
      {
          Real lmax{};
@@ -152,12 +156,12 @@ using Volume  = geom::Volume< nDim,Real>;
             if( j==0 ){ lmax = spectralRadius( cells, resStage[j] ); }
 
          // accumulate stage residual
-            for( FluxRes& r : resTotal ){ r = FluxRes{}; }
-            for( int i=0; i<nx; i++ )
+            for( FluxRes& r : resTotal.elems ){ r = FluxRes{}; }
+            for( size_t i=0; i<nx; i++ )
            {
                for( int k=0; k<=j; k++ )
               {
-                  resTotal[i].flux+=rk.alpha[j][k]*resStage[k][i].flux;
+                  resTotal[{i}].flux+=rk.alpha[j][k]*resStage[k][{i}].flux;
               }
            }
    
@@ -165,20 +169,20 @@ using Volume  = geom::Volume< nDim,Real>;
             eulerForwardUpdate( cells, species, rk.beta[j]*cfl, lmax, resTotal, q, q2 );
             std::swap( q1,q2 );
         }
-         q=q1;
+         for( size_t i=0; i<nx; i++ ){ q[{i}]=q1[{i}]; }
      }
 
-      std::ofstream solutionFile( "data/testSA.dat" );
+      std::ofstream solutionFile( "data/riemannProblem/result.dat" );
       if( solutionFile.is_open() )
      {
-         for( const SolutionVarSet& q0 : q )
+         for( const SolutionVarSet& q0 : q.elems )
         {
             writeState( solutionFile, set2State( species, q0 ) );
         }
      }
       else
      {
-         std::cout << "cannot open \"testSA.dat for writing\"\n" << std::endl;
+         std::cout << "cannot open \"data/riemannProblem/result.dat\" for writing\n" << std::endl;
          return 1;
      }
       solutionFile.close();

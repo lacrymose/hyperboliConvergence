@@ -5,6 +5,8 @@
 
 # include <utils/concepts.h>
 
+# include <mdarray/mdarray.h>
+
 # include <array>
 # include <vector>
 
@@ -113,18 +115,11 @@ namespace geom
                           const Point<3,Real>&, const Point<3,Real>& );
 
    template<floating_point Real>
-   std::vector<Volume<1,Real>> dual( const std::vector<Point<1,Real>>& nodes );
+   MDArray<Volume<1,Real>,1> dual( const MDArray<Point<1,Real>,1>& nodes );
 
    template<floating_point Real>
-   void dual( const std::vector<Point< 1,Real>>& nodes,
-                    std::vector<Volume<1,Real>>& cells );
-
-   template<floating_point Real>
-   std::vector<Point<1,Real>> dual( const std::vector<Volume<1,Real>>& cells );
-
-   template<floating_point Real>
-   void dual( const std::vector<Volume<1,Real>>& cells,
-                    std::vector<Point< 1,Real>>& nodes );
+   void dual( const MDArray<Point< 1,Real>,1>& nodes,
+                    MDArray<Volume<1,Real>,1>& cells );
 }
 
 # include <geometry/operations.ipp>
