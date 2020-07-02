@@ -10,6 +10,7 @@
 
 # include <conservationLaws/scalarAdvection/scalarAdvection.h>
 # include <conservationLaws/euler/euler.h>
+# include <conservationLaws/euler/boundaryConditions.h>
 
 # include <geometry/geometry.h>
 
@@ -30,7 +31,7 @@ constexpr LawType Law = LawType::Euler;
 constexpr int nDim = 1;
 
 constexpr int  nx  = 128;
-constexpr int  nt  = 64;
+constexpr int  nt  = 192;
 constexpr Real cfl = 1.60;
 
 using BasisT = BasisType<Law>;
@@ -112,6 +113,9 @@ using Volume  = geom::Volume< nDim,Real>;
       for( size_t i=0;    i<nx/2; i++ ){ q[{i}]=ql0; q1[{i}]=ql0; q2[{i}]=ql0; }
       for( size_t i=nx/2; i<nx;   i++ ){ q[{i}]=qr0; q1[{i}]=qr0; q2[{i}]=qr0; }
 
+   // boundary values
+      std::array<SolutionVarSet,2> qb0{ql0,qr0};
+
    // high order reconstruction and flux functions
       const auto hoflux = [&species, &cLimiter, &cFlux, &dLimiter, &dFlux]
                           ( const Surface&          face,
@@ -146,11 +150,14 @@ using Volume  = geom::Volume< nDim,Real>;
          Real lmax{};
          for( int j=0; j<rk.nstages; j++ )
         {
+         // update boundary conditions using riemann invariants
+            const std::array<SolutionVarSet,2> qbc = updateBCs( species, nodes, q1, qb0 );
+
          // calculate differences
             gradientCalc( cells, q1, dq );
    
          // accumulate flux residual
-            residualCalc( cells, nodes, hoflux, ql0, q1, dq, resStage[j] );
+            residualCalc( cells, nodes, hoflux, qbc, q1, dq, resStage[j] );
    
          // calculate maximum stable timestep for this timestep
             if( j==0 ){ lmax = spectralRadius( cells, resStage[j] ); }

@@ -22,6 +22,7 @@ CSCRIPT = test.cpp \
 	testGenericVariableSet.cpp \
 	riemannProblem.cpp \
 	riemannProblemRK.cpp \
+	shockTube_mach00001.cpp \
 	testScalarAdvection.cpp \
 	testArray.cpp
 

@@ -1,10 +1,9 @@
-# ifndef UTILS_H
-# define UTILS_H
 
-# include <types.h>
+# pragma once
+
 # include <cmath>
 
-namespace Utils
+namespace utils
 {
 // return -1 if val<0, 0 if val==0, 1 if val>0
    template<typename T>
@@ -81,4 +80,3 @@ namespace Utils
   }
 }
 
-# endif
