@@ -19,7 +19,7 @@
    // assemble flux
       FluxResult<LawType::Euler,nDim,Real> fr;
 
-   // momentum flux
+   // momentum fluxes
       for( int i=0; i<nDim; i++ )
      {
          fr.flux[i] = mn*state.velocity(i) + p*normal[i];

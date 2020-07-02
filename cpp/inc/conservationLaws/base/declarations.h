@@ -4,15 +4,18 @@
 # include <utils/concepts.h>
 
 // unique identifier for each conservation law
-   enum struct LawType { NoLaw,
-                         ArtificialCompressibility,
-                         Burgers,
-                         Euler,
-                         IsothermalGas,
-                         Maxwell,
-                         ScalarAdvection,
-                         ShallowWater,
-                         TrafficFlow };
+   enum struct LawType
+  {
+      NoLaw,
+      ArtificialCompressibility,
+      Burgers,
+      Euler,
+      IsothermalGas,
+      Maxwell,
+      ScalarAdvection,
+      ShallowWater,
+      TrafficFlow
+  };
 
 
 // number of scalar, vector or total variables required for each law
