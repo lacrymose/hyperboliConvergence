@@ -205,7 +205,7 @@
    void residualCalc( const MDArray<geom::Volume<1,Real>,1>& cells,
                       const MDArray<geom::Point< 1,Real>,1>& nodes,
                       const HighOrderFlux                   hoflux,
-                      const SolVarT&                           qlb,
+                      const std::array<SolVarT,2>              qbc,
                       const MDArray<SolVarT,1>&                  q,
                       const MDArray<SolDelT,1>&                 dq,
                             MDArray<FluxResult<Law,1,Real>,1>& res )
@@ -246,10 +246,10 @@
      }
 
    // first order boundaries
-   // left boundary : dirichlet condition at initial state
+   // left boundary
      {
          const size_t i=0;
-         const SolVarT ql=qlb;
+         const SolVarT ql=qbc[0];
          const SolVarT qr=q[{i}];
 
       // zero gradients
@@ -262,11 +262,11 @@
          res[{i}]+=fr;
      }
 
-   // right boundary : outflow, upwind flux
+   // right boundary
      {
          const size_t i=nc-1;
          const SolVarT ql=q[{i}];
-         const SolVarT qr=q[{i}];
+         const SolVarT qr=qbc[1];
 
       // zero gradients
          const SolDelT dqc = SolDelT{};
