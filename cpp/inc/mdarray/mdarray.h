@@ -48,7 +48,8 @@
  */
    template<int nDim, size_t... Is>
       requires (sizeof...(Is)==nDim)
-   Idx<nDim> idx_add_offset( const Idx<nDim> idx, const Offset<nDim> off, std::index_sequence<Is...> )
+   Idx<nDim> idx_add_offset( const Idx<nDim> idx, const Offset<nDim> off,
+                             const std::index_sequence<Is...> )
   {
       return {(idx[Is]+off[Is])...};
   }
@@ -73,6 +74,23 @@
       bool isSame=true;
       for( int i=0; i<nDim; i++ ){ isSame = isSame && (lhs[i]==rhs[i]); }
       return isSame;
+  }
+
+/*
+ * return Dims of node array, given Dims of cells array
+ */
+   template<int nDim, typename Indices=std::make_index_sequence<nDim>>
+   Dims<nDim> nodeDims_from_cellDims( const Dims<nDim>& cellDims )
+  {
+      return nodeDims_from_cellDims( cellDims, Indices{} );
+  }
+
+   // implementation
+   template<int nDim, size_t... Is>
+   Dims<nDim> nodeDims_from_cellDims( const Dims<nDim>& cellDims,
+                                      const std::index_sequence<Is...> )
+  {
+      return Dims<nDim>{ (cellDims[Is]+1)... };
   }
 
 

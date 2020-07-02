@@ -8,7 +8,6 @@
 # include <mdarray/mdarray.h>
 
 # include <array>
-# include <vector>
 
 namespace geom
 {
@@ -59,7 +58,9 @@ namespace geom
       const Direction<nDim,Real>& operator[]( const int i ) const { return m[i]; };
   };
 
-// used to represent hypersurfaces in a space
+/*
+ * used to represent hyper-quadrilaterals in an nDim space
+ */
    template<int nDim, floating_point Real>
    struct Surface
   {
@@ -68,12 +69,39 @@ namespace geom
       Metric<nDim,Real> metric;
   };
 
-// used to represent sections of a space of the same # of dimensions as the space
+/*
+ * used to represent hyper-hexahedrons in an nDim space
+ */
    template<int nDim, floating_point Real>
    struct Volume
   {
       Real             volume;
       Point<nDim,Real> centre;
+  };
+
+/*
+ * Struct holding the cell Volumes and node Points for a structured mesh
+ */
+   template<int nDim, floating_point Real>
+   struct Mesh
+  {
+      Dims<nDim> shape;
+
+      MDArray<Point< nDim,Real>,nDim> nodes;
+      MDArray<Volume<nDim,Real>,nDim> cells;
+
+   // MDArray only supports move construction, so same must be for Mesh
+      Mesh() = delete;
+      Mesh( const Mesh&  ) = delete;
+      Mesh(       Mesh&& ) =default;
+
+   // MDArray only supports move assignment, so same must be for Mesh
+      Mesh& operator=( const Mesh&  ) = delete;
+      Mesh& operator=(       Mesh&& ) = default;
+
+      Mesh( const Dims<nDim>& d ) : shape(d),
+                                    nodes(nodeDims_from_cellDims(d)),
+                                    cells(d) {}
   };
 
    template<int nDim, floating_point Real>
@@ -120,6 +148,25 @@ namespace geom
    template<floating_point Real>
    void dual( const MDArray<Point< 1,Real>,1>& nodes,
                     MDArray<Volume<1,Real>,1>& cells );
+
+/*
+ * create a 1D mesh over domain [lo:hi] with linear spacing and nc cells
+ */
+   template<floating_point Real>
+   Mesh<1,Real> make_linspace_mesh( const Dims<1>& cellDims, const Real lo, const Real hi )
+  {
+      Mesh<1,Real> mesh(cellDims);
+
+      const size_t nc = cellDims[0];
+      const size_t np = cellDims[0]+1;
+
+      const Real dx = ( hi - lo ) / nc;
+
+      for( size_t i=0; i<np; i++ ){ mesh.nodes[{i}] = lo + i*dx; }
+      mesh.cells = dual( mesh.nodes );
+
+      return mesh;
+  }
 }
 
 # include <geometry/operations.ipp>
