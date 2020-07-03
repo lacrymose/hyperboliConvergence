@@ -1,10 +1,10 @@
-# ifndef  TEST_BLANK_H
-# define  TEST_BLANK_H
 
-#include <cppunit/TestFixture.h>
-#include <cppunit/extensions/HelperMacros.h>
+# pragma once
 
-#include <BLANK.h>
+# include <cppunit/TestFixture.h>
+# include <cppunit/extensions/HelperMacros.h>
+
+# include <BLANK.h>
 
 /*
    Tests for public methods of the BLANK class
@@ -28,4 +28,3 @@
 
 CPPUNIT_TEST_SUITE_REGISTRATION( Test_BLANK );
 
-# endif

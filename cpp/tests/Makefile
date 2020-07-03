@@ -13,28 +13,26 @@ testPROGRMDIR = progrm/#		test executables
 
 
 # definition source files for the tests for each section of the program
-testCSOURCE = idealGas2D/test-Species.cpp \
-              idealGas2D/test-VariableSet.cpp \
-              idealGas2D/test-VariableDelta.cpp \
-              idealGas2D/test-State.cpp
+testCSOURCE = parallalg/algorithm/test-copy.cpp
 
 # main() function files for running the tests for each section of the program
-testCSCRIPT = idealGas2D/test-Species.cpp \
-              idealGas2D/test-VariableSet.cpp \
-              idealGas2D/test-VariableDelta.cpp \
-              idealGas2D/test-State.cpp
+testCSCRIPT = parallalg/algorithm/test-copy.cpp
 
 # main() function file for running all tests
 testallCSCRIPT = test-full.cpp
 
 # definition source files for program to be tested
-progCSOURCE = idealGas2D/species.cpp
+progCSOURCE =
 
 
 # Compiler and flags
-CCMP = g++
+CCMP = g++-8
 
-COPT = -g -Wall
+COPT = -Og -D_GLIBCXX_DEBUG -fno-omit-frame-pointer# -fsanitize=address
+
+CWARN = -Wall -Wextra -Wpedantic -Wno-unused-parameter -Wshadow
+
+CSTD = -std=c++17 -fconcepts
 
 LIBS = -lcppunit
 
@@ -42,8 +40,10 @@ LIBS = -lcppunit
 #-------------------------------------
 #  variable definitions
 
+# all directories
 DIRS = $(testINCLDEDIR) $(testSOURCEDIR) $(testSCRIPTDIR) $(testPROGRMDIR)
 
+# include paths for both files to test and testing files
 INCLDE = $(addprefix -I,$(testINCLDEDIR)) $(addprefix -I,$(progINCLDEDIR))
 
 # full paths for source, script and executable files
@@ -74,23 +74,16 @@ OBJS = $(progSOURCEOBJ) $(testSOURCEOBJ) $(testSCRIPTOBJ) $(testallSCRIPTOBJ)
 
 # default
 %.o : %.cpp
-	$(CCMP) $(COPT) $(INCLDE) -o $@ -c $<
+	$(CCMP) $(COPT) $(CSTD) $(CWARN) $(INCLDE) -o $@ -c $<
 
-## wraps all program source object files into one
-#allprog.o : $(progSOURCEOBJ)
-#	ld -r $^ -o $@
-#
-## wraps all test source object files into one
-#alltest.o : $(testSOURCEOBJ)
-#	ld -r $^ -o $@
 
 # each test executable depends on its own object file, the object file of the test, and all program source objects
 $(testPROGRM) : $(testPROGRMDIR)%.out : $(testSCRIPTDIR)%.o $(testSOURCEDIR)%.o $(progSOURCEOBJ)
-	$(CCMP) $(COPT) $(INCLDE) $^ $(LIBS) -o $@
+	$(CCMP) $(COPT) $(CSTD) $(CWARN) $(INCLDE) $^ $(LIBS) -o $@
 
 # executable for all tests depends on its own object file, all the test source objects, and all program source objects
 $(testallPROGRM) : $(testallSCRIPTOBJ) $(testSOURCEOBJ) $(progSOURCEOBJ)
-	$(CCMP) $(COPT) $(INCLDE) $^ $(LIBS) -o $@
+	$(CCMP) $(COPT) $(CSTD) $(CWARN) $(INCLDE) $^ $(LIBS) -o $@
 
 
 #-------------------------------------

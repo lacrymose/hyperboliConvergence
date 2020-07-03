@@ -1,13 +1,13 @@
 # include <cppunit/ui/text/TestRunner.h>
 # include <cppunit/TestResult.h>
 
-# include <idealGas2D/test-VariableSet.h>
+# include <parallalg/algorithm/test-copy.h>
 
    int main()
   {
       CppUnit::TextUi::TestRunner   runner;
 
-      runner.addTest( Test_IdealGas2D_VariableSet::suite() );
+      runner.addTest( Test_par_copy::suite() );
 
       bool wasSuccessful = runner.run( "", false );
 
