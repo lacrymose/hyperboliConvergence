@@ -24,7 +24,8 @@ CSCRIPT = test.cpp \
 	riemannProblemRK.cpp \
 	shockTube_mach00001.cpp \
 	testScalarAdvection.cpp \
-	testArray.cpp
+	testArray.cpp \
+	testArray2.cpp
 
 # compiler
 CCMP = g++-8
