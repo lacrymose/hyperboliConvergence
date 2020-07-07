@@ -5,6 +5,9 @@
 
 # include <geometry/geometry.h>
 
+# include <parallalg/algorithm.h>
+# include <parallalg/array.h>
+
 # include <vector>
 
 # include <cassert>
@@ -12,27 +15,27 @@
 // overload with return value (must be used to construct vector to use RVO)
    template<LawType Law, int nDim, ImplementedVarSet SolVarT, floating_point Real>
       requires ConsistentTypes<Law,nDim,Real,SolVarT>
-   MDArray<SolVarT,1> eulerForwardUpdate( const MDArray<geom::Volume<nDim,Real>,1>& cells,
+   par::Array<SolVarT,1> eulerForwardUpdate( const par::Array<geom::Volume<nDim,Real>,1>& cells,
                                           const Species<Law,Real>& species,
                                           const Real cfl,
                                           const Real lmax,
-                                          const MDArray<FluxResult<Law,nDim,Real>,1>& r,
-                                          const MDArray<SolVarT,1>& q0 )
+                                          const par::Array<FluxResult<Law,nDim,Real>,1>& r,
+                                          const par::Array<SolVarT,1>& q0 )
   {
-      MDArray<SolVarT,1> q1(q0.dims);
+      par::Array<SolVarT,1> q1(q0.shape());
       eulerForwardUpdate( cells, species, cfl, lmax, r, q0, q1 );
       return q1;
   }
 
    template<LawType Law, int nDim, ImplementedVarSet SolVarT, floating_point Real>
       requires ConsistentTypes<Law,nDim,Real,SolVarT>
-   void eulerForwardUpdate( const MDArray<geom::Volume<nDim,Real>,1>& cells,
+   void eulerForwardUpdate( const par::Array<geom::Volume<nDim,Real>,1>& cells,
                             const Species<Law,Real>& species,
                             const Real cfl,
                             const Real lmax,
-                            const MDArray<FluxResult<Law,nDim,Real>,1>& r,
-                            const MDArray<SolVarT,1>& q0,
-                                  MDArray<SolVarT,1>& q1 )
+                            const par::Array<FluxResult<Law,nDim,Real>,1>& r,
+                            const par::Array<SolVarT,1>& q0,
+                                  par::Array<SolVarT,1>& q1 )
   {
    // conserved variables/deltas needed for correct shock speeds
       constexpr BasisType<Law> ConservedBasis = BasisType<Law>::Conserved;
@@ -40,11 +43,11 @@
       using ConsDelT = VariableDelta<Law,nDim,ConservedBasis,Real>;
 
    // check mesh sizes match
-      assert( cells.dims == q1.dims );
-      assert( cells.dims == q0.dims );
-      assert( cells.dims ==  r.dims );
+      assert( cells.shape() == q1.shape() );
+      assert( cells.shape() == q0.shape() );
+      assert( cells.shape() ==  r.shape() );
 
-      const size_t nc = cells.dims[0];
+//    const size_t nc = cells.dims[0];
 
    // timestep
       const Real dt = cfl/lmax;
@@ -62,14 +65,18 @@
      };
 
    // new = old + dt*residual/vol
-      for( size_t i=0; i<nc; i++ )
-     {
-         const Real d = dt/cells[{i}].volume;
-
-         const ConsDelT dqc = d*r[{i}].flux;
-
       // solv -> consv + increment -> solv
-         q1[{i}] = solvar( consvar( q0[{i}] ) + dqc );
-     }
+      const auto update = [&consvar, &solvar, dt]
+                          ( const SolVarT& v0,
+                            const geom::Volume<nDim,Real>&   cell,
+                            const FluxResult<Law,nDim,Real>&  res ) -> SolVarT
+                          {
+                             const ConsDelT dvc = res.flux*(dt/cell.volume);
+                             return solvar( consvar( v0 ) + dvc );
+                          };
+
+      par::transform( update,
+                      q1,
+                      q0, cells, r );
       return;
   }

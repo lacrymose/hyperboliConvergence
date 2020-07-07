@@ -5,7 +5,7 @@
 
 # include <utils/concepts.h>
 
-# include <mdarray/mdarray.h>
+# include <parallalg/array.h>
 
 # include <array>
 
@@ -85,23 +85,23 @@ namespace geom
    template<int nDim, floating_point Real>
    struct Mesh
   {
-      Dims<nDim> shape;
+      par::Shape<nDim> shape;
 
-      MDArray<Point< nDim,Real>,nDim> nodes;
-      MDArray<Volume<nDim,Real>,nDim> cells;
+      par::Array<Point< nDim,Real>,nDim> nodes;
+      par::Array<Volume<nDim,Real>,nDim> cells;
 
-   // MDArray only supports move construction, so same must be for Mesh
+   // par::Array only supports move construction, so same must be for Mesh
       Mesh() = delete;
       Mesh( const Mesh&  ) = delete;
       Mesh(       Mesh&& ) =default;
 
-   // MDArray only supports move assignment, so same must be for Mesh
+   // par::Array only supports move assignment, so same must be for Mesh
       Mesh& operator=( const Mesh&  ) = delete;
       Mesh& operator=(       Mesh&& ) = default;
 
-      Mesh( const Dims<nDim>& d ) : shape(d),
-                                    nodes(nodeDims_from_cellDims(d)),
-                                    cells(d) {}
+      Mesh( const par::Shape<nDim>& s ) : shape(s),
+                                     nodes(par::nodeDims_from_cellDims(s)),
+                                     cells(s) {}
   };
 
    template<int nDim, floating_point Real>
@@ -143,17 +143,17 @@ namespace geom
                           const Point<3,Real>&, const Point<3,Real>& );
 
    template<floating_point Real>
-   MDArray<Volume<1,Real>,1> dual( const MDArray<Point<1,Real>,1>& nodes );
+   par::Array<Volume<1,Real>,1> dual( const par::Array<Point<1,Real>,1>& nodes );
 
    template<floating_point Real>
-   void dual( const MDArray<Point< 1,Real>,1>& nodes,
-                    MDArray<Volume<1,Real>,1>& cells );
+   void dual( const par::Array<Point< 1,Real>,1>& nodes,
+                    par::Array<Volume<1,Real>,1>& cells );
 
 /*
  * create a 1D mesh over domain [lo:hi] with linear spacing and nc cells
  */
    template<floating_point Real>
-   Mesh<1,Real> make_linspace_mesh( const Dims<1>& cellDims, const Real lo, const Real hi )
+   Mesh<1,Real> make_linspace_mesh( const par::Shape<1>& cellDims, const Real lo, const Real hi )
   {
       Mesh<1,Real> mesh(cellDims);
 

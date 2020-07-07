@@ -3,6 +3,8 @@
 
 # include <conservationLaws/euler/euler.h>
 
+# include <parallalg/array.h>
+
 # include <array>
 
 # include <iostream>
@@ -19,8 +21,8 @@
               && ImplementedVarSet< VariableSet<Law,nDim,Basis,Real>>
    std::array<VariableSet<Law,nDim,Basis,Real>,2> 
            updateBCs( const Species<Law,Real>&                          species,
-                      const MDArray<geom::Point<nDim,Real>,1>&            nodes,
-                      const MDArray<   VariableSet<Law,nDim,Basis,Real>,1>&   q,
+                      const par::Array<geom::Point<nDim,Real>,1>&            nodes,
+                      const par::Array<   VariableSet<Law,nDim,Basis,Real>,1>&   q,
                       const std::array<VariableSet<Law,nDim,Basis,Real>,2>& qb0 )
   {
       using SolVarT = VariableSet<Law,nDim,Basis,Real>;
@@ -29,11 +31,11 @@
 
 	// left/right boundary cell centres
       const size_t ic0=0;
-      const size_t ic1=q.dims[0]-1;
+      const size_t ic1=q.shape(0)-1;
 
 	// left/right boundary nodes
       const size_t in0=0;
-      const size_t in1=nodes.dims[0]-1;
+      const size_t in1=nodes.shape(0)-1;
 
    // left face
       qbc[0] = riemannInvariantBC( species,
