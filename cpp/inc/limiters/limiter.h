@@ -91,6 +91,26 @@ namespace Limiters
   };
 
 /*
+ * Superbee 2nd order limiter
+ */
+   struct Superbee2 : ScalarLimiterInterface<  Superbee2>,
+                      VariableLimiterInterface<Superbee2>
+  {
+      template<floating_point Real>
+      Real limit( const Real a, const Real b ) const;
+  };
+
+/*
+ * Monotonized Central 2nd order limiter
+ */
+   struct MonotonizedCentral2 : ScalarLimiterInterface<  MonotonizedCentral2>,
+                                VariableLimiterInterface<MonotonizedCentral2>
+  {
+      template<floating_point Real>
+      Real limit( const Real a, const Real b ) const;
+  };
+
+/*
  * Van Leer's 2nd order limiter
  */
    struct VanLeer2 : ScalarLimiterInterface<  VanLeer2>,

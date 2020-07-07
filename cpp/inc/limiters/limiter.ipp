@@ -26,14 +26,12 @@ namespace Limiters
    template<floating_point Real>
    Real VanAlbada2::limit( const Real a, const Real b ) const
   {
-      Real z;
-
       const Real eps = std::numeric_limits<Real>::min();
 
    // do not evaluate division if unnecessary
-      z = a*b<0 ?  0
-                 : ( b*(a*a) + a*(b*b) )
-                  /(    a*a  +    b*b + eps );
+      const Real z = a*b<0 ?  0
+                            : ( b*(a*a) + a*(b*b) )
+                             /(    a*a  +    b*b + eps );
 
       return z;
   }
@@ -41,11 +39,41 @@ namespace Limiters
    template<floating_point Real>
    Real MinMod2::limit( const Real a, const Real b ) const
   {
-      Real       z;
-
    // do not evaluate extra min/max if unnecessary
-      z = a>0 ?  fmin( a, fmax( b, 0. ) )
-               : fmax( a, fmin( b, 0. ) );
+      const Real z = a>0 ?  fmin( a, fmax( b, 0. ) )
+                          : fmax( a, fmin( b, 0. ) );
+
+      return z;
+  }
+
+   template<floating_point Real>
+   Real Superbee2::limit( const Real a, const Real b ) const
+  {
+   // do not evaluate extra min/max if unnecessary
+
+      const Real z = a>0 ?  fmax(  0.,
+                             fmax( fmin( 2*a, b ),
+                                   fmin( 2*b, a ) ) )
+                          : fmin(  0.,
+                             fmin( fmax( 2*a, b ),
+                                   fmax( 2*b, a ) ) );
+
+      return z;
+  }
+
+   template<floating_point Real>
+   Real MonotonizedCentral2::limit( const Real a, const Real b ) const
+  {
+   // do not evaluate extra min/max if unnecessary
+
+      const Real z = a>0 ?  fmax( 0.,
+                                  fmin(  0.5*(a+b),
+                                   fmin( 2*b,
+                                         2*a ) ) )
+                          : fmin(  0.,
+                                  fmax(  0.5*(a+b),
+                                   fmax( 2*b,
+                                         2*a ) ) );
 
       return z;
   }
@@ -54,8 +82,10 @@ namespace Limiters
    Real VanLeer2::limit( const Real a, const Real b ) const
   {
       const Real eps = std::numeric_limits<Real>::min();
-      return ( b + fabs(b) )
-            /( a + fabs(b) + eps );
+
+      const Real z = ( b + fabs(b) )
+                    /( a + fabs(b) + eps );
+      return z;
   }
 
    template<floating_point Real>
