@@ -187,10 +187,30 @@
                                                  const StateT&                            sr ) const;
   };
 
+/*
+ * SLAU simple low-dissipation ausm flux - Shima & Kitamura 2011
+ *    includes template options for convective/acoustic/adaptive scaling of pressure/velocity at low Mach number
+ */
+   template<LowMachScaling VFluxScaling = LowMachScaling::Convective,
+            LowMachScaling PFluxScaling = LowMachScaling::Convective>
+   struct Slau : FluxInterface<Slau<VFluxScaling,
+                                    PFluxScaling>,
+                               LawType::Euler>
+  {
+      template<EulerState StateT, int nDim, floating_point Real>
+         requires   SameDim<   StateT,dim_constant<nDim>>
+                 && SameFPType<StateT,Real>
+      FluxResult<LawType::Euler,nDim,Real> flux( const Species<LawType::Euler,Real>& species,
+                                                 const geom::Surface<nDim,Real>&        face,
+                                                 const StateT&                            sl,
+                                                 const StateT&                            sr ) const;
+  };
+
 // ---------- implementation files  ----------
 
 # include <conservationLaws/euler/fluxes/exactFlux.ipp>
 # include <conservationLaws/euler/fluxes/ausmPlusUP.ipp>
+# include <conservationLaws/euler/fluxes/slau.ipp>
 
 # include <conservationLaws/euler/transforms/conserved.ipp>
 # include <conservationLaws/euler/transforms/primitive.ipp>

@@ -28,8 +28,8 @@
 
    // velocities
 
-      const Real unr = projectedVelocity( face.metric[0], sr );
       const Real unl = projectedVelocity( face.metric[0], sl );
+      const Real unr = projectedVelocity( face.metric[0], sr );
 
    // critical sonic speeds adjusted to prevent sonic expansion shock
 
@@ -156,9 +156,9 @@
       const Real lmd=1.;
 //    const Real lmd= 0.5*(m0_p+1)/fa_p;
 
-      const Real amax = sqrt( fmax( as*as,
-                              fmax( sl.speedOfSound2(),
-                                    sr.speedOfSound2() ) ) );
+      const Real amax = sqrt( fmax(  as*as,
+                               fmax( sl.speedOfSound2(),
+                                     sr.speedOfSound2() ) ) );
 
       const Real lmax =  lmd*amax
                        + fmax(  fabs(ua),

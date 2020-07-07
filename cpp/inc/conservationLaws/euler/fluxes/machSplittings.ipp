@@ -1,4 +1,6 @@
 
+# pragma once
+
 # include <limits>
 
 // mach number splittings for Van-Leer and AUSM type fluxes

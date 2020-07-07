@@ -13,7 +13,8 @@
 
 # include <geometry/geometry.h>
 
-# include <mdarray/mdarray.h>
+# include <parallalg/algorithm.h>
+# include <parallalg/array.h>
 
 # include <vector>
 # include <iostream>
@@ -49,26 +50,26 @@ constexpr ShockTube1D problem = ShockTube1D::LowMach;
 using Real = double;
 
 constexpr int  nx  = 128;
-constexpr int  nt  = 160;
-constexpr Real cfl = 0.20;
+constexpr int  nt  = 96;
+constexpr Real cfl = 0.80;
 
 constexpr BasisT SolutionBasis = BasisT::Primitive;
 
 //using Flux = RusanovFlux<Law>;
 
-using Flux = AusmPlusUP<LowMachScaling::Acoustic,
-                        LowMachScaling::Acoustic>;
+//using Flux = AusmPlusUP<LowMachScaling::Acoustic,
+//                        LowMachScaling::Acoustic>;
 
-using Limiter = Limiters::VanAlbada2;
+using Flux = Slau<LowMachScaling::Acoustic,
+                  LowMachScaling::Acoustic>;
+
+using Limiter = Limiters::MonotonizedCentral2;
 
 
 // ------ typedefs -------------------
 
-constexpr BasisT ViscousBasis = BasisT::Viscous;
-
-using ViscousVarSet    = VariableSet<  Law,nDim,ViscousBasis, Real>;
-using SolVarSet   = VariableSet<  Law,nDim,SolutionBasis, Real>;
-using SolVarDelta = VariableDelta<Law,nDim,SolutionBasis, Real>;
+using SolVarSet     = VariableSet<  Law,nDim,SolutionBasis, Real>;
+using SolVarDelta   = VariableDelta<Law,nDim,SolutionBasis, Real>;
 
 using FluxRes = FluxResult<Law,nDim,Real>;
 
@@ -99,7 +100,7 @@ using Volume  = geom::Volume< nDim,Real>;
 
    int main()
   {
-      const Dims<nDim> cellDims{nx};
+      const par::Shape<nDim> cellShape{nx};
 
       const ODE::Explicit::RungeKutta<Real> rk = ODE::Explicit::ssp33<Real>();
 
@@ -112,26 +113,21 @@ using Volume  = geom::Volume< nDim,Real>;
       const Limiter limiter{};
 
    // initialise mesh
-      const geom::Mesh<nDim,Real> mesh = geom::make_linspace_mesh<Real>( cellDims, 0,nx );
+      const geom::Mesh<nDim,Real> mesh = geom::make_linspace_mesh<Real>( cellShape, 0,nx );
 
    // initialise solution to left/right states
-      MDArray<SolVarSet,nDim> q  = shocktube_initial_solution<SolVarSet>( problem, species, mesh.cells );
-      MDArray<SolVarSet,nDim> q1 = shocktube_initial_solution<SolVarSet>( problem, species, mesh.cells );
-      MDArray<SolVarSet,nDim> q2 = shocktube_initial_solution<SolVarSet>( problem, species, mesh.cells );
-
-//    MDArray<SolVarSet,nDim> q1 = par::copy( q );
-//    MDArray<SolVarSet,nDim> q2 = par::copy( q );
-//    par::copy( /*dst*/ q1, /*src*/ q );
-//    par::copy( /*dst*/ q2, /*src*/ q );
+      par::Array<SolVarSet,nDim> q  = shocktube_initial_solution<SolVarSet>( problem, species, mesh.cells );
+      par::Array<SolVarSet,nDim> q1 = par::copy( q );
+      par::Array<SolVarSet,nDim> q2 = par::copy( q );
 
    // gradient array
-      MDArray<SolVarDelta,nDim>   dq(cellDims);
+      par::Array<SolVarDelta,nDim>   dq(cellShape);
 
    // residual evaluated and accumulated at each runge-kutta stage
       // MDArray has no copy constructor so must construct in-place
-      MDArray<FluxRes,nDim>               resTotal(cellDims);
-      std::vector<MDArray<FluxRes,nDim>>  resStage;
-      for( int i=0; i<rk.nstages; i++ ){ resStage.emplace_back(cellDims); }
+      par::Array<FluxRes,nDim>               resTotal(cellShape);
+      std::vector<par::Array<FluxRes,nDim>>  resStage;
+      for( int i=0; i<rk.nstages; i++ ){ resStage.emplace_back(cellShape); }
 
    // boundary values
       const std::array<SolVarSet,2> qb0 = shocktube_initial_leftright<SolVarSet>( problem, species );
@@ -175,7 +171,8 @@ using Volume  = geom::Volume< nDim,Real>;
             if( j==0 ){ lmax = spectralRadius( mesh.cells, resStage[j] ); }
 
          // accumulate stage residual
-            for( FluxRes& r : resTotal.elems ){ r = FluxRes{}; }
+            par::fill( resTotal, FluxRes{} );
+
             for( size_t i=0; i<nx; i++ )
            {
                for( int k=0; k<=j; k++ )
@@ -188,16 +185,20 @@ using Volume  = geom::Volume< nDim,Real>;
             eulerForwardUpdate( mesh.cells, species, rk.beta[j]*cfl, lmax, resTotal, q, q2 );
             std::swap( q1,q2 );
         }
-         for( size_t i=0; i<nx; i++ ){ q[{i}]=q1[{i}]; }
+         par::copy( q, q1 );
      }
 
       std::ofstream solutionFile( "data/shockTube_mach00001/result.dat" );
       if( solutionFile.is_open() )
      {
-         for( const SolVarSet& q0 : q.elems )
-        {
-            writeState( solutionFile, species, set2State( species, q0 ) );
-        }
+         solutionFile << std::scientific;
+         solutionFile.precision(8);
+
+         par::for_each( // write state to file
+                        [&]( const SolVarSet& q0 ) -> void
+                           { writeState( solutionFile, species, set2State( species, q0 ) ); },
+                        // solution array
+                        q );
      }
       else
      {

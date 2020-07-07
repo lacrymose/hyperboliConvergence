@@ -5,7 +5,7 @@
 
 # include <geometry/geometry.h>
 
-# include <mdarray/mdarray.h>
+# include <parallalg/array.h>
 
 # include <cassert>
 
@@ -29,12 +29,12 @@
  *    Return an full 1D array of initial conditions over a given array of cells.
  *    Cell array must have an even length (otherwise diaphragm will sit inside a cell)
  *
- *       shocktube_initial_solution<VarSet>( ShockTube1D, Species&, MDArray<Cell,1>& ) -> MDArray<VarSet,1>
+ *       shocktube_initial_solution<VarSet>( ShockTube1D, Species&, par::Array<Cell,1>& ) -> par::Array<VarSet,1>
  *    
  *    !!! NOT IMPLEMENTED YET !!!
  *    Exact solution at time t
  *
- *       shocktube_exact_solution<VarSet>( ShockTube1D, Species&, MDArray<Cell,1>&, Real t ) -> MDArray<VarSet,1>
+ *       shocktube_exact_solution<VarSet>( ShockTube1D, Species&, par::Array<Cell,1>&, Real t ) -> par::Array<VarSet,1>
  *    !!! NOT IMPLEMENTED YET !!!
  */
 
@@ -121,17 +121,17 @@
 
    template<EulerVarSet VarT, floating_point Real>
       requires SameFPType<VarT,Real>
-   MDArray<VarT,1> shocktube_initial_solution( const ShockTube1D                    problem,
+   par::Array<VarT,1> shocktube_initial_solution( const ShockTube1D                    problem,
                                                const Species<LawType::Euler,Real>&  species,
-                                               const MDArray<geom::Volume<1,Real>,1>& cells )
+                                               const par::Array<geom::Volume<1,Real>,1>& cells )
   {
       const VarT ql = shocktube_initial_left< VarT>( problem, species );
       const VarT qr = shocktube_initial_right<VarT>( problem, species );
 
-      const size_t nx = cells.dims[0];
+      const size_t nx = cells.shape(0);
       assert( nx%2 == 0 );
 
-      MDArray<VarT,1> q0(cells.dims);
+      par::Array<VarT,1> q0(cells.shape());
 
       for( size_t i=0;    i<nx/2; i++ ){ q0[{i}] = ql; }
       for( size_t i=nx/2; i<nx;   i++ ){ q0[{i}] = qr; }
