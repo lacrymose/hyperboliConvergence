@@ -14,10 +14,12 @@
  *    Conserved: velocity, scalar
  */
    enum struct EulerBases
-  { Conserved,            // { momentum, density,     total energy }
-// Characteristic,        // { entropy,  vorticity,   left/right acoustic }
-   Primitive,             // { velocity, density,     pressure }
-   Viscous                // { velocity, temperature, pressure }
+  {
+      Conserved,             // { momentum, density,     total energy }
+   // Characteristic,        // { entropy,  vorticity,   left/right acoustic }
+   // Entropy,               // { velocity, entropy,     pressure }
+      Primitive,             // { velocity, density,     pressure }
+      Viscous                // { velocity, temperature, pressure }
   };
 
    template<>
@@ -79,11 +81,22 @@
       has_same_law_v<T,law_constant<LawType::Euler>>
    && ImplementedVarSet<T>;
 
+   // conserved variables
+
    template<typename T>
    concept bool EulerConservedVariables =
       is_specialised_VarSet_v<T,
                               LawType::Euler,
                               EulerBases::Conserved>;
+
+   template<typename T>
+   concept bool EulerConservedDelta =
+      is_specialised_VarDelta_v<T,
+                                LawType::Euler,
+                                EulerBases::Conserved>;
+
+   // primitive variables
+
    template<typename T>
    concept bool EulerPrimitiveVariables =
       is_specialised_VarSet_v<T,
@@ -91,10 +104,24 @@
                               EulerBases::Primitive>;
 
    template<typename T>
+   concept bool EulerPrimitiveDelta =
+      is_specialised_VarDelta_v<T,
+                                LawType::Euler,
+                                EulerBases::Primitive>;
+
+   // viscous variables
+
+   template<typename T>
    concept bool EulerViscousVariables =
       is_specialised_VarSet_v<T,
                               LawType::Euler,
                               EulerBases::Viscous>;
+
+   template<typename T>
+   concept bool EulerViscousDelta =
+      is_specialised_VarDelta_v<T,
+                                LawType::Euler,
+                                EulerBases::Viscous>;
 
 
 // ---------- exact physical flux and spectral radius ----------
@@ -112,7 +139,7 @@
   }
 
 
-// ---------- transformation functions ----------
+// ---------- transformation functions set<->state ----------
 
 // conserved variables
 
@@ -148,6 +175,57 @@
    template<EulerViscousVariables ViscVarT, floating_point Real>
       requires SameFPType<ViscVarT,Real>
    state_t<ViscVarT> set2State( const Species<LawType::Euler,Real>& species, const ViscVarT& qv );
+
+
+// ---------- transformation functions delta<->delta ----------
+
+// conserved <-> viscous
+
+   // conserved -> viscous
+   template<EulerViscousDelta   ViscDelT,
+            EulerConservedDelta ConsDelT,
+            EulerState            StateT,
+            floating_point          Real>
+      requires ConsistentTypes<LawType::Euler,dim_of_v<StateT>,Real,
+                               ViscDelT,ConsDelT,StateT>
+   ViscDelT delta2Delta( const Species<LawType::Euler,Real>& species,
+                         const StateT&                         state,
+                         const ConsDelT&                         dqc );
+   
+   // viscous -> conserved
+   template<EulerConservedDelta ConsDelT,
+            EulerViscousDelta   ViscDelT,
+            EulerState            StateT,
+            floating_point          Real>
+      requires ConsistentTypes<LawType::Euler,dim_of_v<StateT>,Real,
+                               ConsDelT,ViscDelT,StateT>
+   ConsDelT delta2Delta( const Species<LawType::Euler,Real>& species,
+                         const StateT&                         state,
+                         const ViscDelT&                         dqv );
+   
+// conserved <-> primitive
+
+   // conserved -> primitive
+   template<EulerPrimitiveDelta PrimDelT,
+            EulerConservedDelta ConsDelT,
+            EulerState            StateT,
+            floating_point          Real>
+      requires ConsistentTypes<LawType::Euler,dim_of_v<StateT>,Real,
+                               PrimDelT,ConsDelT,StateT>
+   PrimDelT delta2Delta( const Species<LawType::Euler,Real>& species,
+                         const StateT&                         state,
+                         const ConsDelT&                         dqc );
+   
+   // primitive -> conserved
+   template<EulerConservedDelta ConsDelT,
+            EulerPrimitiveDelta PrimDelT,
+            EulerState            StateT,
+            floating_point          Real>
+      requires ConsistentTypes<LawType::Euler,dim_of_v<StateT>,Real,
+                               ConsDelT,PrimDelT,StateT>
+   ConsDelT delta2Delta( const Species<LawType::Euler,Real>& species,
+                         const StateT&                         state,
+                         const PrimDelT&                         dqp );
 
 
 // ---------- standard ideal gas species ----------
@@ -192,7 +270,7 @@
  *    includes template options for convective/acoustic/adaptive scaling of pressure/velocity at low Mach number
  */
    template<LowMachScaling VFluxScaling = LowMachScaling::Convective,
-            LowMachScaling PFluxScaling = LowMachScaling::Convective>
+            LowMachScaling PFluxScaling = LowMachScaling::Acoustic>
    struct Slau : FluxInterface<Slau<VFluxScaling,
                                     PFluxScaling>,
                                LawType::Euler>

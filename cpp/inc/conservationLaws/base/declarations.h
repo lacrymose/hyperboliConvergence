@@ -7,14 +7,14 @@
    enum struct LawType
   {
       NoLaw,
-      ArtificialCompressibility,
-      Burgers,
+//    ArtificialCompressibility,
+//    Burgers,
       Euler,
-      IsothermalGas,
-      Maxwell,
+//    IsothermalGas,
+//    Maxwell,
       ScalarAdvection,
-      ShallowWater,
-      TrafficFlow
+//    ShallowWater,
+//    TrafficFlow
   };
 
 
@@ -54,8 +54,8 @@
 // template<typename DstT, typename SrcT, typename SpeciesT>
 // DstT set2Set( const SpeciesT&, const SrcT& )=delete;
 
-   template<typename DstT, typename StateT, typename SrcT, typename SpeciesT>
-   DstT delta2Delta( const SpeciesT&, const StateT&, const SrcT& )=delete;
+   template<typename DstT, typename StateT, typename SrcT, typename SpeciesT, typename Metric>
+   DstT delta2Delta( const SpeciesT&, const StateT&, const SrcT&, const Metric& )=delete;
 
    template<typename DstT, typename SrcT, typename SpeciesT>
    auto set2State( const SpeciesT&, const SrcT& )=delete;

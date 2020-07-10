@@ -18,9 +18,10 @@ namespace geom
   }
 
    template<floating_point Real>
-   Direction<2,Real> cross( const Direction<2,Real>& a )
+   Real cross( const Direction<2,Real>& a,
+               const Direction<2,Real>& b )
   {
-      return Direction<2,Real>{-a[1],a[0]};
+      return a[0]*b[1] - a[1]*b[0];
   }
 
    template<floating_point Real>
@@ -30,5 +31,11 @@ namespace geom
       return Direction<3,Real>{ a[1]*b[2] - a[2]*b[1],
                                 a[2]*b[0] - a[0]*b[2],
                                 a[0]*b[1] - a[1]*b[0] };
+  }
+
+   template<floating_point Real>
+   Direction<2,Real> orthog( const Direction<2,Real>& d )
+  {
+      return Direction<2,Real>{-d[1],d[0]};
   }
 }

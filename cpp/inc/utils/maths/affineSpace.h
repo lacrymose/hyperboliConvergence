@@ -201,6 +201,7 @@
       Point& operator-=( const Delta& d );
   };
 
+
 /*
  * base CRTP type for a displacement in an affine space
  */

@@ -19,8 +19,8 @@ namespace geom
       Surface<2,Real> surf;
       surf.area   = length( tangent );
       surf.centre = p0 + 0.5*tangent;
-      surf.metric = Metric<2,Real>{ cross(tangent),
-                                          tangent };
+      surf.metric = Metric<2,Real>{ orthog(tangent),
+                                           tangent };
       return surf;
   }
 }

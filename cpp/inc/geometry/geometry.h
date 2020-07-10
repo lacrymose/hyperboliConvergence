@@ -11,12 +11,16 @@
 
 namespace geom
 {
-// forward declarations
+// ----------------- forward declarations ----------------- 
+
    template<int nDim, floating_point Real> struct Point;
    template<int nDim, floating_point Real> struct Direction;
    template<int nDim, floating_point Real> struct Metric;
    template<int nDim, floating_point Real> struct Volume;
    template<int nDim, floating_point Real> struct Surface;
+
+
+// ----------------- geometry structs ----------------- 
 
 /*
  * {Point,Direction} form an affine space.
@@ -46,6 +50,7 @@ namespace geom
                             Real>::AffineDeltaBase;
   };
 
+
 /*
  * Metric for a surface in nDim dimensions. Direction m[0] is surface normal, m[1...] are surface tangents
  */
@@ -58,6 +63,7 @@ namespace geom
       const Direction<nDim,Real>& operator[]( const int i ) const { return m[i]; };
   };
 
+
 /*
  * used to represent hyper-quadrilaterals in an nDim space
  */
@@ -69,6 +75,7 @@ namespace geom
       Metric<nDim,Real> metric;
   };
 
+
 /*
  * used to represent hyper-hexahedrons in an nDim space
  */
@@ -78,6 +85,7 @@ namespace geom
       Real             volume;
       Point<nDim,Real> centre;
   };
+
 
 /*
  * Struct holding the cell Volumes and node Points for a structured mesh
@@ -104,19 +112,62 @@ namespace geom
                                      cells(s) {}
   };
 
+
+// ----------------- functions on metrics ----------------- 
+
+/*
+ *  return identity metric
+ */
+   template<int nDim, floating_point Real>
+   Metric<nDim,Real> metricI();
+
+/*
+ * return transpose metric
+ *    metrics are unary matrices, so transpose is inverse
+ */
+   template<int nDim, floating_point Real>
+   Metric<nDim,Real> transpose( const Metric<nDim,Real>& m );
+
+
+// ----------------- operations on Points/Directions ----------------- 
+
+/*
+ * Length of a Direction squared
+ *    comparison of Direction lengths can be done on length2 with the same result, avoiding a sqrt
+ */
    template<int nDim, floating_point Real>
    Real length2( const Direction<nDim,Real>& );
 
+/*
+ * Length of a Direction
+ */
    template<int nDim, floating_point Real>
    Real length(  const Direction<nDim,Real>& );
 
+
+/*
+ * Cross products of two directions
+ */
    template<floating_point Real>
-   Direction<2,Real> cross( const Direction<2,Real>& );
+   Real cross( const Direction<2,Real>&,
+               const Direction<2,Real>& );
 
    template<floating_point Real>
    Direction<3,Real> cross( const Direction<3,Real>&,
                             const Direction<3,Real>& );
 
+/*
+ * Orthogonal vector in 2D
+ */
+   template<floating_point Real>
+   Direction<2,Real> orthog( const Direction<2,Real>& );
+
+
+// ----------------- generation of geometric entities from Points ----------------- 
+
+/*
+ * Create a surface (one less dimension than the background space) from its corners
+ */
    template<floating_point Real>
    Surface<1,Real> surface( const Point<1,Real>& );
 
@@ -130,6 +181,10 @@ namespace geom
                             const Point<3,Real>&,
                             const Point<3,Real>& );
 
+
+/*
+ * Create a volume (same number of dimensions as the background space) from its corners
+ */
    template<floating_point Real>
    Volume<1,Real> volume( const Point<1,Real>&, const Point<1,Real>& );
 
@@ -142,6 +197,14 @@ namespace geom
                           const Point<3,Real>&, const Point<3,Real>&,
                           const Point<3,Real>&, const Point<3,Real>& );
 
+
+// ----------------- operations on the dual mesh ----------------- 
+
+/*
+ * Create the dual mesh from the primal mesh (assumes mesh is structured)
+ *    the primal mesh is the nodes
+ *    the dual mesh is the cells
+ */
    template<floating_point Real>
    par::Array<Volume<1,Real>,1> dual( const par::Array<Point<1,Real>,1>& nodes );
 
@@ -149,28 +212,23 @@ namespace geom
    void dual( const par::Array<Point< 1,Real>,1>& nodes,
                     par::Array<Volume<1,Real>,1>& cells );
 
+
+// ----------------- full mesh generation ----------------- 
+
 /*
  * create a 1D mesh over domain [lo:hi] with linear spacing and nc cells
  */
    template<floating_point Real>
-   Mesh<1,Real> make_linspace_mesh( const par::Shape<1>& cellDims, const Real lo, const Real hi )
-  {
-      Mesh<1,Real> mesh(cellDims);
+   Mesh<1,Real> make_linspace_mesh( const par::Shape<1>& cellDims, const Real lo, const Real hi );
 
-      const size_t nc = cellDims[0];
-      const size_t np = cellDims[0]+1;
-
-      const Real dx = ( hi - lo ) / nc;
-
-      for( size_t i=0; i<np; i++ ){ mesh.nodes[{i}] = lo + i*dx; }
-      mesh.cells = dual( mesh.nodes );
-
-      return mesh;
-  }
 }
 
 # include <geometry/operations.ipp>
+
+# include <geometry/metric.ipp>
 # include <geometry/surface.ipp>
 # include <geometry/volume.ipp>
+
 # include <geometry/dual.ipp>
+# include <geometry/mesh.ipp>
 

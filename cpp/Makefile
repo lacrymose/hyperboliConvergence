@@ -23,7 +23,9 @@ CSCRIPT = test.cpp \
 	riemannProblem.cpp \
 	riemannProblemRK.cpp \
 	shocktube.cpp \
+	periodic1D.cpp \
 	testScalarAdvection.cpp \
+	testEulerDelta.cpp \
 	testArray.cpp \
 	testArray2.cpp
 

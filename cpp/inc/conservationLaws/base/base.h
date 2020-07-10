@@ -93,7 +93,9 @@
       requires   SameLaw<VarT,law_constant<Law>>
               && SameFPType<VarT,Real>
               && ImplementedLawType<Law>
-   fluxresult_t<VarT> exactFlux( const Species<Law,Real>& species, const geom::Direction<dim_of_v<VarT>,Real>& normal, const VarT& q0 )
+   fluxresult_t<VarT> exactFlux( const Species<Law,Real>&                   species,
+                                 const geom::Direction<dim_of_v<VarT>,Real>& normal,
+                                 const VarT&                                     q0 )
   {
       return exactFlux( species, normal, setToState( species, q0 ) );
   }
@@ -103,7 +105,8 @@
  *    assumes State<Law,nDim,Real> has a .velocity(int) member
  */
    template<LawType Law, int nDim, floating_point Real>
-   Real projectedVelocity( const geom::Direction<nDim,Real>& dir, const State<Law,nDim,Real>& state )
+   Real projectedVelocity( const geom::Direction<nDim,Real>& dir,
+                           const State<Law,nDim,Real>&     state )
   {
       Real un=0;
       for( int i=0; i<nDim; i++ )
@@ -114,16 +117,18 @@
   }
 
 /*
- * for each vector quantity in VarT, rotate the underlying spatial basis to the given metric
- *    uses assumption that vector quantities are always contiguous first elements of VariableSet
+ * for each vector quantity in VarT, rotate the underlying spatial basis from the background (identity) metric to the given metric
+ *    assumes that vector quantities are always contiguous first elements of VariableSet
  */
-   template<LawType Law, int nDim, ImplementedVarSet VarT, floating_point Real>
-      requires   SameLaw<VarT,law_constant<Law>>
-              && SameDim<VarT,dim_constant<nDim>>
-              && SameFPType<VarT,Real>
-   VarT rotateToMetric( const Species<Law,Real>& species, const geom::Metric<nDim,Real>& metric, const VarT& q0 )
+   template<int nDim, typename VarT, floating_point Real>
+      requires   (   ImplementedVarSet<  VarT>
+                  || ImplementedVarDelta<VarT> )
+              && ConsistentTypes<law_of_v<VarT>,nDim,Real,VarT>
+   VarT rotateToMetric( const geom::Metric<nDim,Real>& metric,
+                        const VarT&                        q0 )
   {
-      constexpr int nVec = nVectorQuantities<Law>;
+      constexpr LawType Law = law_of_v<VarT>;
+      constexpr int    nVec = nVectorQuantities<Law>;
 
       VarT q1(q0);
       for( int v=0; v<nVec; v++ )
@@ -141,8 +146,38 @@
       return q1;
   }
 
+/*
+ * for each vector quantity in VarT, rotate the underlying spatial basis from the given metric to the background (identity) metric
+ *    assumes that vector quantities are always contiguous first elements of VariableSet
+ */
+   template<int nDim, typename VarT, floating_point Real>
+      requires   (   ImplementedVarSet<  VarT>
+                  || ImplementedVarDelta<VarT> )
+              && ConsistentTypes<law_of_v<VarT>,nDim,Real,VarT>
+   VarT rotateFromMetric( const geom::Metric<nDim,Real>& metric,
+                          const VarT&                        q0 )
+  {
+      return rotateToMetric( geom::transpose( metric ), q0 );
+  }
 
 // ---------- explicit transformation functions ----------
+
+/*
+ * transformations between two VariableSets of different bases (SrcT & DstT) defaults to transforming SrcT->State->DstT
+ *    this means that only transformations to/from a State needs implementing for each (Law,Basis) pair
+ */
+   template<ImplementedVarSet DstT,
+            ImplementedVarSet SrcT,
+            LawType            Law,
+            floating_point    Real>
+      requires   ConsistentTypes<Law,dim_of_v<SrcT>,Real,
+                                 DstT,SrcT>
+              && !(std::is_same_v<DstT,SrcT>)
+   DstT set2Set( const Species<Law,Real>& species,
+                 const SrcT&                   q0 )
+  {
+      return state2Set<DstT>( species, set2State( species, q0 ) );
+  }
 
 /*
  * transformations to the same type just return a copy
@@ -150,45 +185,79 @@
    template<ImplementedVarSet VarT, LawType Law, floating_point Real>
       requires   SameLaw<VarT,law_constant<Law>>
               && SameFPType<VarT,Real>
-   VarT set2Set( const Species<Law,Real>& species, const VarT& q0 )
+   VarT set2Set( const Species<Law,Real>& species,
+                 const VarT&                   q0 )
   {
       return VarT(q0);
   }
 
-/*
- * transformations between two VariableSets of different bases (SrcT & DstT) defaults to transforming SrcT->State->DstT
- *    this means that only transformations to/from a State needs implementing for each (Law,Basis) pair
- */
-   template<ImplementedVarSet DstT, ImplementedVarSet SrcT, LawType Law, floating_point Real>
-      requires   SameLaw<DstT,SrcT,law_constant<Law>>
-              && SameDim<DstT,SrcT>
-              && SameFPType<DstT,SrcT,Real>
-              && !(std::is_same_v<DstT,SrcT>)
-   DstT set2Set( const Species<Law,Real>& species, const SrcT& q0 )
-  {
-      return state2Set<DstT>( species, set2State( species, q0 ) );
-  }
 
 /*
- * transformations between two VariableDeltas of different bases must be around a particular point in the phase space. If this point is defined by a VariableSet, it will be transformed to a State before transforming the VariableDeltas.
+ * transformations between two VariableDeltas of different bases (SrcT & DstT) defaults to transforming SrcT->ConservedDelta->DstT
+ * transformations between two VariableDeltas at a particular point in the phase space, defined by a state
  *    this means that Delta transformations only need defining around a State for each Basis pair
  */
-   template<ImplementedVarDelta DstT, ImplementedVarDelta SrcT, ImplementedVarSet VarT, LawType Law, floating_point Real>
-      requires   SameLaw<DstT,SrcT,VarT,law_constant<Law>>
-              && SameDim<DstT,SrcT,VarT>
-              && SameFPType<DstT,SrcT,VarT,Real>
-   DstT delta2Delta( const Species<Law,Real>& species, const VarT& q0, const SrcT& dq0 )
+   template<ImplementedVarDelta DstT,
+            ImplementedVarDelta SrcT,
+            typename          StateT,
+            LawType              Law,
+            floating_point      Real>
+      requires   is_State_v<StateT>
+              && ConsistentTypes<Law,dim_of_v<SrcT>,Real,
+                                 DstT,SrcT,StateT>
+              && !(std::is_same_v<DstT,SrcT>)
+   DstT delta2Delta( const Species<Law,Real>&      species,
+                     const StateT&                   state,
+                     const SrcT&                       dq0 )
   {
-      return delta2Delta( species, set2State( species, q0 ), dq0 );
+      constexpr int nDim = dim_of_v<SrcT>;
+      using ConsDelT = VariableDelta<Law,nDim,BasisType<Law>::Conserved,Real>;
+
+      return delta2Delta<DstT>( species,
+                                state,
+                                delta2Delta<ConsDelT>( species,
+                                                       state,
+                                                       dq0 ) );
   }
 
-// template<ImplementedVarDelta DstT, ImplementedVarDelta SrcT, LawType Law, int nDim>
-//    requires   SameLaw<DstT,SrcT,law_constant<Law>>
-//            && SameDim<DstT,SrcT,dim_constant<nDim>>
-// DstT delta2Delta( const Species<Law>&, const State<Law,nDim,Real>& state, SrcT& dq0 )
-//{
-//    return flux2Delta( species, state, delta2Flux( species, state, dq0 ) );
-//}
+/*
+ * If point in phase space is defined by a VariableSet, it will be transformed to a State before transforming the VariableDeltas.
+*/
+   template<ImplementedVarDelta DstT,
+            ImplementedVarDelta SrcT,
+            ImplementedVarSet   VarT,
+            LawType              Law,
+            floating_point      Real>
+      requires   ConsistentTypes<Law,dim_of_v<SrcT>,Real,
+                                 DstT,SrcT,VarT>
+              && !(std::is_same_v<DstT,SrcT>)
+   DstT delta2Delta( const Species<Law,Real>&      species,
+                     const VarT&                        q0,
+                     const SrcT&                       dq0 )
+  {
+      return delta2Delta<DstT>( species,
+                                set2State( species, q0 ),
+                                dq0 );
+  }
+
+/*
+ * transformations to the same type just return a copy
+ */
+   template<ImplementedVarDelta DelT,
+            typename            VarT,
+            LawType              Law,
+            floating_point      Real>
+      requires   (   ImplementedVarSet<VarT>
+                  || is_State_v<VarT> )
+              && ConsistentTypes<Law,dim_of_v<DelT>,Real,
+                                 DelT,VarT>
+   DelT delta2Delta( const Species<Law,Real>&      species,
+                     const VarT&                        q0,
+                     const DelT&                       dq0 )
+  {
+      return DelT(dq0);
+  }
+
 
 
 // ---------- generic flux functions ----------
@@ -213,8 +282,8 @@
                                             const VarSetT&                    qr ) const
      {
          return static_cast<const Flux*>(this)->flux( species, face,
-                                                set2State( species, ql ),
-                                                set2State( species, qr ) );
+                                                      set2State( species, ql ),
+                                                      set2State( species, qr ) );
      }
 
       template<int nDim, floating_point Real>
