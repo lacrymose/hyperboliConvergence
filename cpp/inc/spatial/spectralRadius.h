@@ -22,23 +22,6 @@
   {
       assert( cells.shape() == resid.shape() );
 
-//    return std::inner_product( cells.elems.begin(), cells.elems.end(),
-//                               resid.elems.begin(),
-
-//                            // initial value for finding maximum
-//                               std::numeric_limits<Real>::min(),
-
-//                            // find maximum of all spectral radii
-//                               []( const Real l, const Real r )
-//                              { return std::max( l,r ); },
-
-//                            // find spectral radii of one cell/resid pair
-//                               []( const geom::Volume<  nDim,Real>& cell,
-//                                   const FluxResult<Law,nDim,Real>& res )
-//                              { return res.lambda / cell.volume; }
-
-//                             );
-
    // max( (cell,resid)->spectral radius ... )
       return par::transform_reduce(
                                  // transform one cell/resid pair to a spectral radius

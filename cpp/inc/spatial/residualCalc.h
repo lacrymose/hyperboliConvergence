@@ -14,197 +14,13 @@
 
 # include <cassert>
 
-//// overload with return value
-//   template<LawType Law, ImplementedVarSet SolVarT, FluxFunctor<Law> Flux, floating_point Real>
-//      requires ConsistentTypes<Law,1,Real,SolVarT>
-//   std::vector<FluxResult<Law,1,Real>> residualCalc( const std::vector<geom::Volume<1,Real>>& cells,
-//                                                     const std::vector<geom::Point< 1,Real>>& nodes,
-//                                                     const Flux flux,
-//                                                     const Species<Law,Real>& species,
-//                                                     const SolVarT& qlb,
-//                                                     const std::vector<SolVarT>& q )
-//  {
-//      using FluxRes = FluxResult<Law,1,Real>;
-//      std::vector<FluxRes> res(q.size());
-//      residualCalc( cells, nodes, flux, species, qlb, q, res );
-//      return res;
-//  }
-//
-///*
-// * First order flux evaluation
-// */
-//   template<LawType Law, ImplementedVarSet SolVarT, FluxFunctor<Law> Flux, floating_point Real>
-//      requires ConsistentTypes<Law,1,Real,SolVarT>
-//   void residualCalc( const std::vector<geom::Volume<1,Real>>& cells,
-//                      const std::vector<geom::Point< 1,Real>>& nodes,
-//                      const Flux flux,
-//                      const Species<Law,Real>& species,
-//                      const SolVarT& qlb,
-//                      const std::vector<SolVarT>& q,
-//                            std::vector<FluxResult<Law,1,Real>>& res )
-//  {
-//      using FluxRes = FluxResult<Law,1,Real>;
-//      using Surface = geom::Surface<1,Real>;
-//
-//   // check mesh sizes match
-//      const size_t nc = cells.size();
-//
-//      assert( nc+1 == nodes.size() );
-//      assert( nc   == res.size() );
-//      assert( nc   ==   q.size() );
-//
-//   // reset residual
-//      for( FluxRes& fr : res ){ fr = FluxRes{}; }
-//
-//   // accumulate cell residual contributions from the flux across each face
-//      for( size_t i=0; i<nc-1; i++ )
-//     {
-//         const SolVarT ql=q[i];
-//         const SolVarT qr=q[i+1];
-//
-//         const Surface face = surface( nodes[i] );
-//
-//         const FluxRes fr = flux( species, face,  ql, qr );
-//
-//         res[i]  -=fr;
-//         res[i+1]+=fr;
-//     }
-//
-//   // left boundary : dirichlet condition at initial state
-//     {
-//         const size_t i=0;
-//         const SolVarT qr=q[i];
-//         const Surface face = surface( nodes[i] );
-//         const FluxRes fr = flux( species, face, qlb, qr );
-//         res[i]+=fr;
-//     }
-//
-//   // right boundary : outflow, upwind flux
-//     {
-//         const size_t i=nc-1;
-//         const SolVarT ql=q[i];
-//         const Surface face = surface( nodes[i] );
-//         const FluxRes fr = flux( species, face, ql, ql );
-//         res[i]-=fr;
-//     }
-//      return;
-//  }
-//
-//// overload with return value
-//   template<LawType Law, ImplementedVarSet SolVarT, ImplementedVarDelta SolDelT, typename Limiter, FluxFunctor<Law> Flux, floating_point Real>
-//      requires ConsistentTypes<Law,1,Real,SolVarT,SolDelT>
-//   std::vector<FluxResult<Law,1,Real>> residualCalc( const std::vector<geom::Volume<1,Real>>& cells,
-//                                                     const std::vector<geom::Point< 1,Real>>& nodes,
-//                                                     const Flux                    flux,
-//                                                     const Limiter              limiter,
-//                                                     const Species<Law,Real>&   species,
-//                                                     const SolVarT&                 qlb,
-//                                                     const std::vector<SolVarT>&      q,
-//                                                     const std::vector<SolDelT>&     dq )
-//  {
-//      using FluxRes = FluxResult<Law,1,Real>;
-//      std::vector<FluxRes> res(q.size());
-//      residualCalc( cells, nodes, flux, limiter, species, qlb, q,dq, res );
-//      return res;
-//  }
-//
-///*
-// * Higher order flux evaluation
-// */
-//   template<LawType Law, ImplementedVarSet SolVarT, ImplementedVarDelta SolDelT, typename Limiter, FluxFunctor<Law> Flux, floating_point Real>
-//      requires ConsistentTypes<Law,1,Real,SolVarT,SolDelT>
-//   void residualCalc( const std::vector<geom::Volume<1,Real>>& cells,
-//                      const std::vector<geom::Point< 1,Real>>& nodes,
-//                      const Flux                    flux,
-//                      const Limiter              limiter,
-//                      const Species<Law,Real>&   species,
-//                      const SolVarT&                 qlb,
-//                      const std::vector<SolVarT>&      q,
-//                      const std::vector<SolDelT>&     dq,
-//                            std::vector<FluxResult<Law,1,Real>>& res )
-//  {
-//      using FluxRes = FluxResult<Law,1,Real>;
-//      using Surface = geom::Surface<1,Real>;
-//
-//   // check mesh sizes match
-//      const size_t nc = cells.size();
-//
-//      assert( nc+1 == nodes.size() );
-//      assert( nc   == res.size() );
-//      assert( nc   ==  dq.size() );
-//      assert( nc   ==   q.size() );
-//
-//   // limit all elements in vardelta
-//      const auto limvar = [&limiter]( const SolDelT& dq0, const SolDelT& dq1 ) -> SolDelT
-//     {
-//         SolDelT dqlim;
-//         for( int i=0; i<SolDelT::N; i++ )
-//        {
-//            dqlim[i] = limiter( dq0[i],dq1[i] );
-//        }
-//         return dqlim;
-//     };
-//
-//   // reset residual
-//      for( FluxRes& fr : res ){ fr = FluxRes{}; }
-//
-//   // accumulate cell residual contributions from the flux across each face
-//      for( size_t i=0; i<nc-1; i++ )
-//     {
-//      // left/right cell values
-//         const SolVarT ql0=q[i];
-//         const SolVarT qr0=q[i+1];
-//
-//      // central, and left/right bias differences
-//         const SolDelT dqc = qr0 - ql0;
-//         const SolDelT dql = dq[i  ] - dqc;
-//         const SolDelT dqr = dq[i+1] - dqc;
-//
-//         const SolDelT slopel = limvar( dqc, dql );
-//         const SolDelT sloper = limvar( dqc, dqr );
-//
-//      // interface values
-//         const SolVarT ql1 = ql0 + 0.5*slopel;
-//         const SolVarT qr1 = qr0 - 0.5*sloper;
-//
-//         const Surface face = surface( nodes[i] );
-//
-//         const FluxRes fr = flux( species, face,  ql1, qr1 );
-//
-//         res[i]  -=fr;
-//         res[i+1]+=fr;
-//     }
-//
-//   // first order boundaries
-//   // left boundary : dirichlet condition at initial state
-//     {
-//         const size_t i=0;
-//         const SolVarT qr=q[i];
-//         const Surface face = surface( nodes[i] );
-//         const FluxRes fr = flux( species, face, qlb, qr );
-//         res[i]+=fr;
-//     }
-//
-//   // right boundary : outflow, upwind flux
-//     {
-//         const size_t i=nc-1;
-//         const SolVarT ql=q[i];
-//         const Surface face = surface( nodes[i] );
-//         const FluxRes fr = flux( species, face, ql, ql );
-//         res[i]-=fr;
-//     }
-//
-//      return;
-//  }
-//
 /*
- * Higher order flux evaluation with general form
+ * Higher order flux evaluation with general form and ghost cells at boundaries
  */
 
    template<LawType Law, ImplementedVarSet SolVarT, ImplementedVarDelta SolDelT, typename HighOrderFlux, floating_point Real>
       requires ConsistentTypes<Law,1,Real,SolVarT,SolDelT>
-   void residualCalc( const par::Array<geom::Volume<1,Real>,1>& cells,
-                      const par::Array<geom::Point< 1,Real>,1>& nodes,
+   void residualCalc( const geom::Mesh<1,Real>&                  mesh,
                       const HighOrderFlux                      hoflux,
                       const std::array<SolVarT,2>                 qbc,
                       const par::Array<SolVarT,1>&                  q,
@@ -212,75 +28,110 @@
                             par::Array<FluxResult<Law,1,Real>,1>& res )
   {
       using FluxRes = FluxResult<Law,1,Real>;
-      using Surface = geom::Surface<1,Real>;
 
    // check mesh sizes match
 
-      assert( cells.shape() == res.shape() );
-      assert( cells.shape() ==  dq.shape() );
-      assert( cells.shape() ==   q.shape() );
-      assert( nodes.shape() == par::Shape<1>{cells.shape(0)+1} );
+      assert( mesh.cells.shape() == res.shape() );
+      assert( mesh.cells.shape() ==  dq.shape() );
+      assert( mesh.cells.shape() ==   q.shape() );
+      assert( mesh.nodes.shape() == par::Shape<1>{mesh.cells.shape(0)+1} );
 
-      const size_t nc = cells.shape(0);
-
-   // reset residual
-//    for( FluxRes& fr : res.elems ){ fr = FluxRes{}; }
+      const size_t nc = mesh.cells.shape(0);
 
       par::fill( res, FluxRes{} );
 
    // accumulate cell residual contributions from the flux across each face
       for( size_t i=0; i<nc-1; i++ )
      {
-      // left/right cell values
-         const SolVarT ql=q[{i}];
-         const SolVarT qr=q[{i+1}];
+         const size_t ip = i;
+         const size_t il = i;
+         const size_t ir = i+1;
 
-      // left,right and central bias differences
-         const SolDelT dqc = qr - ql;
-         const SolDelT dql = dq[{i  }] - dqc;
-         const SolDelT dqr = dq[{i+1}] - dqc;
+         const FluxRes fr = hoflux( surface( mesh.nodes[{ip}] ),
+                                    dq[{il}],dq[{ir}],
+                                     q[{il}], q[{ir}] );
 
-         const Surface face = surface( nodes[{i}] );
-
-         const FluxRes fr = hoflux( face, dql,dqc,dqr, ql,qr );
-
-         res[{i}]  -=fr;
-         res[{i+1}]+=fr;
+         res[{il}]-=fr;
+         res[{ir}]+=fr;
      }
 
    // first order boundaries
    // left boundary
      {
-         const size_t i=0;
-         const SolVarT ql=qbc[0];
-         const SolVarT qr=q[{i}];
-
-      // zero gradients
-         const SolDelT dqc = SolDelT{};
-         const SolDelT dql = SolDelT{};
-         const SolDelT dqr = SolDelT{};
-
-         const Surface face = surface( nodes[{i}] );
-         const FluxRes fr = hoflux( face, dql,dqc,dqr, ql,qr );
-         res[{i}]+=fr;
+         const size_t ip=0;
+         const size_t ir=0;
+         const FluxRes fr = hoflux( surface( mesh.nodes[{ip}] ),
+                                    SolDelT{},dq[{ir}],
+                                    qbc[0],    q[{ir}] );
+         res[{ir}]+=fr;
      }
 
    // right boundary
      {
-         const size_t i=nc-1;
-         const SolVarT ql=q[{i}];
-         const SolVarT qr=qbc[1];
-
-      // zero gradients
-         const SolDelT dqc = SolDelT{};
-         const SolDelT dql = SolDelT{};
-         const SolDelT dqr = SolDelT{};
-
-         const Surface face = surface( nodes[{i}] );
-         const FluxRes fr = hoflux( face, dql,dqc,dqr, ql,qr );
-         res[{i}]-=fr;
+         const size_t ip=nc-1;
+         const size_t il=nc-1;
+         const FluxRes fr = hoflux( surface( mesh.nodes[{ip}] ),
+                                    dq[{il}],SolDelT{},
+                                     q[{il}],   qbc[1] );
+         res[{il}]-=fr;
      }
 
+      return;
+  }
+
+
+/*
+ * Higher order flux evaluation with general form and periodic boundaries
+ */
+
+   template<LawType Law, ImplementedVarSet SolVarT, ImplementedVarDelta SolDelT, typename HighOrderFlux, floating_point Real>
+      requires ConsistentTypes<Law,1,Real,SolVarT,SolDelT>
+   void residualCalc( const geom::Mesh<1,Real>&                  mesh,
+                      const HighOrderFlux                      hoflux,
+                      const par::Array<SolVarT,1>&                  q,
+                      const par::Array<SolDelT,1>&                 dq,
+                            par::Array<FluxResult<Law,1,Real>,1>& res )
+  {
+      using FluxRes = FluxResult<Law,1,Real>;
+
+   // check mesh sizes match
+
+      assert( mesh.cells.shape() == res.shape() );
+      assert( mesh.cells.shape() ==  dq.shape() );
+      assert( mesh.cells.shape() ==   q.shape() );
+      assert( mesh.nodes.shape() == par::Shape<1>{mesh.cells.shape(0)+1} );
+
+      const size_t nc = mesh.cells.shape(0);
+
+      par::fill( res, FluxRes{} );
+
+   // accumulate cell residual contributions from the flux across each face
+      for( size_t i=0; i<nc-1; i++ )
+     {
+         const size_t ip=i;
+         const size_t il=i;
+         const size_t ir=i+1;
+
+         const FluxRes fr = hoflux( surface( mesh.nodes[{ip}] ),
+                                    dq[{il}],dq[{ir}],
+                                     q[{il}], q[{ir}] );
+
+         res[{il}]-=fr;
+         res[{ir}]+=fr;
+     }
+
+   // periodic boundary
+     {
+         const size_t ip=0;
+         const size_t il=nc-1;
+         const size_t ir=0;
+
+         const FluxRes fr = hoflux( surface( mesh.nodes[{ip}] ),
+                                    dq[{il}],dq[{ir}],
+                                     q[{il}], q[{ir}] );
+         res[{il}]-=fr;
+         res[{ir}]+=fr;
+     }
       return;
   }
 

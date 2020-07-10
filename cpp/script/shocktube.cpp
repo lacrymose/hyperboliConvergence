@@ -50,8 +50,10 @@ constexpr ShockTube1D problem = ShockTube1D::LowMach;
 using Real = double;
 
 constexpr int  nx  = 128;
-constexpr int  nt  = 96;
+constexpr int  nt  = 192;
 constexpr Real cfl = 0.80;
+
+constexpr Real dt = 0.5e-3;
 
 constexpr BasisT SolutionBasis = BasisT::Primitive;
 
@@ -63,7 +65,7 @@ constexpr BasisT SolutionBasis = BasisT::Primitive;
 using Flux = Slau<LowMachScaling::Acoustic,
                   LowMachScaling::Acoustic>;
 
-using Limiter = Limiters::MonotonizedCentral2;
+using Limiter = Limiters::VanAlbada2;
 
 
 // ------ typedefs -------------------
@@ -137,17 +139,22 @@ using Volume  = geom::Volume< nDim,Real>;
 
    // high order reconstruction and flux functions
       const auto hoflux = [&species, &limiter, &flux]
-                          ( const Surface&          face,
-                            const SolVarDelta&  dql,
-                            const SolVarDelta&  dqc,
-                            const SolVarDelta&  dqr,
-                            const SolVarSet&     ql,
-                            const SolVarSet&     qr ) -> FluxRes
+                          ( const Surface&      face,
+                            const SolVarDelta& gradl,
+                            const SolVarDelta& gradr,
+                            const SolVarSet&      ql,
+                            const SolVarSet&      qr ) -> FluxRes
      {
-      // inviscid flux
+      // central and biased differences
+         const SolVarDelta dqc = qr - ql;
+         const SolVarDelta dql = gradl - dqc;
+         const SolVarDelta dqr = gradr - dqc;
+
+      // limited differences
          const SolVarDelta Slopel = limiter( dqc, dql );
          const SolVarDelta Sloper = limiter( dqc, dqr );
 
+      // inviscid flux
          return flux( species, face, ql+0.5*Slopel,
                                      qr-0.5*Sloper );
      };
@@ -165,10 +172,15 @@ using Volume  = geom::Volume< nDim,Real>;
             gradientCalc( mesh.cells, q1, dq );
    
          // accumulate flux residual
-            residualCalc( mesh.cells, mesh.nodes, hoflux, qbc, q1, dq, resStage[j] );
+            residualCalc( mesh, hoflux, qbc, q1, dq, resStage[j] );
    
          // calculate maximum stable timestep for this timestep
-            if( j==0 ){ lmax = spectralRadius( mesh.cells, resStage[j] ); }
+            if( j==0 )
+           {
+               lmax = spectralRadius( mesh.cells, resStage[j] );
+               lmax = cfl/dt;
+//             std::cout << cfl/lmax << std::endl;
+           }
 
          // accumulate stage residual
             par::fill( resTotal, FluxRes{} );
@@ -188,7 +200,19 @@ using Volume  = geom::Volume< nDim,Real>;
          par::copy( q, q1 );
      }
 
-      std::ofstream solutionFile( "data/shockTube_mach00001/result.dat" );
+   // write solution to file
+      std::ofstream solutionFile = []()
+     {
+         if( problem == ShockTube1D::Sods )
+        {
+            return std::ofstream( "data/shocktube/sods/result.dat" );
+        }
+         else if( problem == ShockTube1D::LowMach )
+        {
+            return std::ofstream( "data/shocktube/lowmach/result.dat" );
+        }
+     }();
+
       if( solutionFile.is_open() )
      {
          solutionFile << std::scientific;

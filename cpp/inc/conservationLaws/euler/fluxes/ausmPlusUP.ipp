@@ -53,17 +53,17 @@
       const Real mr = unr/as;
 
       // cut-off mach number
-      const Real minf2 = species.minf*species.minf;
+      const Real minf = species.minf;
 
       // local mach number
-      const Real m2 = 0.5*( ml*ml + mr*mr );
+      const Real m0 = sqrt( 0.5*( ml*ml + mr*mr ) );
 
       // ratio of acoustic timescale to simulation timestep
       const Real mu = species.lref/(as*species.dt);
 
       // convective / adaptive  scaling parameters
-      [[maybe_unused]] const Real m0_c = sqrt( std::clamp<Real>(       m2,          minf2, 1. ) );
-      [[maybe_unused]] const Real m0_a = sqrt( std::clamp<Real>( fmax( m2, mu*mu ), minf2, 1. ) );
+      [[maybe_unused]] const Real m0_c = std::clamp<Real>(       m0,       minf, 1. );
+      [[maybe_unused]] const Real m0_a = std::clamp<Real>( fmax( m0, mu ), minf, 1. );
 
    // scaling parameter for pressure diffusion in mass flux
       const Real m0_p = [&]() -> Real
@@ -103,7 +103,7 @@
       const Real delp =  sr.pressure()
                        - sl.pressure();
 
-      const Real mp = Kp * fmax( 1.-sigma*m2, 0. ) * delp / ( fa_p*ra*as*as );
+      const Real mp = Kp * fmax( 1.-sigma*m0*m0, 0. ) * delp / ( fa_p*ra*as*as );
 
       // assemble
       const Real ua = as*( mlp + mrm - mp )*face.area;
@@ -153,8 +153,8 @@
                                   + m1r*sr.specificTotalEnthalpy() );
 
 //    spectral radius scaling for low mach numbers
-      const Real lmd=1.;
-//    const Real lmd= 0.5*(m0_p+1)/fa_p;
+//    const Real lmd=1.;
+      const Real lmd= 0.5*(m0_p+1)/fa_p;
 
       const Real amax = sqrt( fmax(  as*as,
                                fmax( sl.speedOfSound2(),

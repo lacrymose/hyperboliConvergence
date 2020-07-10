@@ -1,6 +1,4 @@
 
-# pragma once
-
 # include <conservationLaws/euler/euler.h>
 
 # include <geometry/geometry.h>

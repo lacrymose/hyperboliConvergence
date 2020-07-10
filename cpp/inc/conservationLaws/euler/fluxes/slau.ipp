@@ -14,7 +14,7 @@
                                                       const StateT&                            sl,
                                                       const StateT&                            sr ) const
   {
-   // average velocities
+// average velocities
       const Real ua = sqrt( 0.5*( sl.velocity2() + sr.velocity2() ) );
 
       const Real aa = 0.5*(  sqrt( sl.speedOfSound2() )
@@ -24,7 +24,7 @@
       const Real ma = ua*aa1;
       const Real ma_hat = fmin( 1.0,ma );
 
-   // left/right mach numbers
+// left/right mach numbers
       const Real unl = projectedVelocity( face.metric[0], sl );
       const Real unr = projectedVelocity( face.metric[0], sr );
 
@@ -34,22 +34,59 @@
       const Real una = ( sl.density()*fabs(unl) + sr.density()*fabs(unr) )
                       /( sl.density()           + sr.density()           );
 
-   // scaling parameters
+// scaling parameters
       const Real chi= ( 1.-ma_hat )*( 1.-ma_hat );
+
+   // cut-off mach number
+      const Real minf = species.minf;
+
+   // ratio of acoustic timescale to simulation timestep
+      const Real mu = species.lref/(aa*species.dt);
+
+   // convective / adaptive  scaling parameters
+      [[maybe_unused]] const Real m0_c = std::clamp<Real>(       ma,       minf, 1. );
+      [[maybe_unused]] const Real m0_a = std::clamp<Real>( fmax( ma, mu ), minf, 1. );
+
+   // scaling parameter for pressure diffusion in mass flux
+      const Real m0_p = [&]() -> Real
+     {
+         if      constexpr( PFluxScaling == LowMachScaling::Convective ){ return m0_c; }
+         else if constexpr( PFluxScaling == LowMachScaling::Acoustic   ){ return 1.0;  }
+         else            /* PFluxScaling == LowMachScaling::Adaptive  */{ return m0_a; }
+     }();
+
+   // scaling parameter for velocity diffusion in pressure flux
+      const Real m0_u = [&]() -> Real
+     {
+         if      constexpr( VFluxScaling == LowMachScaling::Convective ){ return m0_c; }
+         else if constexpr( VFluxScaling == LowMachScaling::Acoustic   ){ return 1.0;  }
+         else            /* VFluxScaling == LowMachScaling::Adaptive  */{ return m0_a; }
+     }();
 
    // switch function to prevent negative density in very high speed expansions
       const Real g = -fmax(fmin(ml,0.),-1.)*fmin(fmax(mr,0.),1.);
 
-   // interface mass flux
+// interface mass flux
       const Real dr = sr.density() - sl.density();
       const Real dp = sr.pressure()- sl.pressure();
 
+   // central contribution
       const Real mdot_c  =  sl.density()*unl
                           + sr.density()*unr;
-      const Real mdot_dr = una*dr;
-      const Real mdot_dp = chi*dp*aa1;
 
+   // diffusive contributions
+      const Real mdot_dr = una*dr;
+   // const Real mdot_dr = 0.;
+
+   // const Real mdot_dp = chi*dp*aa1;       // slau
+      const Real mdot_dp = chi*dp/(aa*m0_p); // slau-p'
+   // const Real mdot_dp = 0.;
+
+   // assemble
       const Real mdot = 0.5*( ( mdot_c - mdot_dr )*(1.-g) - mdot_dp )*face.area;
+   // const Real mdot = 0.5*mdot_c*face.area;
+
+// interface pressure
 
    // pressure splitting
       const unsigned int mlsup = fabs(ml)>1 ? 1:0;
@@ -64,17 +101,23 @@
       const Real betar =  mrsub*MachSplit_P3( -1, mr )
                         + mrsup*MachSplit_P1( -1, mr );
 
-   // interface pressure
-
+   // central component
       const Real p_c  = ( sl.pressure() + sr.pressure() );
+
+   // diffusive contributions
       const Real p_dp = ( betal - betar )*dp;
-//    const Real p_du =-(1. - chi )*( betal + betar - 1. )*( p_c );  // slau
-//    const Real p_du =         -ma*( betal + betar - 1. )*( p_c );  // slau2
-      const Real p_du =            -( betal + betar - 1. )*( p_c );  // slau-u'
+   // const Real p_dp = 0.;
 
+   // const Real p_du =-(1. - chi )*( betal + betar - 1. )*( p_c );  // slau
+   // const Real p_du =         -ma*( betal + betar - 1. )*( p_c );  // slau2
+      const Real p_du =       -m0_u*( betal + betar - 1. )*( p_c );  // slau-u'
+   // const Real p_du = 0.;
+
+   // assemble
       const Real pa = 0.5*( p_c - p_dp - p_du )*face.area;
+   // const Real pa = 0.5*p_c*face.area;
 
-   // interface flux
+// interface flux
       FluxResult<LawType::Euler,nDim,Real> result;
 
    // switch functions
@@ -95,6 +138,16 @@
    // energy flux
       result.flux[nDim+1] = mdot*(  m1l*sl.specificTotalEnthalpy()
                                   + m1r*sr.specificTotalEnthalpy() );
+
+   // zha-bilgen energy flux
+//    const Real el = sl.specificTotalEnthalpy()-0.5*sl.velocity2();
+//    const Real er = sr.specificTotalEnthalpy()-0.5*sr.velocity2();
+
+//    result.flux[nDim+1] =( 0.5*(mdot_c-mdot_dr)*(  m1l*el
+//                                                 + m1r*er )
+//                         - 0.5*mdot_dp*(  m1l*sl.specificTotalEnthalpy()
+//                                        + m1r*sr.specificTotalEnthalpy() )
+//                         - 0.5*una*( p_dp + p_du ) )*face.area;
 
    // spectral radius
       const Real lmax =  sqrt( fmax( sl.speedOfSound2(),
