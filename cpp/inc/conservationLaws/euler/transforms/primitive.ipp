@@ -1,4 +1,7 @@
 
+// set <-> state
+
+   // state -> set
    template<EulerPrimitiveVariables PrimVarT, EulerState StateT, floating_point Real>
       requires   SameDim<PrimVarT,StateT>
               && SameFPType<PrimVarT,StateT,Real>
@@ -17,6 +20,7 @@
       return qp;
   }
 
+   // set -> state
    template<EulerPrimitiveVariables PrimVarT, floating_point Real>
       requires SameFPType<PrimVarT,Real>
    state_t<PrimVarT> set2State( const Species<LawType::Euler,Real>& species, const PrimVarT& qp )
@@ -54,6 +58,8 @@
 
       return state;
   }
+
+// deltas
 
    // conserved -> primitive
    template<EulerPrimitiveDelta PrimDelT,

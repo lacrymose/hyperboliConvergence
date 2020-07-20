@@ -7,7 +7,6 @@
 # include <spatial/eulerForwardUpdate.h>
 
 # include <limiters/limiter.h>
-
 # include <conservationLaws/euler/euler.h>
 # include <conservationLaws/euler/boundaryConditions.h>
 
@@ -31,12 +30,12 @@ constexpr int nDim = 1;
 using BasisT = BasisType<Law>;
 using Real = long double;
 
-// ------- User Inputs ------- 
+// ------- User Inputs -------
 
 constexpr Periodic1D problem = Periodic1D::Soundwave;
 //constexpr Periodic1D problem = Periodic1D::AcousticEntropy;
 
-constexpr Real mach = 1.e-4;
+constexpr Real mach = 1.e-8;
 
 // isolated soundwave
 constexpr Real amplitude = 0.1;
@@ -52,16 +51,18 @@ constexpr Real width_s = 0.04;
 constexpr Real amplitude_a = 0.05;
 constexpr Real amplitude_s = 0.00*mach;
 
+// discretisation
 constexpr int  nx  = 32;
-constexpr int  nt  = 2048;
+constexpr int  nt  = 128*128+40;
 constexpr Real cfl = 0.5;
 
-constexpr BasisT SolutionBasis = BasisT::Conserved;
+constexpr BasisT SolutionBasis = BasisT::Primitive;
 constexpr BasisT   ExtrapBasis = BasisT::Primitive;
 
 //using Flux = CentralFlux<Law>;
+//using Flux = RoeFlux<Law>;
 
-//using Flux = AusmPlusUP<LowMachScaling::Acoustic,
+//using Flux = AusmPlusUP<LowMachScaling::Convective,
 //                        LowMachScaling::Acoustic>;
 
 using Flux = Slau<LowMachScaling::Convective,
@@ -85,7 +86,7 @@ using Surface = geom::Surface<nDim,Real>;
 using Volume  = geom::Volume< nDim,Real>;
 
 
-// ------- i/o ------- 
+// ------- i/o -------
 
    void writeState( std::ofstream& os, const Species<Law,Real> species, const State<Law,1,Real>& state )
   {
@@ -110,7 +111,7 @@ using Volume  = geom::Volume< nDim,Real>;
   }
 
 
-// ------- run script ------- 
+// ------- run script -------
 
    int main()
   {
@@ -216,10 +217,10 @@ using Volume  = geom::Volume< nDim,Real>;
         {
          // calculate differences
             gradientCalcP( mesh.cells, q1, dq );
-   
+
          // accumulate flux residual
             residualCalc( mesh, hoflux, q1, dq, resStage[j] );
-   
+
          // calculate maximum stable timestep for this timestep
             if( j==0 ){ lmax = spectralRadius( mesh.cells, resStage[j] ); }
 
@@ -233,7 +234,7 @@ using Volume  = geom::Volume< nDim,Real>;
                   resTotal[{i}].flux+=rk.alpha[j][k]*resStage[k][{i}].flux;
               }
            }
-   
+
          // integrate cell residuals forward by dt and average over cell volume
             eulerForwardUpdate( mesh.cells, species, rk.beta[j]*cfl, lmax, resTotal, q, q2 );
             std::swap( q1,q2 );

@@ -15,11 +15,11 @@
  */
    enum struct EulerBases
   {
-      Conserved,             // { momentum, density,     total energy }
-   // Characteristic,        // { entropy,  vorticity,   left/right acoustic }
-   // Entropy,               // { velocity, entropy,     pressure }
-      Primitive,             // { velocity, density,     pressure }
-      Viscous                // { velocity, temperature, pressure }
+      Conserved,             // { momentum, density,      total energy }
+      Characteristic,        // { entropy,  l/r acoustic, vorticity    }
+   // Entropy,               // { velocity, entropy,      pressure     }
+      Primitive,             // { velocity, density,      pressure     }
+      Viscous                // { velocity, temperature,  pressure     }
   };
 
    template<>
@@ -123,6 +123,14 @@
                                 LawType::Euler,
                                 EulerBases::Viscous>;
 
+   // characteristic deltas
+
+   template<typename T>
+   concept bool EulerCharacteristicDelta =
+      is_specialised_VarDelta_v<T,
+                                LawType::Euler,
+                                EulerBases::Characteristic>;
+
 
 // ---------- exact physical flux and spectral radius ----------
 
@@ -136,6 +144,21 @@
                         const State<LawType::Euler,nDim,Real>& state )
   {
       return std::abs( projectedVelocity( normal, state ) ) + std::sqrt( state.speedOfSound2() );
+  }
+
+   template<int nDim, floating_point Real>
+   WaveSpeeds<LawType::Euler,nDim,Real> wavespeeds( const Species<LawType::Euler,Real>&  species,
+                                                    const geom::Direction<nDim,Real>&     normal,
+                                                    const State<LawType::Euler,nDim,Real>& state )
+  {
+      WaveSpeeds<LawType::Euler,nDim,Real> speeds;
+      const Real u = projectedVelocity( normal, state );
+      const Real a = sqrt(state.speedOfSound2());
+      speeds[0]=u;
+      speeds[1]=u-a;
+      speeds[2]=u+a;
+      for( unsigned int i=0; i<nDim-1; i++ ){ speeds[3+i]=u; }
+      return speeds;
   }
 
 
@@ -227,6 +250,56 @@
                          const StateT&                         state,
                          const PrimDelT&                         dqp );
 
+// primitive <-> characteristic
+
+   // characteristic -> primitive
+   template<EulerPrimitiveDelta      PrimDelT,
+            EulerCharacteristicDelta CharDelT,
+            EulerState                 StateT,
+            floating_point               Real>
+      requires ConsistentTypes<LawType::Euler,dim_of_v<StateT>,Real,
+                               PrimDelT,CharDelT,StateT>
+   PrimDelT delta2Delta( const Species<LawType::Euler,Real>& species,
+                         const StateT&                         state,
+                         const CharDelT&                         dqw );
+   
+   // primitive -> characteristic
+   template<EulerCharacteristicDelta CharDelT,
+            EulerPrimitiveDelta      PrimDelT,
+            EulerState                 StateT,
+            floating_point               Real>
+      requires ConsistentTypes<LawType::Euler,dim_of_v<StateT>,Real,
+                               CharDelT,PrimDelT,StateT>
+   CharDelT delta2Delta( const Species<LawType::Euler,Real>& species,
+                         const StateT&                         state,
+                         const PrimDelT&                         dqp );
+
+
+// conserved <-> characteristic
+
+   // characteristic -> conserved
+   template<EulerConservedDelta      ConsDelT,
+            EulerCharacteristicDelta CharDelT,
+            EulerState                 StateT,
+            floating_point               Real>
+      requires ConsistentTypes<LawType::Euler,dim_of_v<StateT>,Real,
+                               ConsDelT,CharDelT,StateT>
+   ConsDelT delta2Delta( const Species<LawType::Euler,Real>& species,
+                         const StateT&                         state,
+                         const CharDelT&                         dqw );
+   
+   // conserved -> characteristic
+   template<EulerCharacteristicDelta CharDelT,
+            EulerConservedDelta      ConsDelT,
+            EulerState                 StateT,
+            floating_point               Real>
+      requires ConsistentTypes<LawType::Euler,dim_of_v<StateT>,Real,
+                               CharDelT,ConsDelT,StateT>
+   CharDelT delta2Delta( const Species<LawType::Euler,Real>& species,
+                         const StateT&                         state,
+                         const ConsDelT&                         dqc );
+
+
 
 // ---------- standard ideal gas species ----------
 
@@ -284,13 +357,28 @@
                                                  const StateT&                            sr ) const;
   };
 
+/*
+ * Roe flux utilities
+ */
+   template<int nDim, floating_point Real>
+   State<LawType::Euler,nDim,Real> roeAverage( const Species<LawType::Euler,Real>& species,
+                                               const State<LawType::Euler,nDim,Real>&   sl,
+                                               const State<LawType::Euler,nDim,Real>&   sr );
+
+   template<int nDim, floating_point Real>
+   WaveSpeeds<LawType::Euler,nDim,Real> entropyfix( const WaveSpeeds<LawType::Euler,nDim,Real>& la,
+                                                    const WaveSpeeds<LawType::Euler,nDim,Real>& ll,
+                                                    const WaveSpeeds<LawType::Euler,nDim,Real>& lr );
+
 // ---------- implementation files  ----------
 
 # include <conservationLaws/euler/fluxes/exactFlux.ipp>
 # include <conservationLaws/euler/fluxes/ausmPlusUP.ipp>
 # include <conservationLaws/euler/fluxes/slau.ipp>
+# include <conservationLaws/euler/fluxes/roe.ipp>
 
 # include <conservationLaws/euler/transforms/conserved.ipp>
+# include <conservationLaws/euler/transforms/characteristic.ipp>
 # include <conservationLaws/euler/transforms/primitive.ipp>
 # include <conservationLaws/euler/transforms/viscous.ipp>
 

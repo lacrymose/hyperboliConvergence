@@ -25,10 +25,12 @@
                                         VariableDelta<Law,nDim,Basis,Real>,
                                         Real>
   {
-   using AffinePointBase<nVar<Law,nDim>,
-                         VariableSet<  Law,nDim,Basis,Real>,
-                         VariableDelta<Law,nDim,Basis,Real>,
-                         Real>::AffinePointBase;
+     /*
+      using AffinePointBase<nVar<Law,nDim>,
+                            VariableSet<  Law,nDim,Basis,Real>,
+                            VariableDelta<Law,nDim,Basis,Real>,
+                            Real>::AffinePointBase;
+     */
   };
 
 
@@ -42,10 +44,12 @@
                                           VariableDelta<Law,nDim,Basis,Real>,
                                           Real>
   {
-   using AffineDeltaBase<nVar<Law,nDim>,
-                         VariableSet<  Law,nDim,Basis,Real>,
-                         VariableDelta<Law,nDim,Basis,Real>,
-                         Real>::AffineDeltaBase;
+     /*
+      using AffineDeltaBase<nVar<Law,nDim>,
+                            VariableSet<  Law,nDim,Basis,Real>,
+                            VariableDelta<Law,nDim,Basis,Real>,
+                            Real>::AffineDeltaBase;
+     */
   };
 
 
@@ -81,6 +85,47 @@
       FluxResult& operator+=( const FluxResult& fr );
       FluxResult& operator-=( const FluxResult& fr );
   };
+
+/*
+ * The wavespeeds (eigenvalues) associated with each characteristic field (eigenvectors)
+ *    used for flux difference splitting (eg roe) schemes and preconditioning
+ *    can be multiplied by a characteristic VariableDelta to convect
+ */
+   template<LawType Law, int nDim, floating_point Real>
+   struct WaveSpeeds
+  {
+      std::array<Real,nVar<Law,nDim>> speeds;
+
+   // accessors
+            Real& operator[]( const int i )       { return speeds[i]; }
+      const Real& operator[]( const int i ) const { return speeds[i]; }
+  };
+
+/*
+ * Calculate wavespeeds for 1D split flux-jacobian aligned with face
+ */
+   template<LawType Law, int nDim, floating_point Real>
+   WaveSpeeds<Law,nDim,Real> wavespeeds( const Species<Law,Real>&     species,
+                                         const geom::Surface<nDim,Real>& face,
+                                         const State<Law,nDim,Real>&    state )
+  {
+      return wavespeeds( species, face.metric[0], state );
+  }
+
+
+/*
+ * multiply the jump in each characteristic field by the corresponding wavespeed
+ */
+   template<LawType Law, int nDim, floating_point Real>
+   VariableDelta<Law,nDim,BasisType<Law>::Characteristic,Real>
+      operator*( const WaveSpeeds<   Law,nDim,Real>&                               speeds,
+                 const VariableDelta<Law,nDim,BasisType<Law>::Characteristic,Real>& waves )
+  {
+      constexpr int nv = nVar<Law,nDim>;
+      VariableDelta<Law,nDim,BasisType<Law>::Characteristic,Real> result;
+      for( int i=0; i<nv; i++ ){ result[i]=speeds[i]*waves[i]; }
+      return result;
+  }
 
 
 // ---------- exact physical flux ----------
@@ -158,6 +203,39 @@
                           const VarT&                        q0 )
   {
       return rotateToMetric( geom::transpose( metric ), q0 );
+  }
+
+/*
+ * overloads for rotating to a surface aligned metric
+ */
+   template<int nDim, typename VarT, floating_point Real>
+      requires   (   ImplementedVarSet<  VarT>
+                  || ImplementedVarDelta<VarT> )
+              && ConsistentTypes<law_of_v<VarT>,nDim,Real,VarT>
+   VarT rotateToFace( const geom::Surface<nDim,Real>& face,
+                      const VarT&                       q0 )
+  {
+      return rotateToMetric( face.metric, q0 );
+  }
+
+   template<int nDim, typename VarT, floating_point Real>
+      requires   (   ImplementedVarSet<  VarT>
+                  || ImplementedVarDelta<VarT> )
+              && ConsistentTypes<law_of_v<VarT>,nDim,Real,VarT>
+   VarT rotateFromFace( const geom::Surface<nDim,Real>& face,
+                        const VarT&                       q0 )
+  {
+      return rotateFromMetric( face.metric, q0 );
+  }
+
+/*
+ * wrapper for spectral radius over a surface
+ */
+   template<LawType Law, int nDim, floating_point Real>
+   Real spectralRadius( const geom::Surface<nDim,Real>& face,
+                        const State<Law,nDim,Real>&     state )
+  {
+     return spectralRadius( face.metric[0], state );
   }
 
 // ---------- explicit transformation functions ----------
@@ -341,6 +419,21 @@
                                              const State<Law,nDim,Real>&       sr );
   };
 
+/*
+ * Interface flux using a central average of the exact fluxes with scalar upwind dissipation proportional to the spectral radius of the central flux
+ *    Uses CRTP to provide interface to call flux with any VariableSet basis
+ */
+   template<LawType Law>
+      requires ImplementedLawType<Law>
+   struct RoeFlux : FluxInterface<RoeFlux<Law>,Law>
+  {
+      template<int nDim, floating_point Real>
+      static FluxResult<Law,nDim,Real> flux( const Species<Law,Real>&     species,
+                                             const geom::Surface<nDim,Real>& face,
+                                             const State<Law,nDim,Real>&       sl,
+                                             const State<Law,nDim,Real>&       sr );
+  };
+
 
 
 // ---------- implementation files ----------
@@ -349,4 +442,5 @@
 
 # include <conservationLaws/base/fluxes/centralFlux.ipp>
 # include <conservationLaws/base/fluxes/rusanovFlux.ipp>
+# include <conservationLaws/base/fluxes/roeFlux.ipp>
 

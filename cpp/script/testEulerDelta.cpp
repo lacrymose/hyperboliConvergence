@@ -17,6 +17,7 @@ using BasisT = BasisType<Law>;
 constexpr BasisT ConsBasis = BasisT::Conserved;
 constexpr BasisT PrimBasis = BasisT::Primitive;
 constexpr BasisT ViscBasis = BasisT::Viscous;
+constexpr BasisT CharBasis = BasisT::Characteristic;
 
 using ConsVarT = VariableSet<Law,nDim,ConsBasis,Real>;
 using PrimVarT = VariableSet<Law,nDim,PrimBasis,Real>;
@@ -25,6 +26,7 @@ using ViscVarT = VariableSet<Law,nDim,ViscBasis,Real>;
 using ConsDelT = VariableDelta<Law,nDim,ConsBasis,Real>;
 using PrimDelT = VariableDelta<Law,nDim,PrimBasis,Real>;
 using ViscDelT = VariableDelta<Law,nDim,ViscBasis,Real>;
+using CharDelT = VariableDelta<Law,nDim,CharBasis,Real>;
 
 using StateT = State<Law,nDim,Real>;
 
@@ -46,9 +48,6 @@ using StateT = State<Law,nDim,Real>;
 
       const ViscDelT dqv2 = delta2Delta<ViscDelT>( gas, qp0, dqp1 );
       const PrimDelT dqp2 = delta2Delta<PrimDelT>( gas, qv0, dqv1 );
-
-      std::cout << "precision:\n";
-      std::cout << std::numeric_limits<Real>::min() << std::endl;
 
       std::cout << "dqv0\n";
       std::cout << dqv0 << std::endl;
@@ -72,6 +71,20 @@ using StateT = State<Law,nDim,Real>;
       std::cout << dqp1 << std::endl;
       std::cout << "dqv1\n";
       std::cout << dqv1 << std::endl;
+
+      std::cout << std::endl;
+
+      std::cout << "characteristic:\n";
+
+      const ViscDelT dqv3 = delta2Delta<ViscDelT>( gas, qv0,
+                                                   delta2Delta<CharDelT>( gas, qv0, dqv0 ) );
+
+      std::cout << "dqv0\n";
+      std::cout << dqv0 << std::endl;
+      std::cout << "dqv3\n";
+      std::cout << dqv3 << std::endl;
+      std::cout << "diff\n";
+      std::cout << dqv0-dqv3 << std::endl;
 
       return 0;
   }

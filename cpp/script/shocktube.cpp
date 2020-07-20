@@ -43,29 +43,31 @@ constexpr LawType Law = LawType::Euler;
 constexpr int nDim = 1;
 using BasisT = BasisType<Law>;
 
-// ------- User Inputs ------- 
+// ------- User Inputs -------
 
-constexpr ShockTube1D problem = ShockTube1D::LowMach;
+constexpr ShockTube1D problem = ShockTube1D::Sods;
 
 using Real = double;
 
 constexpr int  nx  = 128;
-constexpr int  nt  = 192;
+constexpr int  nt  = 96;
 constexpr Real cfl = 0.80;
 
-constexpr Real dt = 0.5e-3;
+//constexpr Real dt = 0.5e-3;
 
 constexpr BasisT SolutionBasis = BasisT::Primitive;
 
 //using Flux = RusanovFlux<Law>;
+using Flux = RoeFlux<Law>;
 
 //using Flux = AusmPlusUP<LowMachScaling::Acoustic,
 //                        LowMachScaling::Acoustic>;
 
-using Flux = Slau<LowMachScaling::Acoustic,
-                  LowMachScaling::Acoustic>;
+//using Flux = Slau<LowMachScaling::Acoustic,
+//                  LowMachScaling::Acoustic>;
 
-using Limiter = Limiters::VanAlbada2;
+using Limiter = Limiters::MonotonizedCentral2;
+//using Limiter = Limiters::NoLimit1;
 
 
 // ------ typedefs -------------------
@@ -80,7 +82,7 @@ using Surface = geom::Surface<nDim,Real>;
 using Volume  = geom::Volume< nDim,Real>;
 
 
-// ------- i/o ------- 
+// ------- i/o -------
 
    void writeState( std::ofstream& os, const Species<Law,Real> species, const State<Law,1,Real>& state )
   {
@@ -98,7 +100,7 @@ using Volume  = geom::Volume< nDim,Real>;
   }
 
 
-// ------- run script ------- 
+// ------- run script -------
 
    int main()
   {
@@ -170,15 +172,15 @@ using Volume  = geom::Volume< nDim,Real>;
 
          // calculate differences
             gradientCalc( mesh.cells, q1, dq );
-   
+
          // accumulate flux residual
             residualCalc( mesh, hoflux, qbc, q1, dq, resStage[j] );
-   
+
          // calculate maximum stable timestep for this timestep
             if( j==0 )
            {
                lmax = spectralRadius( mesh.cells, resStage[j] );
-               lmax = cfl/dt;
+//             lmax = cfl/dt;
 //             std::cout << cfl/lmax << std::endl;
            }
 
@@ -192,7 +194,7 @@ using Volume  = geom::Volume< nDim,Real>;
                   resTotal[{i}].flux+=rk.alpha[j][k]*resStage[k][{i}].flux;
               }
            }
-   
+
          // integrate cell residuals forward by dt and average over cell volume
             eulerForwardUpdate( mesh.cells, species, rk.beta[j]*cfl, lmax, resTotal, q, q2 );
             std::swap( q1,q2 );
