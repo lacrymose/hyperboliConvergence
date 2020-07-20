@@ -14,7 +14,7 @@ namespace geom
 
       const Real dx = ( hi - lo ) / nc;
 
-      for( size_t i=0; i<np; i++ ){ mesh.nodes[{i}] = lo + i*dx; }
+      for( size_t i=0; i<np; i++ ){ mesh.nodes[{i}][0] = lo + i*dx; }
       mesh.cells = dual( mesh.nodes );
 
       return mesh;

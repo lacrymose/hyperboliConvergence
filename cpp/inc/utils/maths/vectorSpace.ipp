@@ -97,7 +97,7 @@
  * send each element of Vector to stream, seperated by a single space
  */
    template<typename Vec>
-      requires is_vectorspace_base<Vec>::value
+      requires has_vectorspace_base<Vec>::value
    std::ostream& operator<<( std::ostream& os, const Vec& v )
   {
       constexpr int N=Vec::N;
@@ -114,7 +114,7 @@
  * read each element of Vector from stream
  */
    template<typename Vec>
-      requires is_vectorspace_base<Vec>::value
+      requires has_vectorspace_base<Vec>::value
    std::istream& operator<<( std::istream& os, Vec& v )
   {
       for( auto& elem : v.elems ){ is >> elem; }

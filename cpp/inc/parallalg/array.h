@@ -215,7 +215,7 @@ namespace par
      {
          shape_array  = Shape< NDIM>(s);
          stride_array = Stride<NDIM>(s);
-         elems_array.resize( length(s) );
+         elems_array.resize(length(s));
      }
   };
 

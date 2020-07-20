@@ -63,7 +63,7 @@
             constexpr Real ul = 0.;
             constexpr Real rl = 1.;
             constexpr Real pl = 1.;
-            return set2Set<VarT>( species, PrimVarT{ul,rl,pl} );
+            return set2Set<VarT>( species, PrimVarT{{ul,rl,pl}} );
         }
 
          case( ShockTube1D::LowMach ) :
@@ -72,10 +72,10 @@
             constexpr Real tl = 300.;
             constexpr Real pl = 100028.04;
             const Real rl = pl / ( species.R * tl );
-            return set2Set<VarT>( species, PrimVarT{ul,rl,pl} );
+            return set2Set<VarT>( species, PrimVarT{{ul,rl,pl}} );
         }
      }
-      return set2Set<VarT>( species, PrimVarT{0.,0.,0.} );
+      return set2Set<VarT>( species, PrimVarT{{0.,0.,0.}} );
   }
 
 
@@ -93,7 +93,7 @@
             constexpr Real ur = 0.;
             constexpr Real rr = 0.125;
             constexpr Real pr = 0.1;
-            return set2Set<VarT>( species, PrimVarT{ur,rr,pr} );
+            return set2Set<VarT>( species, PrimVarT{{ur,rr,pr}} );
         }
 
          case( ShockTube1D::LowMach ) :
@@ -102,10 +102,10 @@
             constexpr Real tr = 300.;
             constexpr Real pr = 100000.;
             const Real rr = pr / ( species.R * tr );
-            return set2Set<VarT>( species, PrimVarT{ur,rr,pr} );
+            return set2Set<VarT>( species, PrimVarT{{ur,rr,pr}} );
         }
      }
-      return set2Set<VarT>( species, PrimVarT{0.,0.,0.} );
+      return set2Set<VarT>( species, PrimVarT{{0.,0.,0.}} );
   }
 
    template<EulerVarSet VarT, floating_point Real>

@@ -73,7 +73,7 @@
       // calculate velocity from riemann invariant u-2*a/(gamma-1) for u+a wave
          const Real u = u0 + 2.*( a - a0 )/(species.gamma-1.);
 
-         q[{i}] = set2Set<VarT>( species, PrimitiveVarT{u,r,p} );
+         q[{i}] = set2Set<VarT>( species, PrimitiveVarT{{u,r,p}} );
      }
       return q;
   }

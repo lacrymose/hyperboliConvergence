@@ -32,10 +32,12 @@ namespace geom
                                   Direction<nDim,Real>,
                                   Real>
   {
+     /*
       using AffinePointBase<nDim,
                             Point<nDim,Real>,
                             Direction<nDim,Real>,
                             Real>::AffinePointBase;
+     */
   };
 
    template<int nDim, floating_point Real>
@@ -44,10 +46,12 @@ namespace geom
                                       Direction<nDim,Real>,
                                       Real>
   {
+     /*
       using AffineDeltaBase<nDim,
                             Point<nDim,Real>,
                             Direction<nDim,Real>,
                             Real>::AffineDeltaBase;
+     */
   };
 
 
@@ -108,8 +112,8 @@ namespace geom
       Mesh& operator=(       Mesh&& ) = default;
 
       Mesh( const par::Shape<nDim>& s ) : shape(s),
-                                     nodes(par::nodeDims_from_cellDims(s)),
-                                     cells(s) {}
+                                          nodes(par::nodeDims_from_cellDims(s)),
+                                          cells(s) {}
   };
 
 

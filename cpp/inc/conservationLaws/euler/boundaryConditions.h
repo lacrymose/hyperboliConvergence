@@ -110,7 +110,7 @@
 		const Real rub = rb*ub;
       const Real reb = pb*gam1 + 0.5*rb*ub*ub;
 
-      return set2Set<SolVarT>( species, ConservedVarT{rub,rb,reb} );
+      return set2Set<SolVarT>( species, ConservedVarT{{rub,rb,reb}} );
   }
 
 

@@ -175,10 +175,9 @@
       AffinePointBase( const AffinePointBase&  ) = default;
       AffinePointBase(       AffinePointBase&& ) = default;
 
-   // explicit Delta constructors are only enabled by adding following to derived Point definition:
-      // using AffinePointBase<NDIM,Point,Delta>::AffinePointBase
-
    // only allow explicit copy/move construction from Delta
+      // explicit Delta constructors are only enabled by adding following to derived Point definition:
+      // using AffinePointBase<NDIM,Point,Delta>::AffinePointBase
       explicit AffinePointBase( const Delta&  d ) noexcept : elems(d.elems) {}
       explicit AffinePointBase(       Delta&& d ) noexcept : elems(std::move(d.elems)) {}
 
@@ -219,10 +218,9 @@
       AffineDeltaBase( const AffineDeltaBase&  ) = default;
       AffineDeltaBase(       AffineDeltaBase&& ) = default;
 
-   // explicit Point constructors are only enabled by adding following to derived Delta definition:
-      // using AffineDeltaBase<NDIM,Point,Delta>::AffineDeltaBase
-
    // only allow explicit copy/move constructor from Point
+      // explicit Point constructors are only enabled by adding following to derived Delta definition:
+      // using AffineDeltaBase<NDIM,Point,Delta>::AffineDeltaBase
       explicit AffineDeltaBase( const Point&  p ) noexcept : elems(p.elems) {}
       explicit AffineDeltaBase(       Point&& p ) noexcept : elems(std::move(p.elems)) {}
 
