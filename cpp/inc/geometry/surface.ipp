@@ -4,23 +4,19 @@ namespace geom
    template<floating_point Real>
    Surface<1,Real> surface( const Point<1,Real>& p )
   {
-      Surface<1,Real> surf;
-      surf.area   = 1;
-      surf.centre = p;
-      surf.metric = Metric<1,Real>{Direction<1,Real>{Real(1.)}};
-      return surf;
+      return Surface<1,Real>{.area   = Real(1.),
+                             .centre = p,
+                             .metric = Metric<1,Real>{Direction<1,Real>{Real(1.)}}};
   }
 
    template<floating_point Real>
    Surface<2,Real> surface( const Point<2,Real>& p0, const Point<2,Real>& p1 )
   {
       const Direction<2,Real> tangent=p1-p0;
-
-      Surface<2,Real> surf;
-      surf.area   = length( tangent );
-      surf.centre = p0 + 0.5*tangent;
-      surf.metric = Metric<2,Real>{ orthog(tangent),
-                                           tangent };
-      return surf;
+      const Real l = length(tangent);
+      return Surface<2,Real>{.area   = l,
+                             .centre = p0 + 0.5*tangent,
+                             .metric = Metric<2,Real>{ -1.*norm(orthog(tangent)),
+                                                        norm(       tangent ) }};
   }
 }

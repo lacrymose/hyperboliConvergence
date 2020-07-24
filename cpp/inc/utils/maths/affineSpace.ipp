@@ -131,7 +131,7 @@
   }
 
    // d = d/a
-   template<typename Delta, floating_point Real>
+   template<typename Delta>
       requires has_affinedelta_base<Delta>::value
    Delta operator/( const Delta& d, const typename Delta::value_type a )
   {

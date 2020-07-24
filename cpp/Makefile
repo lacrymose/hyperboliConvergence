@@ -24,6 +24,7 @@ CSCRIPT = test.cpp \
 	riemannProblemRK.cpp \
 	shocktube.cpp \
 	periodic1D.cpp \
+	periodic2D.cpp \
 	testScalarAdvection.cpp \
 	testEulerDelta.cpp \
 	testArray.cpp \
@@ -38,7 +39,7 @@ COPT = -O3 -flto -fno-exceptions
 
 CWARN = -Wall -Wextra -Wpedantic -Wno-unused-parameter -Wshadow
 
-CSTD = -std=c++17 -fconcepts
+CSTD = -std=c++2a -fconcepts
 
 # external libraries, eg lapack, blas, openmp ...
 LIBS =

@@ -1,25 +1,17 @@
 
 # pragma once
 
+# include <geometry/declarations.h>
+# include <geometry/type-traits.h>
+
 # include <utils/maths/affineSpace.h>
 
 # include <utils/concepts.h>
-
-# include <parallalg/array.h>
 
 # include <array>
 
 namespace geom
 {
-// ----------------- forward declarations ----------------- 
-
-   template<int nDim, floating_point Real> struct Point;
-   template<int nDim, floating_point Real> struct Direction;
-   template<int nDim, floating_point Real> struct Metric;
-   template<int nDim, floating_point Real> struct Volume;
-   template<int nDim, floating_point Real> struct Surface;
-
-
 // ----------------- geometry structs ----------------- 
 
 /*
@@ -32,12 +24,10 @@ namespace geom
                                   Direction<nDim,Real>,
                                   Real>
   {
-     /*
       using AffinePointBase<nDim,
                             Point<nDim,Real>,
                             Direction<nDim,Real>,
                             Real>::AffinePointBase;
-     */
   };
 
    template<int nDim, floating_point Real>
@@ -46,12 +36,10 @@ namespace geom
                                       Direction<nDim,Real>,
                                       Real>
   {
-     /*
       using AffineDeltaBase<nDim,
                             Point<nDim,Real>,
                             Direction<nDim,Real>,
                             Real>::AffineDeltaBase;
-     */
   };
 
 
@@ -88,32 +76,6 @@ namespace geom
   {
       Real             volume;
       Point<nDim,Real> centre;
-  };
-
-
-/*
- * Struct holding the cell Volumes and node Points for a structured mesh
- */
-   template<int nDim, floating_point Real>
-   struct Mesh
-  {
-      par::Shape<nDim> shape;
-
-      par::Array<Point< nDim,Real>,nDim> nodes;
-      par::Array<Volume<nDim,Real>,nDim> cells;
-
-   // par::Array only supports move construction, so same must be for Mesh
-      Mesh() = delete;
-      Mesh( const Mesh&  ) = delete;
-      Mesh(       Mesh&& ) =default;
-
-   // par::Array only supports move assignment, so same must be for Mesh
-      Mesh& operator=( const Mesh&  ) = delete;
-      Mesh& operator=(       Mesh&& ) = default;
-
-      Mesh( const par::Shape<nDim>& s ) : shape(s),
-                                          nodes(par::nodeDims_from_cellDims(s)),
-                                          cells(s) {}
   };
 
 
@@ -166,6 +128,27 @@ namespace geom
    template<floating_point Real>
    Direction<2,Real> orthog( const Direction<2,Real>& );
 
+/*
+ * coefficients of equation describing straight line y=ax+b
+ */
+   template<floating_point Real>
+   std::array<Real,2> line_coefficients( const Point<2,Real>& p, const Direction<2,Real>& d );
+
+/*
+ * vertex centroid of a polygon is average of all vertices
+ */
+   template<typename Pt0, typename... Pts>
+      requires    is_Point_v<Pt0>
+              && ((std::is_same_v<Pt0,Pts>)&&...)
+   Pt0 vertex_centroid( const Pt0& pt0,  const Pts&... pts );
+
+/*
+ * mass centroid of a polygon is centre of mass
+ */
+   template<floating_point Real>
+   Point<2,Real> mass_centroid( const Point<2,Real>& p0, const Point<2,Real>& p1,
+                                const Point<2,Real>& p2, const Point<2,Real>& p3 );
+
 
 // ----------------- generation of geometric entities from Points ----------------- 
 
@@ -202,29 +185,6 @@ namespace geom
                           const Point<3,Real>&, const Point<3,Real>& );
 
 
-// ----------------- operations on the dual mesh ----------------- 
-
-/*
- * Create the dual mesh from the primal mesh (assumes mesh is structured)
- *    the primal mesh is the nodes
- *    the dual mesh is the cells
- */
-   template<floating_point Real>
-   par::Array<Volume<1,Real>,1> dual( const par::Array<Point<1,Real>,1>& nodes );
-
-   template<floating_point Real>
-   void dual( const par::Array<Point< 1,Real>,1>& nodes,
-                    par::Array<Volume<1,Real>,1>& cells );
-
-
-// ----------------- full mesh generation ----------------- 
-
-/*
- * create a 1D mesh over domain [lo:hi] with linear spacing and nc cells
- */
-   template<floating_point Real>
-   Mesh<1,Real> make_linspace_mesh( const par::Shape<1>& cellDims, const Real lo, const Real hi );
-
 }
 
 # include <geometry/operations.ipp>
@@ -233,6 +193,5 @@ namespace geom
 # include <geometry/surface.ipp>
 # include <geometry/volume.ipp>
 
-# include <geometry/dual.ipp>
-# include <geometry/mesh.ipp>
+# include <geometry/centroid.ipp>
 

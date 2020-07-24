@@ -38,4 +38,17 @@ namespace geom
   {
       return Direction<2,Real>{-d[1],d[0]};
   }
+
+   template<int nDim, floating_point Real>
+   Direction<nDim,Real> norm( const Direction<nDim,Real>& d )
+  {
+      return d/length(d);
+  }
+
+   template<floating_point Real>
+   std::array<Real,2> line_coefficients( const Point<2,Real>& p, const Direction<2,Real>& d )
+  {
+      const Real a = d[1]/d[0];
+      return {a, p[1] - a*p[0]};
+  }
 }
