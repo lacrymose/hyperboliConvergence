@@ -40,6 +40,5 @@
                                     cells,
                                     resid
                                   );
-
   }
 

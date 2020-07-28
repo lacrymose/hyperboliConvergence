@@ -1,11 +1,8 @@
 
-# include <ode.h>
+# include <timestepping/rungeKutta.h>
 
 # include <spatial/gradientCalc2D.h>
 # include <spatial/residualCalc2D.h>
-# include <spatial/spectralRadius.h>
-# include <spatial/rungeKuttaAccumulation.h>
-# include <spatial/eulerForwardUpdate.h>
 
 # include <limiters/limiter.h>
 # include <conservationLaws/scalarAdvection/scalarAdvection.h>
@@ -13,6 +10,10 @@
 
 # include <mesh/generate/twoD.h>
 # include <mesh/mesh.h>
+
+# include <controls.h>
+
+# include <ode.h>
 
 # include <parallalg/algorithm.h>
 # include <parallalg/array.h>
@@ -50,16 +51,19 @@ constexpr Real th_hy = 0.625;
 
 // discretisation
 constexpr int  nx  = 32;
-constexpr int  nt  = 640;
+constexpr int  nt  = 128;
 constexpr Real cfl = 1.0;
 
-constexpr BasisT SolBasis = BasisT::Conserved;
+constexpr BasisT SolBasis = BasisT::Primitive;
 
 //using Flux = CentralFlux<Law>;
-using Flux = RoeFlux<Law>;
+//using Flux = RoeFlux<Law>;
 //using Flux = RusanovFlux<Law>;
 
-using Limiter = Limiters::NoLimit3;
+using Flux = Slau<LowMachScaling::Convective,
+                  LowMachScaling::Acoustic>;
+
+using Limiter = Limiters::NoLimit1;
 
 
 // ------ typedefs -------------------
@@ -126,40 +130,31 @@ using Face  = MeshT::Face;
 
    int main()
   {
+//    const ODE::Explicit::RungeKutta<Real>      rk = IO::read_exRungeKutta<Real>(         "data/twoD/euler/periodic2D/rungekutta.dat" );
+//    const UnsteadyTimeControls<Real> timeControls = IO::read_UnsteadyTimeControls<Real>( "data/twoD/euler/periodic2D/time.dat" );
+//    const Species<Law,Real>               species = IO::read_Species<Law,Real>(          "data/twoD/euler/periodic2D/species.dat" );
+
       const par::Shape<nDim> cellShape{nx,nx};
 
       const ODE::Explicit::RungeKutta<Real> rk = ODE::Explicit::ssp33<Real>();
-
-      std::cout << std::scientific;
-      std::cout.precision(8);
+      const UnsteadyTimeControls<Real> timeControls{nt,cfl};
 
    // setup
-//    const Species<Law,Real> species{};
-      const Species<Law,Real> species=[](){ auto s = get_air_species<Real>(); s.minf=0.3; return s; }();
+      const Species<Law,Real> species=[](){ auto s = get_air_species<Real>(); s.minf=0.1; return s; }();
       const Flux                 flux{};
       const Limiter           limiter{};
+
 
    // initialise mesh
       const MeshT mesh = make_linspace_mesh<Real>( cellShape, 0,nx, 0,nx );
 
    // initialise solution
-      par::Array<SolVarSet,nDim> q = initialise_scalar_tophat<SolVarSet>( mesh,
+//    par::Array<SolVarSet,nDim> q = initialise_scalar_tophat<SolVarSet>( mesh,
+      par::Array<SolVarSet,nDim> q = initialise_scalar_gaussian<SolVarSet>( mesh,
                                                                           species,
                                                                           theta,speed,
                                                                           th_lx*nx,th_hx*nx,
                                                                           th_ly*nx,th_hy*nx );
-
-      par::Array<SolVarSet,nDim> q1 = par::copy( q );
-      par::Array<SolVarSet,nDim> q2 = par::copy( q );
-
-   // gradient array
-      par::Array<SolVarGrad,nDim>   dq(cellShape);
-      par::fill( dq, SolVarGrad{} );
-
-   // residual evaluated and accumulated at each runge-kutta stage
-      // MDArray has no copy constructor so must construct in-place
-      par::Array<FluxRes,nDim>               resTotal(cellShape);
-      std::vector<par::Array<FluxRes,nDim>>  resStage=par::vec_of_Arrays<FluxRes,nDim>(rk.nstages,cellShape);
 
    // high order reconstruction and flux functions
       const auto hoflux = [&species, &limiter, &flux]
@@ -183,31 +178,25 @@ using Face  = MeshT::Face;
                                      qr-0.5*sloper );
      };
 
-   // integrate forward in time
-      for( size_t tstep=0; tstep<nt; tstep++ )
+   // gradient array
+      par::Array<SolVarGrad,nDim>   dq(cellShape);
+
+   // spatial residual evaluation
+      const auto rhs = [&dq,&hoflux]
+                       ( const MeshT&                    msh,
+                         const Real                     time,
+                         const par::Array<SolVarSet,nDim>& v )
      {
-         Real lmax{};
-         for( unsigned int stg=0; stg<rk.nstages; stg++ )
-        {
-         // calculate differences
-            dq=gradientCalcP( mesh.cells, q1 );
+         dq = gradientCalcP( msh.cells, v );
+         return residualCalc( msh, hoflux, v, dq );
+     };
 
-         // accumulate flux residual
-            resStage[stg] = residualCalc( mesh, hoflux, q1, dq );
-
-         // calculate maximum stable timestep for this timestep
-            if( stg==0 ){ lmax = spectralRadius( mesh.cells, resStage[stg] ); }
-
-         // accumulate stage residual
-            resTotal = rungeKuttaAccumulation( rk, stg, resStage );
-
-         // integrate cell residuals forward by dt and average over cell volume
-            q1 = eulerForwardUpdate( mesh.cells, species, rk.beta[stg]*cfl, lmax, resTotal, q );
-        }
-         par::copy( q, q1 );
-     }
+      integrate( timeControls, rk,
+                 species, mesh, q,
+                 rhs );
 
    // write solution to file
+     {
       std::ofstream solutionFile = []()
      {
          if( Law==LawType::ScalarAdvection ){ return std::ofstream("data/twoD/periodic/scalarAdvection/result.dat"); }
@@ -227,14 +216,6 @@ using Face  = MeshT::Face;
            }
             solutionFile << std::endl;
         }
-
-/*
-         par::for_each( // write state to file
-                        [&]( const SolVarSet& q0 ) -> void
-                           { writeState( solutionFile, species, set2State( species, q0 ) ); },
-                        // solution array
-                        q );
-*/
      }
       else
      {
@@ -242,6 +223,7 @@ using Face  = MeshT::Face;
          return 1;
      }
       solutionFile.close();
+     }
 
       return 0;
   }

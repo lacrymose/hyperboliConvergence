@@ -9,22 +9,32 @@
 
 # include <vector>
 
-   template<LawType Law, floating_point Real>
-   par::Array<FluxResult<Law,1,Real>,1>
+
+   template<LawType Law, int nDim, floating_point Real>
+   par::Array<FluxResult<Law,nDim,Real>,nDim>
       rungeKuttaAccumulation( const ODE::Explicit::RungeKutta<Real>& rk,
                               const unsigned int        stg,
-                              const std::vector<par::Array<FluxResult<Law,1,Real>,1>>& resStage )
+                              const std::vector<par::Array<FluxResult<Law,nDim,Real>,nDim>>& resStage )
   {
-      assert( resStage.size()<stg );
+      using FluxRes = FluxResult<Law,nDim,Real>;
+      par::Array<FluxRes,nDim> resTotal(resStage[0].shape());
+      rungeKuttaAccumulation( rk, stg, resStage, resTotal );
+      return resTotal;
+  }
+
+   template<LawType Law, floating_point Real>
+   void rungeKuttaAccumulation( const ODE::Explicit::RungeKutta<Real>& rk,
+                                const unsigned int        stg,
+                                const std::vector<par::Array<FluxResult<Law,1,Real>,1>>& resStage,
+                                      par::Array<FluxResult<Law,1,Real>,1>&              resTotal )
+  {
+      assert( resStage.size()==rk.nstages );
+      for( const auto& r : resStage ){ assert( r.shape()==resTotal.shape() ); }
 
       using FluxRes = FluxResult<Law,1,Real>;
-
-      const par::Shape<1> shape(resStage[0].shape());
-      par::Array<FluxRes,1> resTotal(shape);
-
       par::fill( resTotal, FluxRes{} );
 
-      const size_t ni=shape[0];
+      const size_t ni=resTotal.shape(0);
 
       for( size_t i=0; i<ni; i++ )
      {
@@ -33,26 +43,22 @@
             resTotal[{i}].flux += rk.alpha[stg][l]*resStage[l][{i}].flux;
         }
      }
-      return resTotal;
   }
 
    template<LawType Law, floating_point Real>
-   par::Array<FluxResult<Law,2,Real>,2>
-      rungeKuttaAccumulation( const ODE::Explicit::RungeKutta<Real>& rk,
-                              const unsigned int        stg,
-                              const std::vector<par::Array<FluxResult<Law,2,Real>,2>>& resStage )
+   void rungeKuttaAccumulation( const ODE::Explicit::RungeKutta<Real>& rk,
+                                const unsigned int        stg,
+                                const std::vector<par::Array<FluxResult<Law,2,Real>,2>>& resStage,
+                                      par::Array<FluxResult<Law,2,Real>,2>&              resTotal )
   {
-      assert( resStage.size()<stg );
+      assert( resStage.size()==rk.nstages );
+      for( const auto& r : resStage ){ assert( r.shape()==resTotal.shape() ); }
 
       using FluxRes = FluxResult<Law,2,Real>;
-
-      const par::Shape<2> shape(resStage[0].shape());
-      par::Array<FluxRes,2> resTotal(shape);
-
       par::fill( resTotal, FluxRes{} );
 
-      const size_t ni=shape[0];
-      const size_t nj=shape[1];
+      const size_t ni=resTotal.shape(0);
+      const size_t nj=resTotal.shape(1);
 
       for( size_t i=0; i<ni; i++ )
      {
@@ -64,27 +70,23 @@
            }
         }
      }
-      return resTotal;
   }
 
    template<LawType Law, floating_point Real>
-   par::Array<FluxResult<Law,3,Real>,3>
-      rungeKuttaAccumulation( const ODE::Explicit::RungeKutta<Real>& rk,
-                              const unsigned int        stg,
-                              const std::vector<par::Array<FluxResult<Law,3,Real>,3>>& resStage )
+   void rungeKuttaAccumulation( const ODE::Explicit::RungeKutta<Real>& rk,
+                                const unsigned int        stg,
+                                const std::vector<par::Array<FluxResult<Law,3,Real>,3>>& resStage,
+                                      par::Array<FluxResult<Law,3,Real>,3>&              resTotal )
   {
-      assert( resStage.size()<stg );
+      assert( resStage.size()==rk.nstages );
+      for( const auto& r : resStage ){ assert( r.shape()==resTotal.shape() ); }
 
       using FluxRes = FluxResult<Law,3,Real>;
-
-      const par::Shape<3> shape(resStage[0].shape());
-      par::Array<FluxRes,3> resTotal(shape);
-
       par::fill( resTotal, FluxRes{} );
 
-      const size_t ni=shape[0];
-      const size_t nj=shape[1];
-      const size_t nk=shape[2];
+      const size_t ni=resTotal.shape(0);
+      const size_t nj=resTotal.shape(1);
+      const size_t nk=resTotal.shape(2);
 
       for( size_t i=0; i<ni; i++ )
      {
@@ -99,6 +101,5 @@
            }
         }
      }
-      return resTotal;
   }
 
