@@ -48,6 +48,16 @@
 /*
  * Periodic differences
  */
+   template<ImplementedVarSet VarSetT, floating_point Real>
+      requires ConsistentTypes<law_of_v<VarSetT>,1,Real,VarSetT>
+   par::Array<vardelta_t<VarSetT>,1> gradientCalcP( const par::Array<geom::Volume<1,Real>,1>& cells,
+                                                    const par::Array<VarSetT,1>& q )
+  {
+      par::Array<vardelta_t<VarSetT>,1> dq(q.shape());
+      gradientCalcP( cells,q,dq );
+      return dq;
+  }
+
    template<ImplementedVarSet VarSetT, ImplementedVarDelta VarDelT, floating_point Real>
       requires ConsistentTypes<law_of_v<VarSetT>,1,Real,VarSetT,VarDelT>
    void gradientCalcP( const par::Array<geom::Volume<1,Real>,1>& cells,

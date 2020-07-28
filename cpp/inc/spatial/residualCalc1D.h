@@ -7,6 +7,8 @@
 
 # include <geometry/geometry.h>
 
+# include <mesh/mesh.h>
+
 # include <parallalg/algorithm.h>
 # include <parallalg/array.h>
 
@@ -15,14 +17,14 @@
 # include <cassert>
 
 /*
- * Higher order flux evaluation with general form and ghost cells at boundaries
+ * 1D Higher order flux evaluation with general form and ghost cells at boundaries
  */
 
    template<LawType Law, ImplementedVarSet SolVarT, ImplementedVarDelta SolDelT, typename HighOrderFlux, floating_point Real>
       requires ConsistentTypes<Law,1,Real,SolVarT,SolDelT>
-   void residualCalc( const geom::Mesh<1,Real>&                  mesh,
+   void residualCalc( const Mesh<1,Real>&                        mesh,
                       const HighOrderFlux                      hoflux,
-                      const std::array<SolVarT,2>                 qbc,
+                      const std::array<SolVarT,2>&                qbc,
                       const par::Array<SolVarT,1>&                  q,
                       const par::Array<SolDelT,1>&                 dq,
                             par::Array<FluxResult<Law,1,Real>,1>& res )
@@ -34,7 +36,7 @@
       assert( mesh.cells.shape() == res.shape() );
       assert( mesh.cells.shape() ==  dq.shape() );
       assert( mesh.cells.shape() ==   q.shape() );
-      assert( mesh.nodes.shape() == par::Shape<1>{mesh.cells.shape(0)+1} );
+      assert( mesh.nodes.shape() == par::nodeDims_from_cellDims(mesh.cells.shape()) );
 
       const size_t nc = mesh.cells.shape(0);
 
@@ -81,12 +83,12 @@
 
 
 /*
- * Higher order flux evaluation with general form and periodic boundaries
+ * 1D Higher order flux evaluation with general form and periodic boundaries
  */
 
    template<LawType Law, ImplementedVarSet SolVarT, ImplementedVarDelta SolDelT, typename HighOrderFlux, floating_point Real>
       requires ConsistentTypes<Law,1,Real,SolVarT,SolDelT>
-   void residualCalc( const geom::Mesh<1,Real>&                  mesh,
+   void residualCalc( const Mesh<1,Real>&                        mesh,
                       const HighOrderFlux                      hoflux,
                       const par::Array<SolVarT,1>&                  q,
                       const par::Array<SolDelT,1>&                 dq,

@@ -63,3 +63,48 @@ namespace TimeStepping
       return;
   }
 }
+
+/*
+ * integrates dq/dt = rhs forward in time using an explicit runge kutta scheme
+ */
+   template<int                   nDim,
+           ImplementedVarSet   SolVarT,
+           typename    ResidualFunctor,
+           typename    TimestepFunctor,
+           typename      UpdateFunctor>
+   void integrate( const UnsteadyTimeControls&        utc,
+                   const ODE::ExplicitRungeKutta&      rk,
+                   const Mesh<nDim,Real>&            mesh,
+                         par::Array<SolVarSet,nDim>&   q0,
+                         RHSFunctor&                  rhs,
+                         TimestepFunctor&            delt,
+                         UpdateFunctor&            update )
+  {
+   // check sizes match
+      assert( q0.shape() == mesh.shape() );
+
+      const par::Shape<nDim> shape = q0.shape();
+
+      par::Array<FluxRes,nDim>               resTotal(shape);
+      std::vector<par::Array<FluxRes,nDim>>  resStage = par::vec_of_Arrays<FluxRes,nDim>(rk.nstages,shape);
+
+      Real t=0;
+      for( size_t tstep=0; tstep<tc.nt; tstep++ )
+     {
+         Real dt;
+         for( int stg=0; stg<rk.nstages; stg++ )
+        {
+            resStage[stg] = rhs( mesh, t, q1 );
+
+            if( stg==0 ){ dt = delt( mesh, resStage[0] ); }
+
+            resTotal = weightedSum( stg+1, rk.alpha[stg], resStage );
+
+            q2 = UpdateFunctor( mesh, rk.beta[stg]*dt, resTotal, q0 );
+            std::swap( q1, q2 );
+        }
+         par::copy( q0, q1 );
+         t+=dt;
+     }
+  }
+

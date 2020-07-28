@@ -10,7 +10,8 @@
 # include <conservationLaws/euler/euler.h>
 # include <conservationLaws/euler/boundaryConditions.h>
 
-# include <geometry/geometry.h>
+# include <mesh/mesh.h>
+# include <mesh/generate/oneD.h>
 
 # include <parallalg/algorithm.h>
 # include <parallalg/array.h>
@@ -81,14 +82,15 @@ using ExtrapDelta   = VariableDelta<Law,nDim,ExtrapBasis, Real>;
 
 using FluxRes = FluxResult<Law,nDim,Real>;
 
-using Point   = geom::Point<  nDim,Real>;
-using Surface = geom::Surface<nDim,Real>;
-using Volume  = geom::Volume< nDim,Real>;
+using MeshT = Mesh<nDim,Real>;
+using Face  = MeshT::Face;
 
 
 // ------- i/o -------
 
-   void writeState( std::ofstream& os, const Species<Law,Real> species, const State<Law,1,Real>& state )
+   void writeState( std::ofstream& os,
+                    const Species<Law,  Real>& species,
+                    const State<  Law,1,Real>&   state )
   {
       const Real gam = species.gamma;
 
@@ -96,13 +98,13 @@ using Volume  = geom::Volume< nDim,Real>;
       const Real u0 = 1.;
       const Real p0 = r0/(mach*mach*gam);
       const Real a0 = u0/mach;
-      const Real s0 = a0*a0 / ( gam*pow(r0,gam-1) );
+      const Real s0 = a0*a0 / ( gam*pow(r0,gam-1.) );
 
       const Real a = sqrt( state.speedOfSound2() );
       const Real r = state.density();
       const Real u = state.velocity(0);
       const Real p = state.pressure();
-      const Real s = a*a / ( gam*pow(r,gam-1) );
+      const Real s = a*a / ( gam*pow(r,gam-1.) );
 
       os << (r-r0)/r0 << " "
          << (u-u0)/u0 << " "
@@ -133,7 +135,7 @@ using Volume  = geom::Volume< nDim,Real>;
       const Limiter limiter{};
 
    // initialise mesh
-      const geom::Mesh<nDim,Real> mesh = geom::make_linspace_mesh<Real>( cellShape, 0,nx );
+      const MeshT mesh = make_linspace_mesh<Real>( cellShape, 0,nx );
 
    // initialise solution
       par::Array<SolVarSet,nDim> q = [&]() -> par::Array<SolVarSet,nDim>
@@ -176,11 +178,11 @@ using Volume  = geom::Volume< nDim,Real>;
 
    // high order reconstruction and flux functions
       const auto hoflux = [&species, &limiter, &flux]
-                          ( const Surface&      face,
-                            const SolVarDelta& gradl,
-                            const SolVarDelta& gradr,
-                            const SolVarSet&      ql,
-                            const SolVarSet&      qr ) -> FluxRes
+                          ( const Face&          face,
+                            const SolVarDelta&  gradl,
+                            const SolVarDelta&  gradr,
+                            const SolVarSet&       ql,
+                            const SolVarSet&       qr ) -> FluxRes
      {
       // average state
          const State<Law,nDim,Real> avg = set2State( species, ql+0.5*(qr-ql) );

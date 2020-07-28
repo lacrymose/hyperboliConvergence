@@ -18,13 +18,13 @@ namespace ODE
    //       = g_0*R( u_{n+1} ) + g_1*R( u_{n} )
 
       // order of accuracy
-         int order;
+         unsigned int order;
 
       // number of nsteps
-         int nsteps;
+         unsigned int nsteps;
 
       // number of residual evaluations
-         int nresid;
+         unsigned int nresid;
 
       // coefficients
          std::array<Real,3>  beta;
@@ -88,10 +88,10 @@ namespace ODE
       struct RungeKutta
      {
       // order of accuracy
-         int order;
+         unsigned int order;
 
       // number of stages
-         int nstages;
+         unsigned int nstages;
 
       // maximum allowable cfl
          Real maxCFL;

@@ -17,8 +17,8 @@
 # include <cassert>
 
    template<floating_point Real, int nDim, LawType Law>
-   Real spectralRadius( const par::Array<geom::Volume<  nDim,Real>,1>& cells,
-                        const par::Array<FluxResult<Law,nDim,Real>,1>& resid )
+   Real spectralRadius( const par::Array<geom::Volume<  nDim,Real>,nDim>& cells,
+                        const par::Array<FluxResult<Law,nDim,Real>,nDim>& resid )
   {
       assert( cells.shape() == resid.shape() );
 

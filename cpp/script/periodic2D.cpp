@@ -1,15 +1,18 @@
 
 # include <ode.h>
 
-# include <spatial/gradientCalc.h>
-# include <spatial/residualCalc.h>
+# include <spatial/gradientCalc2D.h>
+# include <spatial/residualCalc2D.h>
 # include <spatial/spectralRadius.h>
+# include <spatial/rungeKuttaAccumulation.h>
 # include <spatial/eulerForwardUpdate.h>
 
 # include <limiters/limiter.h>
 # include <conservationLaws/scalarAdvection/scalarAdvection.h>
+# include <conservationLaws/euler/euler.h>
 
-# include <geometry/geometry.h>
+# include <mesh/generate/twoD.h>
+# include <mesh/mesh.h>
 
 # include <parallalg/algorithm.h>
 # include <parallalg/array.h>
@@ -19,61 +22,103 @@
 # include <fstream>
 
 # include <cases/scalarAdvection/twoD/periodic.h>
+# include <cases/euler/twoD/periodic.h>
 
 /*
- * One dimensional periodic test cases for the Euler equations
+ * Two dimensional periodic test cases
  */
 
-constexpr LawType Law = LawType::ScalarAdvection;
+//constexpr LawType Law = LawType::ScalarAdvection;
+constexpr LawType Law = LawType::Euler;
 constexpr int nDim = 2;
 using BasisT = BasisType<Law>;
-using Real = float;
+using Real = double;
 
 // ------- User Inputs -------
 
 // Convecting velocity - angle and magnitude
-constexpr Real theta = 45.;
+constexpr Real theta = 0.25*M_PI;
 constexpr Real speed = 1.0;
 
-// width of scalar top-hat (cells)
-constexpr int nh = 8;
+// lo/hi x/y coordinates of scalar top-hat
+constexpr Real th_lx = 0.375;
+constexpr Real th_hx = 0.625;
+
+constexpr Real th_ly = 0.375;
+constexpr Real th_hy = 0.625;
+
 
 // discretisation
-constexpr int  nx  = 24;
-constexpr int  nt  = 0;
-constexpr Real cfl = 0.5;
+constexpr int  nx  = 32;
+constexpr int  nt  = 640;
+constexpr Real cfl = 1.0;
 
-constexpr BasisT SolutionBasis = BasisT::Conserved;
+constexpr BasisT SolBasis = BasisT::Conserved;
 
-using Flux = RusanovFlux<Law>;
+//using Flux = CentralFlux<Law>;
+using Flux = RoeFlux<Law>;
+//using Flux = RusanovFlux<Law>;
 
-using Limiter = Limiters::NoLimit1;
+using Limiter = Limiters::NoLimit3;
 
 
 // ------ typedefs -------------------
 
-using SolVarSet  = VariableSet<Law,nDim,SolutionBasis, Real>;
-using SolVarDel  = VariableDelta<Law,nDim,SolutionBasis, Real>;
+using SolVarSet  = VariableSet<  Law,nDim,SolBasis,Real>;
+using SolVarDel  = VariableDelta<Law,nDim,SolBasis,Real>;
 using SolVarGrad = std::array<SolVarDel,nDim>;
 
 using FluxRes = FluxResult<Law,nDim,Real>;
 
-using Point   = geom::Point<  nDim,Real>;
-using Surface = geom::Surface<nDim,Real>;
-using Volume  = geom::Volume< nDim,Real>;
+using MeshT = Mesh<nDim,Real>;
+using Face  = MeshT::Face;
 
 
 // ------- i/o -------
 
-   void writeState( std::ofstream& os, const Species<Law,Real> species, const State<Law,nDim,Real>& state )
+   void writeState( std::ofstream& os,
+                    const MeshT::Cell&                                    cell,
+                    const Species<LawType::ScalarAdvection,Real>&      species,
+                    const State<  LawType::ScalarAdvection,nDim,Real>&   state )
   {
+      const Real x = cell.centre[0];
+      const Real y = cell.centre[1];
+
       const Real u = state.velocity(0);
       const Real v = state.velocity(1);
       const Real q = state.scalar();
 
-      os << u << " "
+      os << x << " "
+         << y << "  "
+         << u << " "
          << v << " "
          << q << std::endl;
+  }
+
+   void writeState( std::ofstream& os,
+                    const MeshT::Cell&                          cell,
+                    const Species<LawType::Euler,Real>&      species,
+                    const State<  LawType::Euler,nDim,Real>&   state )
+  {
+      const Real x = cell.centre[0];
+      const Real y = cell.centre[1];
+
+      const Real u = state.velocity(0);
+      const Real v = state.velocity(1);
+      const Real p = state.pressure();
+
+      const Real gam = species.gamma;
+      const Real a2= state.speedOfSound2();
+      const Real r = state.density();
+      const Real s = a2 / ( gam*pow(r,gam-1.) );
+
+      os << x << " "
+         << y << "  "
+         << u << " "
+         << v << " "
+         << s << " "
+         << r << " "
+         << p << std::endl;
   }
 
 
@@ -89,31 +134,36 @@ using Volume  = geom::Volume< nDim,Real>;
       std::cout.precision(8);
 
    // setup
-      const Species<Law,Real> species{};
+//    const Species<Law,Real> species{};
+      const Species<Law,Real> species=[](){ auto s = get_air_species<Real>(); s.minf=0.3; return s; }();
       const Flux                 flux{};
       const Limiter           limiter{};
 
    // initialise mesh
-      const geom::Mesh<nDim,Real> mesh = geom::make_linspace_mesh<Real>( cellShape, 0,nx, 0,nx ); // ???
+      const MeshT mesh = make_linspace_mesh<Real>( cellShape, 0,nx, 0,nx );
 
    // initialise solution
-      par::Array<SolVarSet,nDim> q = // ???
+      par::Array<SolVarSet,nDim> q = initialise_scalar_tophat<SolVarSet>( mesh,
+                                                                          species,
+                                                                          theta,speed,
+                                                                          th_lx*nx,th_hx*nx,
+                                                                          th_ly*nx,th_hy*nx );
 
       par::Array<SolVarSet,nDim> q1 = par::copy( q );
       par::Array<SolVarSet,nDim> q2 = par::copy( q );
 
    // gradient array
       par::Array<SolVarGrad,nDim>   dq(cellShape);
+      par::fill( dq, SolVarGrad{} );
 
    // residual evaluated and accumulated at each runge-kutta stage
       // MDArray has no copy constructor so must construct in-place
       par::Array<FluxRes,nDim>               resTotal(cellShape);
-      std::vector<par::Array<FluxRes,nDim>>  resStage;
-      for( int i=0; i<rk.nstages; i++ ){ resStage.emplace_back(cellShape); }
+      std::vector<par::Array<FluxRes,nDim>>  resStage=par::vec_of_Arrays<FluxRes,nDim>(rk.nstages,cellShape);
 
    // high order reconstruction and flux functions
       const auto hoflux = [&species, &limiter, &flux]
-                          ( const Surface&    face,
+                          ( const Face&       face,
                             const SolVarDel& gradl,
                             const SolVarDel& gradr,
                             const SolVarSet&    ql,
@@ -134,49 +184,34 @@ using Volume  = geom::Volume< nDim,Real>;
      };
 
    // integrate forward in time
-      for( int tstep=0; tstep<nt; tstep++ )
+      for( size_t tstep=0; tstep<nt; tstep++ )
      {
          Real lmax{};
-         for( int j=0; j<rk.nstages; j++ )
+         for( unsigned int stg=0; stg<rk.nstages; stg++ )
         {
          // calculate differences
-            gradientCalcP( mesh.cells, q1, dq );
+            dq=gradientCalcP( mesh.cells, q1 );
 
          // accumulate flux residual
-            residualCalc( mesh, hoflux, q1, dq, resStage[j] );
+            resStage[stg] = residualCalc( mesh, hoflux, q1, dq );
 
          // calculate maximum stable timestep for this timestep
-            if( j==0 ){ lmax = spectralRadius( mesh.cells, resStage[j] ); }
+            if( stg==0 ){ lmax = spectralRadius( mesh.cells, resStage[stg] ); }
 
          // accumulate stage residual
-            par::fill( resTotal, FluxRes{} );
-
-            for( size_t i=0; i<nx; i++ )
-           {
-               for( int k=0; k<=j; k++ )
-              {
-                  resTotal[{i}].flux+=rk.alpha[j][k]*resStage[k][{i}].flux;
-              }
-           }
+            resTotal = rungeKuttaAccumulation( rk, stg, resStage );
 
          // integrate cell residuals forward by dt and average over cell volume
-            eulerForwardUpdate( mesh.cells, species, rk.beta[j]*cfl, lmax, resTotal, q, q2 );
-            std::swap( q1,q2 );
+            q1 = eulerForwardUpdate( mesh.cells, species, rk.beta[stg]*cfl, lmax, resTotal, q );
         }
          par::copy( q, q1 );
      }
 
    // write solution to file
-      std::ofstream solutionFile = []() -> std::ofstream
+      std::ofstream solutionFile = []()
      {
-         if( problem == Periodic1D::Soundwave )
-        {
-            return std::ofstream( "data/periodic/soundwave/result.dat" );
-        }
-         else if( problem == Periodic1D::AcousticEntropy )
-        {
-            return std::ofstream( "data/periodic/acoustic_entropy/result.dat" );
-        }
+         if( Law==LawType::ScalarAdvection ){ return std::ofstream("data/twoD/periodic/scalarAdvection/result.dat"); }
+         else if( Law==LawType::Euler ){ return std::ofstream("data/twoD/periodic/euler/result.dat"); }
      }();
 
       if( solutionFile.is_open() )
@@ -184,15 +219,26 @@ using Volume  = geom::Volume< nDim,Real>;
          solutionFile << std::scientific;
          solutionFile.precision(12);
 
+         for( size_t i=0; i<q.shape(0); i++ )
+        {
+            for( size_t j=0; j<q.shape(1); j++ )
+           {
+               writeState( solutionFile, mesh.cells[{i,j}], species, set2State( species, q[{i,j}] ) );
+           }
+            solutionFile << std::endl;
+        }
+
+/*
          par::for_each( // write state to file
                         [&]( const SolVarSet& q0 ) -> void
                            { writeState( solutionFile, species, set2State( species, q0 ) ); },
                         // solution array
                         q );
+*/
      }
       else
      {
-         std::cout << "cannot open \"data/riemannProblem/result.dat\" for writing\n" << std::endl;
+         std::cout << "cannot open \"data/twoD/periodic/scalarAdvection/result.dat\" for writing\n" << std::endl;
          return 1;
      }
       solutionFile.close();

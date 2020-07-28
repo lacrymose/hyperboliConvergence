@@ -117,12 +117,23 @@ namespace par
 /*
  * return Shape of node-based array, given Shape of cell-based array
  */
-   template<int NDIM, typename Indices=std::make_index_sequence<NDIM>>
+   template<int NDIM>
    Shape<NDIM> nodeDims_from_cellDims( const Shape<NDIM>& cellShape )
   {
       Shape<NDIM> nodeShape(cellShape);
       for( unsigned int i=0; i<NDIM; i++ ){ nodeShape.shape[i]+=1; }
       return nodeShape;
+  }
+
+/*
+ * return Shape of cell-based array, given Shape of node-based array
+ */
+   template<int NDIM>
+   Shape<NDIM> cellDims_from_nodeDims( const Shape<NDIM>& nodeShape )
+  {
+      Shape<NDIM> cellShape(nodeShape);
+      for( unsigned int i=0; i<NDIM; i++ ){ cellShape.shape[i]-=1; }
+      return cellShape;
   }
 
 /*
@@ -218,5 +229,21 @@ namespace par
          elems_array.resize(length(s));
      }
   };
+
+/*
+ * returns a vector of arrays with given element type, dimensionality, sizing and shape
+ *    utility function using emplace_back because Arrays cannot be copy constructed
+ */
+   template<typename ElemT, int NDIM, ArraySizing SIZING=ArraySizing::Static>
+   std::vector<Array<ElemT,NDIM,SIZING>> vec_of_Arrays( const size_t    narrays,
+                                                        const Shape<NDIM> shape )
+  {
+      std::vector<Array<ElemT,NDIM,SIZING>> vec;
+      for( size_t i=0; i<narrays; i++ )
+     {
+         vec.emplace_back(shape);
+     }
+      return vec;
+  }
 
 }
