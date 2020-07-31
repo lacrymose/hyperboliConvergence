@@ -17,6 +17,6 @@ namespace geom
       return Surface<2,Real>{.area   = l,
                              .centre = p0 + 0.5*tangent,
                              .metric = Metric<2,Real>{ -1.*norm(orthog(tangent)),
-                                                        norm(       tangent ) }};
+                                                           norm(       tangent ) }};
   }
 }

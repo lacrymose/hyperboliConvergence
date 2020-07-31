@@ -181,6 +181,10 @@ namespace par
       std::vector<ElemT> elems_array;
 
    public:
+
+      using ElemType = ElemT;
+      constexpr static int nDim=NDIM;
+
    // constructors (no construction without dimensions, no copying, only move)
       Array() = delete;
       Array( const Array&  ) = delete;

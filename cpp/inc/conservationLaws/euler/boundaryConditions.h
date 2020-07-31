@@ -15,17 +15,16 @@
  * calculate freestream boundary values at either end of mesh
  */
 
-   template<int nDim, LawType Law, BasisType<Law> Basis, floating_point Real>
+   template<LawType Law, BasisType<Law> Basis, floating_point Real>
       requires   ImplementedLawType<Law>
-              && (nDim==1)
-              && ImplementedVarSet< VariableSet<Law,nDim,Basis,Real>>
-   std::array<VariableSet<Law,nDim,Basis,Real>,2> 
+              && ImplementedVarSet< VariableSet<Law,1,Basis,Real>>
+   std::array<VariableSet<Law,1,Basis,Real>,2> 
            updateBCs( const Species<Law,Real>&                          species,
-                      const par::Array<geom::Point<nDim,Real>,1>&            nodes,
-                      const par::Array<   VariableSet<Law,nDim,Basis,Real>,1>&   q,
-                      const std::array<VariableSet<Law,nDim,Basis,Real>,2>& qb0 )
+                      const par::Array<geom::Point<1,Real>,1>&            nodes,
+                      const par::Array<   VariableSet<Law,1,Basis,Real>,1>&   q,
+                      const std::array<VariableSet<Law,1,Basis,Real>,2>&    qb0 )
   {
-      using SolVarT = VariableSet<Law,nDim,Basis,Real>;
+      using SolVarT = VariableSet<Law,1,Basis,Real>;
 
       std::array<SolVarT,2> qbc;
 
@@ -100,23 +99,17 @@
       const Real sr =  ar2/( gam*pow( stater.density(), gam-1. ) );
 
       // boundary values
-         // velocity, speed of sound, entropy, density, pressure, total energy
+         // velocity, speed of sound, entropy
       const Real ub = 0.5*( ril + rir );
       const Real ab = 0.25*(gam-1.)*( ril - rir );
       const Real sb = (ma<0) ? sl : sr;
-      const Real rb = pow( ab*ab/(gam*sb), gam1 );
-      const Real pb = rb*ab*ab/gam;
 
+         // density, pressure, momentum total energy
+      const Real rb  = pow( ab*ab/(gam*sb), gam1 );
+      const Real pb  = rb*ab*ab/gam;
 		const Real rub = rb*ub;
       const Real reb = pb*gam1 + 0.5*rb*ub*ub;
 
       return set2Set<SolVarT>( species, ConservedVarT{{rub,rb,reb}} );
   }
-
-
-
-
-
-
-
 
