@@ -33,6 +33,10 @@
    template<LawType Law> struct BasisTypeHelper;
    template<LawType Law> using  BasisType = typename BasisTypeHelper<Law>::type;
 
+// typetraits to retrieve boundary condition enum for each law
+   template<LawType Law> struct BoundaryTypeHelper;
+   template<LawType Law> using  BoundaryType = typename BoundaryTypeHelper<Law>::type;
+
 
 // physical constants for each conservation law
    template<LawType Law, floating_point Real> struct Species;

@@ -20,7 +20,7 @@
 # include <cassert>
 
 
-// ------- Inputs ------- 
+// ------- Inputs -------
 using Real = float;
 
 constexpr LawType Law = LawType::Euler;
@@ -55,7 +55,7 @@ using Point   = geom::Point<  nDim,Real>;
 using Surface = geom::Surface<nDim,Real>;
 using Volume  = geom::Volume< nDim,Real>;
 
-  
+
 # include "../script/riemannProblem.h"
 
    int main()

@@ -6,7 +6,7 @@
 # include <parallalg/array.h>
 
 /*
- * Struct holding the cell Volumes and node Points for a structured mesh
+ * data structure holding the cell Volumes and node Points for a structured mesh
  */
    template<int nDim, floating_point Real>
    struct Mesh
@@ -23,7 +23,7 @@
    // par::Array only supports move construction, so same must be for Mesh
       Mesh() = delete;
       Mesh( const Mesh&  ) = delete;
-      Mesh(       Mesh&& ) =default;
+      Mesh(       Mesh&& ) = default;
 
    // par::Array only supports move assignment, so same must be for Mesh
       Mesh& operator=( const Mesh&  ) = delete;

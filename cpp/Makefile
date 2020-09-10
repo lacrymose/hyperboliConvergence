@@ -12,23 +12,24 @@ CSOURCE =
 
 
 # main() function files
-CSCRIPT = test.cpp \
-	testVariableSet.cpp \
-	testUtils.cpp \
-	testSmooth.cpp \
+CSCRIPT = test/test.cpp \
+	test/testVariableSet.cpp \
+	test/testUtils.cpp \
+	test/testSmooth.cpp \
 	sodsExplicitEuler1.cpp \
 	sodsDualTime.cpp \
 	sods.cpp \
-	testGenericVariableSet.cpp \
+	test/testGenericVariableSet.cpp \
 	riemannProblem.cpp \
 	riemannProblemRK.cpp \
 	shocktube.cpp \
 	periodic1D.cpp \
 	periodic2D.cpp \
-	testScalarAdvection.cpp \
-	testEulerDelta.cpp \
-	testArray.cpp \
-	testArray2.cpp
+	test/testScalarAdvection.cpp \
+	test/testEulerDelta.cpp \
+	test/testArray.cpp \
+	test/testArray2.cpp \
+	test/testField.cpp
 
 # compiler
 CCMP = g++-8

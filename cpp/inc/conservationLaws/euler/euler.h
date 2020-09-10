@@ -9,6 +9,9 @@
 
 // ---------- integral values ----------
 
+   template<> constexpr int nScalarQuantities< LawType::Euler > = 2;
+   template<> constexpr int nVectorQuantities< LawType::Euler > = 1;
+
 /*
  * available bases for Variable Sets and Deltas are stored as:
  *    Conserved: velocity, scalar
@@ -25,9 +28,17 @@
    template<>
    struct BasisTypeHelper<LawType::Euler> { using type = EulerBases; };
 
-   template<> constexpr int nScalarQuantities< LawType::Euler > = 2;
-   template<> constexpr int nVectorQuantities< LawType::Euler > = 1;
+/*
+ * available boundary conditions for EulerEquations
+ */
+   enum struct EulerBCs
+  {
+      Periodic,
+      Riemann
+  };
 
+   template<>
+   struct BoundaryTypeHelper<LawType::Euler> { using type = EulerBCs; };
 
 // ---------- Law specific types ----------
 

@@ -9,18 +9,34 @@
 
 // ---------- integral values ----------
 
+   template<> constexpr int nScalarQuantities< LawType::ScalarAdvection > = 1;
+   template<> constexpr int nVectorQuantities< LawType::ScalarAdvection > = 1;
+
 /*
  * available bases for Variable Sets and Deltas are stored as:
  *    Conserved: velocity, scalar
  */
-   enum struct ScalarAdvectionBases { Conserved,
-                                      Characteristic };
+   enum struct ScalarAdvectionBases
+  {
+      Conserved,
+      Characteristic
+  };
 
    template<>
    struct BasisTypeHelper<LawType::ScalarAdvection> { using type = ScalarAdvectionBases; };
 
-   template<> constexpr int nScalarQuantities< LawType::ScalarAdvection > = 1;
-   template<> constexpr int nVectorQuantities< LawType::ScalarAdvection > = 1;
+/*
+ * available boundary conditions for ScalarAdvection
+ */
+   enum struct ScalarAdvectionBCs
+  {
+      Periodic,
+      Riemann
+  };
+
+   template<>
+   struct BoundaryTypeHelper<LawType::ScalarAdvection> { using type = ScalarAdvectionBCs; };
+
 
 
 // ---------- Law specific types ----------
