@@ -171,6 +171,7 @@ namespace par
    struct Array
   {
    private:
+
    // shape of multi-dimensional array
       Shape<NDIM>   shape_array;
 

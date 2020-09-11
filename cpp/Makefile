@@ -16,20 +16,20 @@ CSCRIPT = test/test.cpp \
 	test/testVariableSet.cpp \
 	test/testUtils.cpp \
 	test/testSmooth.cpp \
-	sodsExplicitEuler1.cpp \
-	sodsDualTime.cpp \
-	sods.cpp \
 	test/testGenericVariableSet.cpp \
-	riemannProblem.cpp \
-	riemannProblemRK.cpp \
-	shocktube.cpp \
-	periodic1D.cpp \
-	periodic2D.cpp \
 	test/testScalarAdvection.cpp \
 	test/testEulerDelta.cpp \
 	test/testArray.cpp \
 	test/testArray2.cpp \
-	test/testField.cpp
+	test/testField.cpp \
+	sodsExplicitEuler1.cpp \
+	sodsDualTime.cpp \
+	sods.cpp \
+	riemannProblem.cpp \
+	riemannProblemRK.cpp \
+	shocktube.cpp \
+	periodic1D.cpp \
+	periodic2D.cpp
 
 # compiler
 CCMP = g++-8
@@ -38,7 +38,7 @@ CCMP = g++-8
 #COPT = -Og -D_GLIBCXX_DEBUG -fsanitize=address -fno-omit-frame-pointer
 COPT = -O3 -fno-exceptions
 
-CWARN = -Wall -Wextra -Wpedantic -Wno-unused-parameter -Wshadow
+CWARN = -Wall -Wextra -Wpedantic -Wno-unused-parameter# -Wshadow
 
 CSTD = -std=c++2a -fconcepts
 

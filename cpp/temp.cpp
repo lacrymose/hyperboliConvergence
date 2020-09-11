@@ -1,25 +1,19 @@
 
+# include <array>
 # include <iostream>
 
-   enum struct Numbers : size_t 
+   template<int N>
+   struct Array
   {
-      One,
-      Two
+      std::array<size_t,N> x;
   };
+
 
    int main()
   {
-      std::cout << size_t(Numbers::One) << std::endl;
+      std::array arr0{1,2,3};
 
-      Numbers three=Numbers(size_t(3));
-      Numbers four=Numbers(4);
-
-      std::cout << size_t(three) << std::endl;
-      std::cout << size_t(four)  << std::endl;
-
-      size_t four_s = size_t(four);
-
-      std::cout << four_s << std::endl;
+      Array arr1{0,1,2};
 
       return 0;
   }

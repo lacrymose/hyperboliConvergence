@@ -146,7 +146,6 @@
                                                 mesh.nodes[ip1] ),
                                        dq[icl][1],dq[icr][1],
                                         q[icl],    q[icr] );
-
             res[icl]-=fr;
             res[icr]+=fr;
         }

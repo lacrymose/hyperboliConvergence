@@ -125,7 +125,7 @@ using Face  = MeshT::Face;
       std::cout.precision(8);
 
    // setup
-      const Species<Law,Real> species = []()
+      const Species<Law,Real> species = []() -> Species<Law,Real>
      {
          Species<Law,Real> gas = get_air_species<Real>();
          gas.minf=mach;
@@ -187,25 +187,32 @@ using Face  = MeshT::Face;
       // average state
          const State<Law,nDim,Real> avg = set2State( species, ql+0.5*(qr-ql) );
 
-      // central and l/r biased differences in solution basis
+      // delta aligned with face coordinates in extrapolation variable set
+         auto toFaceDel = [&]( const SolVarDelta& dq ) -> ExtrapDelta
+        {
+            return delta2Delta<ExtrapDelta>( species, avg, rotateToMetric( face.metric, dq ) );
+        };
+
+      // delta aligned with background coordinates in solution variable set
+         auto fromFaceDel = [&]( const ExtrapDelta& dv ) -> SolVarDelta
+        {
+            return rotateFromMetric( face.metric, delta2Delta<SolVarDelta>( species, avg, dv ) );
+        };
+
+      // central and l/r biased differences in solution basis with background coordinates
          const SolVarDelta dqc = qr - ql;
          const SolVarDelta dql = gradl - dqc;
          const SolVarDelta dqr = gradr - dqc;
 
-      // central and l/r biased differences in extrapolation basis aligned with face
-         const ExtrapDelta dvc = delta2Delta<ExtrapDelta>( species, avg, rotateToMetric( face.metric, dqc ) );
-         const ExtrapDelta dvl = delta2Delta<ExtrapDelta>( species, avg, rotateToMetric( face.metric, dql ) );
-         const ExtrapDelta dvr = delta2Delta<ExtrapDelta>( species, avg, rotateToMetric( face.metric, dqr ) );
+      // central and l/r biased differences in extrapolation basis with face coordinates
+         const ExtrapDelta dvc = toFaceDel( dqc );
+         const ExtrapDelta dvl = toFaceDel( dql );
+         const ExtrapDelta dvr = toFaceDel( dqr );
 
       // limited differences in solution basis aligned with background coordinate system
-         const SolVarDelta slopel = rotateFromMetric( face.metric,
-                                                      delta2Delta<SolVarDelta>( species,
-                                                                                avg,
-                                                                                limiter( dvc, dvl ) ) );
-         const SolVarDelta sloper = rotateFromMetric( face.metric,
-                                                      delta2Delta<SolVarDelta>( species,
-                                                                                avg,
-                                                                                limiter( dvc, dvr ) ) );
+         const SolVarDelta slopel = fromFaceDel( limiter( dvc, dvl ) );
+         const SolVarDelta sloper = fromFaceDel( limiter( dvc, dvr ) );
+
       // inviscid flux
          return flux( species, face, ql+0.5*slopel,
                                      qr-0.5*sloper );

@@ -57,9 +57,7 @@ namespace par
    Array<ElemT,NDIM,AS> copy( const Array<ElemT,NDIM,AS>& src )
   {
       Array<ElemT,NDIM,AS> dst(src.shape());
-
       copy( dst, src );
-
       return dst;
   }
 
@@ -140,6 +138,20 @@ namespace par
                                 srcs.flatten(i)... );
      }
       return;
+  }
+
+/*
+ * Return value overload
+ */
+   template<typename Functor, int NDIM, typename    ElemT0, ArraySizing    AS0,
+                                        typename... ElemTs, ArraySizing... ASs>
+   Array<ElemT0,NDIM,AS0> transform( const Functor&                   func,
+                                     const Array<ElemT0,NDIM,AS0>&    src0,
+                                     const Array<ElemTs,NDIM,ASs>&... srcs )
+  {
+      Array<ElemT0,NDIM,AS0> dst(src0.shape());
+      transform( func, dst, src0, srcs... );
+      return dst;
   }
 
 
