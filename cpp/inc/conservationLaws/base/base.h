@@ -25,12 +25,10 @@
                                         VariableDelta<Law,nDim,Basis,Real>,
                                         Real>
   {
-     /*
       using AffinePointBase<nVar<Law,nDim>,
                             VariableSet<  Law,nDim,Basis,Real>,
                             VariableDelta<Law,nDim,Basis,Real>,
                             Real>::AffinePointBase;
-     */
   };
 
 
@@ -44,12 +42,10 @@
                                           VariableDelta<Law,nDim,Basis,Real>,
                                           Real>
   {
-     /*
       using AffineDeltaBase<nVar<Law,nDim>,
                             VariableSet<  Law,nDim,Basis,Real>,
                             VariableDelta<Law,nDim,Basis,Real>,
                             Real>::AffineDeltaBase;
-     */
   };
 
 

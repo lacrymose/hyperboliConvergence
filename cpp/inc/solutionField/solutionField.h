@@ -3,6 +3,7 @@
 
 # include <conservationLaws/base/base.h>
 
+# include <parallalg/algorithm.h>
 # include <parallalg/array.h>
 
    template<typename ElemT>
@@ -51,33 +52,27 @@
  *    boundary condition types
  *    boundary reference solutions
  */
-   template<LawType          Law,
-            int             nDim,
-            BasisType<Law> Basis,
-            floating_point  Real>
+   template<ImplementedVarSet VarSet,
+            int                 nDim>
    struct SolutionField
   {
       const static unsigned int nBoundaries=2*nDim;
+      const static LawType Law = law_of_v<VarSet>;
 
-   // held variable set of field
-      using VarSet   = VariableSet<  Law,nDim,Basis,Real>;
-      using VarDel   = VariableDelta<Law,nDim,Basis,Real>;
+      using VarDel = vardelta_t<VarSet>;
 
    // array type for field
       using VarField = par::Array<VarSet,nDim>;
 
    // enum for specifying boundary condition
-      using BCType   = BoundaryType<Law>;
-
-   // shape of internal domain
-      par::Shape<nDim> shape;
+      using BCType = BoundaryType<Law>;
 
    // internal and boundary solution fields
       VarField                         interior;
       std::array<VarField,nBoundaries> boundary;
 
    // boundary condition types
-      std::array<BCType,  nBoundaries>  bcTypes;
+      std::array<BCType,nBoundaries> bcTypes;
 
    // par::Array only supports move construction, so same must be for SolutionField
       SolutionField() = delete;
@@ -90,36 +85,31 @@
 
    // must be initialised with shape of domain
       SolutionField( const par::Shape<nDim>& s )
-                     : shape(s),
-                       q(s),
-                       qb(makeBoundaryArray<VarSet>(s)){}
+                     : interior(s),
+                       boundary(makeBoundaryArray<VarSet>(s)){}
   };
 
 
-   template<LawType          Law,
-            int             nDim,
-            BasisType<Law> Basis,
-            floating_point  Real>
-   void copy(       SolutionField<Law,nDim,Basis,Real>& dst,
-              const SolutionField<Law,nDim,Basis,Real>& src )
+   template<ImplementedVarSet VarSet,
+            int                 nDim>
+   void copy(       SolutionField<VarSet,nDim>& dst,
+              const SolutionField<VarSet,nDim>& src )
   {
-      assert( dst.shape == src.shape );
+      assert( dst.interior.shape() == src.interior.shape() );
 
       par::copy( dst.interior, src.interior );
-      for( int i=0; i<src.nBoundaries; i++ )
+      for( unsigned int i=0; i<src.nBoundaries; i++ )
      {
          par::copy( dst.boundary[i], src.boundary[i] );
          dst.bcTypes[i] = src.bcTypes[i];
      }
   }
 
-   template<LawType          Law,
-            int             nDim,
-            BasisType<Law> Basis,
-            floating_point  Real>
-   SolutionField<Law,nDim,Basis,Real> copy( const SolutionField<Law,nDim,Basis,Real>& src )
+   template<ImplementedVarSet VarSet,
+            int                 nDim>
+   SolutionField<VarSet,nDim> copy( const SolutionField<VarSet,nDim>& src )
   {
-      SolutionField<Law,nDim,Basis,Real> dst(src.shape);
+      SolutionField<VarSet,nDim> dst(src.interior.shape());
       copy( dst,src );
       return dst;
   }

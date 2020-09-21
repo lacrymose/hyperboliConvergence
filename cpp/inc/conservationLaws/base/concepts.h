@@ -98,11 +98,11 @@
    concept bool FluxFunctor =
       ImplementedLawType<Law>
    && requires( T Flux, Species<Law,double> species,  geom::Surface<2,double> face,
-                State<Law,2,double> sl, State<Law,2,double> sr,
+//              State<Law,2,double> sl, State<Law,2,double> sr,
                 VariableSet<Law,2,BasisType<Law>::Conserved,double> ql,
                 VariableSet<Law,2,BasisType<Law>::Conserved,double> qr )
      {
-         { Flux( species, face, sl, sr ) } ->  FluxResult<Law,2,double>;
+//       { Flux( species, face, sl, sr ) } ->  FluxResult<Law,2,double>;
          { Flux( species, face, ql, qr ) } ->  FluxResult<Law,2,double>;
      };
 

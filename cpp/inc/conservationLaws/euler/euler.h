@@ -92,6 +92,11 @@
       has_same_law_v<T,law_constant<LawType::Euler>>
    && ImplementedVarSet<T>;
 
+   template<typename T>
+   concept bool EulerVarDelta =
+      has_same_law_v<T,law_constant<LawType::Euler>>
+   && ImplementedVarDelta<T>;
+
    // conserved variables
 
    template<typename T>

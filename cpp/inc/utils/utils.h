@@ -1,82 +1,49 @@
 
 # pragma once
 
+# include <tuple>
 # include <cmath>
+# include <cassert>
 
 namespace utils
 {
-// return -1 if val<0, 0 if val==0, 1 if val>0
-   template<typename T>
-   inline int sign( const T val )
+/*
+ * recursively loop through tuple and call DoSomething with tuple element matching thingToMatch and args
+      must be called with N=0 first
+ */
+   template<size_t                   N,
+            typename      ThingToMatch,
+            typename...     TupleElems,
+            typename  GetThingFromElem,
+            typename     CompareThings,
+            typename       DoSomething,
+            typename...           Args>
+   void selectFromTuple( const ThingToMatch         thingToMatch,
+                         const std::tuple<TupleElems...>     tpl,
+                         const GetThingFromElem&       get_thing,
+                         const CompareThings&     compare_things,
+                         const DoSomething&         do_something,
+                               Args&&...                    args )
   {
-      return ( T(0) < val ) - ( val < T(0) );
-  }
-
-// specialisation using signbit for floating point types
-   template<>
-   inline int sign( const double val )
-  {
-      return 1-2*std::signbit(val);
-  }
-
-// return 1 if val>0, else 0
-   template<typename T>
-   inline int greaterThan0( const T val )
-  {
-      return (sign(val)+1)/2;
-  }
-
-// return 1 if val<0, else 0
-   template<typename T>
-   inline int lessThan0( const T val )
-  {
-      return -(sign(val)-1)/2;
-  }
-
-// return 1 if val>off, else 0
-   template<typename T>
-   inline int greaterThan( const T val, const T offset )
-  {
-      return greaterThan0( val-offset );
-  }
-
-// return 1 if val<off, else 0
-   template<typename T>
-   inline int lessThan( const T val, const T offset )
-  {
-      return lessThan0( val-offset );
-  }
-
-// return val if val>0, else 0
-   template<typename T>
-   inline T positiveRamp( const T val )
-  {
-      return 0.5*( val + fabs( val ) );
-  }
-
-// return val if val<0, else 0
-   template<typename T>
-   inline T negativeRamp( const T val )
-  {
-      return 0.5*( val - fabs( val ) );
-  }
-
-// specializations for integral values
-   template<>
-   inline int positiveRamp( const int val )
-  {
-      return ( val + abs( val ) )/2;
-  }
-
-   template<>
-   inline int negativeRamp( const int val )
-  {
-      return ( val - abs( val ) )/2;
-  }
-
-   inline int int_or( const int a, const int b )
-  {
-      return a + b - a*b;
+      if( compare_things( thingToMatch,
+                          get_thing( std::get<N>(tpl) ) ) )
+     {
+         do_something( std::get<N>(tpl), std::forward<Args>(args)... );
+         return;
+     }
+      if constexpr( N+1 < sizeof...(TupleElems) )
+     {
+         selectFromTuple<N+1>( thingToMatch, tpl,
+                               get_thing,
+                               compare_things,
+                               do_something,
+                               std::forward<Args>(args)... );
+         return;
+     }
+      else
+     {
+         assert( false && "selectFromTuple did not match any member of tuple" );
+     }
   }
 }
 

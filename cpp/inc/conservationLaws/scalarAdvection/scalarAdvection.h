@@ -71,6 +71,11 @@
    && ImplementedVarSet<T>;
 
    template<typename T>
+   concept bool ScalarVarDelta =
+      has_same_law_v<T,law_constant<LawType::ScalarAdvection>>
+   && ImplementedVarDelta<T>;
+
+   template<typename T>
    concept bool ScalarConservedVariables =
       is_specialised_VarSet_v<T,
                               LawType::ScalarAdvection,

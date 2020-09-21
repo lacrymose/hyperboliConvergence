@@ -1,1 +1,1 @@
--Wall -Wextra -Wpedantic -std=c++2a
+-I./inc -Wall -Wextra -Wpedantic -std=c++2a -fconcepts
