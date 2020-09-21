@@ -98,6 +98,13 @@ namespace geom
 // ----------------- operations on Points/Directions ----------------- 
 
 /*
+ * Dot product of two Directions
+ */
+   template<int nDim, floating_point Real>
+   Real dot( const Direction<nDim,Real>&,
+             const Direction<nDim,Real>& );
+
+/*
  * Length of a Direction squared
  *    comparison of Direction lengths can be done on length2 with the same result, avoiding a sqrt
  */

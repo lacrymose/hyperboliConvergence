@@ -4,11 +4,18 @@
 namespace geom
 {
    template<int nDim, floating_point Real>
+   Real dot( const Direction<nDim,Real>& l,
+             const Direction<nDim,Real>& r )
+  {
+      Real d=0;
+      for( int i=0; i<nDim; i++ ){ d+=l[i]*r[i]; }
+      return d;
+  }
+
+   template<int nDim, floating_point Real>
    Real length2( const Direction<nDim,Real>& d )
   {
-      Real l=0;
-      for( const Real& x : d.elems ){ l+=x*x; }
-      return l;
+      return dot( d,d );
   }
 
    template<int nDim, floating_point Real>
