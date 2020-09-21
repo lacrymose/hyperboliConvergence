@@ -28,7 +28,9 @@ CSCRIPT = test/test.cpp \
 	riemannProblem.cpp \
 	riemannProblemRK.cpp \
 	shocktube.cpp \
-	periodic1D.cpp \
+	eulerPeriodic1D.cpp \
+	scalarPeriodic1D.cpp \
+	scalarPeriodic2D.cpp \
 	periodic2D.cpp
 
 # compiler
@@ -38,7 +40,7 @@ CCMP = g++-8
 #COPT = -Og -D_GLIBCXX_DEBUG -fsanitize=address -fno-omit-frame-pointer
 COPT = -O3 -fno-exceptions
 
-CWARN = -Wall -Wextra -Wpedantic -Wno-unused-parameter# -Wshadow
+CWARN = -Wall -Wextra -Wpedantic -Wno-unused-parameter -Wshadow
 
 CSTD = -std=c++2a -fconcepts
 
