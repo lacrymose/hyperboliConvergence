@@ -201,7 +201,11 @@ namespace par
                  && (is_integer_v<Ints> && ...)
       Array( const Ints... Is ) : shape_array{Is...}, stride_array({Is...}), elems_array( (Is*...) ) {}
 
+   // constructor array with shape s, and no initialisation of array elements
       Array( const Shape<NDIM>& s ) : shape_array(s), stride_array(s), elems_array( length(s) ) {}
+
+   // constructor array with shape s, and initialise array elements to val
+      Array( const Shape<NDIM>& s, const ElemT& val ) : shape_array(s), stride_array(s), elems_array( length(s), val ) {}
 
    // flattened length of array
       size_t flattened_length() const { return elems_array.size(); }

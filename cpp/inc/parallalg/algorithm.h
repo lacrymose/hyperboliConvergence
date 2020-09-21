@@ -82,6 +82,78 @@ namespace par
 
 
 /*
+ * ------------------------- par::generate ------------------------
+ */
+
+/*
+ * Fill an array with the result of repeated calls to Generator
+ */
+   template<typename ElemT, int NDIM, ArraySizing AS, typename Generator>
+   void generate( Array<ElemT,NDIM,AS>& dst, Generator generator )
+  {
+      const size_t len = dst.flattened_length();
+
+      for( size_t i=0; i<len; i++ ){ dst.flatten(i) = generator(); }
+
+      return;
+  }
+
+
+/*
+ * ------------------------- par::generate_idx ------------------------
+ */
+
+/*
+ * Fill an array with the result of repeated calls to Generator, using the index as an argument
+ */
+   template<typename ElemT, ArraySizing AS, typename Generator>
+   void generate_idx( Array<ElemT,1,AS>& dst, Generator generator )
+  {
+      const size_t n = dst.shape(0);
+      for( size_t i=0; i<n; i++ ){ dst[{i}] = generator( par::Idx<1>{i} ); }
+      return;
+  }
+
+   template<typename ElemT, ArraySizing AS, typename Generator>
+   void generate_idx( Array<ElemT,2,AS>& dst, Generator generator )
+  {
+      const size_t ni = dst.shape(0);
+      const size_t nj = dst.shape(1);
+
+      for( size_t i=0; i<ni; i++ )
+     {
+         for( size_t j=0; j<nj; j++ )
+        {
+            const par::Idx<2> idx{i,j};
+            dst[idx] = generator(idx);
+        }
+     }
+      return;
+  }
+
+   template<typename ElemT, ArraySizing AS, typename Generator>
+   void generate_idx( Array<ElemT,3,AS>& dst, Generator generator )
+  {
+      const size_t ni = dst.shape(0);
+      const size_t nj = dst.shape(1);
+      const size_t nk = dst.shape(2);
+
+      for( size_t i=0; i<ni; i++ )
+     {
+         for( size_t j=0; j<nj; j++ )
+        {
+            for( size_t k=0; k<nk; k++ )
+           {
+               const par::Idx<3> idx{i,j,k};
+               dst[idx] = generator(idx);
+           }
+        }
+     }
+      return;
+  }
+
+
+/*
  * ------------------------- par::for_each ------------------------
  */
 
@@ -90,9 +162,9 @@ namespace par
  */
    template<typename Functor, int NDIM, typename    ElemT0, ArraySizing    AS0,
                                         typename... ElemTs, ArraySizing... ASs>
-   void for_each( const Functor&                   func,
-                        Array<ElemT0,NDIM,AS0>&    array0,
-                        Array<ElemTs,NDIM,ASs>&... arrays )
+   void for_each( Functor                    func,
+                  Array<ElemT0,NDIM,AS0>&    array0,
+                  Array<ElemTs,NDIM,ASs>&... arrays )
   {
       (( assert(   (array0.shape() == arrays.shape())
                 && "par::for_each - arrays must be the same shape" ) ),... );
@@ -103,6 +175,86 @@ namespace par
      {
          func( array0.flatten(i),
                arrays.flatten(i)... );
+     }
+      return;
+  }
+
+
+/*
+ * ------------------------- par::for_each_idx ------------------------
+ */
+
+/*
+ * Applies a given functor to each element pack in an array pack, and also passes the current index
+ */
+   template<typename Functor, typename    ElemT0, ArraySizing    AS0,
+                              typename... ElemTs, ArraySizing... ASs>
+   void for_each_idx( Functor                   func,
+                      Array<ElemT0,1,AS0>&    array0,
+                      Array<ElemTs,1,ASs>&... arrays )
+  {
+      (( assert(   (array0.shape() == arrays.shape())
+                && "par::for_each - arrays must be the same shape" ) ),... );
+
+      const size_t n = array0.shape(0);
+
+      for( size_t i=0; i<n; i++ )
+     {
+         const par::Idx<1> idx{i};
+         func( idx, array0[idx],
+                    arrays[idx]... );
+     }
+      return;
+  }
+
+   template<typename Functor, typename    ElemT0, ArraySizing    AS0,
+                              typename... ElemTs, ArraySizing... ASs>
+   void for_each_idx( Functor                   func,
+                      Array<ElemT0,2,AS0>&    array0,
+                      Array<ElemTs,2,ASs>&... arrays )
+  {
+      (( assert(   (array0.shape() == arrays.shape())
+                && "par::for_each - arrays must be the same shape" ) ),... );
+
+      const size_t ni = array0.shape(0);
+      const size_t nj = array0.shape(1);
+
+      for( size_t i=0; i<ni; i++ )
+     {
+         for( size_t j=0; j<nj; j++ )
+        {
+            const par::Idx<2> idx{i,j};
+            func( idx, array0[idx],
+                       arrays[idx]... );
+        }
+     }
+      return;
+  }
+
+   template<typename Functor, typename    ElemT0, ArraySizing    AS0,
+                              typename... ElemTs, ArraySizing... ASs>
+   void for_each_idx( Functor                   func,
+                      Array<ElemT0,3,AS0>&    array0,
+                      Array<ElemTs,3,ASs>&... arrays )
+  {
+      (( assert(   (array0.shape() == arrays.shape())
+                && "par::for_each - arrays must be the same shape" ) ),... );
+
+      const size_t ni = array0.shape(0);
+      const size_t nj = array0.shape(1);
+      const size_t nk = array0.shape(2);
+
+      for( size_t i=0; i<ni; i++ )
+     {
+         for( size_t j=0; j<nj; j++ )
+        {
+            for( size_t k=0; k<nk; k++ )
+           {
+               const par::Idx<3> idx{i,j,k};
+               func( idx, array0[idx],
+                          arrays[idx]... );
+           }
+        }
      }
       return;
   }
