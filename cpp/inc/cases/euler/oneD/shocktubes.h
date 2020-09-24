@@ -1,4 +1,6 @@
 
+# include <solutionField/solutionField.h>
+
 # include <conservationLaws/euler/euler.h>
 
 # include <geometry/geometry.h>
@@ -119,22 +121,26 @@
 
    template<EulerVarSet VarT, floating_point Real>
       requires SameFPType<VarT,Real>
-   par::Array<VarT,1> shocktube_initial_solution( const ShockTube1D                    problem,
-                                               const Species<LawType::Euler,Real>&  species,
-                                               const par::Array<geom::Volume<1,Real>,1>& cells )
+   SolutionField<VarT,1> shocktube_initial_solution( const ShockTube1D                    problem,
+                                                  const Species<LawType::Euler,Real>&  species,
+                                                  const par::Shape<1>                meshShape )
   {
       const VarT ql = shocktube_initial_left< VarT>( problem, species );
       const VarT qr = shocktube_initial_right<VarT>( problem, species );
 
-      const size_t nx = cells.shape(0);
+      const size_t nx = meshShape[0];
       assert( nx%2 == 0 );
 
-      par::Array<VarT,1> q0(cells.shape());
+      SolutionField<VarT,1> q(meshShape);
 
-      for( size_t i=0;    i<nx/2; i++ ){ q0[{i}] = ql; }
-      for( size_t i=nx/2; i<nx;   i++ ){ q0[{i}] = qr; }
+      for( size_t i=0;    i<nx/2; ++i ){ q.interior[{i}] = ql; }
+      for( size_t i=nx/2; i<nx;   ++i ){ q.interior[{i}] = qr; }
 
-      return q0;
+      for( EulerBCs& bc : q.bcTypes ){ bc=EulerBCs::Riemann; }
+      par::fill( q.boundary[0], ql );
+      par::fill( q.boundary[1], qr );
+
+      return q;
   }
 
 

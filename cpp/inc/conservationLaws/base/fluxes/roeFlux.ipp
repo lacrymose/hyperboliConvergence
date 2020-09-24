@@ -9,11 +9,11 @@
   {
 
    // types needed for upwind diffusion calculation
-      using ConsSet   = VariableSet<  Law,nDim,BasisType<Law>::Conserved,     Real>;
-      using ConsDelta = VariableDelta<Law,nDim,BasisType<Law>::Conserved,     Real>;
-      using CharDelta = VariableDelta<Law,nDim,BasisType<Law>::Characteristic,Real>;
-      using FluxRes   = FluxResult<Law,nDim,Real>;
-      using StateT    = State<Law,nDim,Real>;
+      using ConsSet = VariableSet<  Law,nDim,BasisType<Law>::Conserved,     Real>;
+      using ConsDel = VariableDelta<Law,nDim,BasisType<Law>::Conserved,     Real>;
+      using CharDel = VariableDelta<Law,nDim,BasisType<Law>::Characteristic,Real>;
+      using FluxRes = FluxResult<Law,nDim,Real>;
+      using StateT  = State<Law,nDim,Real>;
 
    // central flux
       FluxRes result = CentralFlux<Law>::flux( species, face, sl,sr );
@@ -27,21 +27,22 @@
                                                            wavespeeds( species, face,  sl  ),
                                                            wavespeeds( species, face,  sr  ) );
 
-   // face aligned conserved variables
-      const ConsDelta dqc = rotateToFace( face, ( state2Set<ConsSet>( species, sr )
-                                                 -state2Set<ConsSet>( species, sl ) ) );
+      // face aligned jump in conserved variables
+      const ConsDel dqc = rotateToFace( face, ( state2Set<ConsSet>( species, sr )
+                                               -state2Set<ConsSet>( species, sl ) ) );
 
-   // scaled characteristic variables
-      const CharDelta dqw = lambda*delta2Delta<CharDelta>( species, ravg, dqc );
+      // eigenvalue scaled jumps in characteristic variables
+      const CharDel dqw = lambda*delta2Delta<CharDel>( species, ravg, dqc );
 
-   // roe dissipation in conserved variables
-      const ConsDelta fd = rotateFromFace( face, delta2Delta<ConsDelta>( species, ravg, dqw ) );
+      // roe dissipation in conserved variables
+      const ConsDel fd = rotateFromFace( face, delta2Delta<ConsDel>( species, ravg, dqw ) );
 
-      // spectral radius
+   // flux is sum of central and dissipative components
+      result.flux-=0.5*fd;
+
+   // spectral radius
       result.lambda = fmax( result.lambda,
                             spectralRadius( face, ravg )*face.area );
-
-      result.flux-=0.5*fd;
 
       return result;
   }

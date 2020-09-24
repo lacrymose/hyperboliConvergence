@@ -9,6 +9,7 @@
 
 # include <array>
 # include <type_traits>
+# include <iostream>
 
 /*
  * calculate boundary value from Riemann invariant conditions
@@ -24,71 +25,74 @@
                            const geom::Surface<nDim,Real>&        face,
                            const geom::Volume<nDim,Real>& cellinterior,
                            const SolVarT&                    qinterior,
-                           const SolVarT&                    qboundary )
+                           const SolVarT&                    qfarfield )
   {
       using StateT = State<LawType::Euler,nDim,Real>;
       using PrimVarT = VariableSet<LawType::Euler,nDim,EulerBases::Primitive,Real>;
+      using Direction = geom::Direction<nDim,Real>;
 
       const Real gam =species.gamma;
       const Real gam1=species.gamma1;
 
-   // direction from interior cell to boundary face
-      const geom::Direction<nDim,Real> toBoundary = face.centre - cellinterior.centre;
-
+   // direction from boundary face into domain
+      const Direction intoDomain = cellinterior.centre - face.centre;
    // face normal points into or out of domain?
-      const bool face_into_domain = dot( toBoundary, face.metric[0] ) < 0;
+      const bool face_into_domain = dot( intoDomain, face.metric[0] ) > 0;
+      assert( face_into_domain );
 
-   // face normal points from left to right
-      const SolVarT& qr = face_into_domain ? qinterior : qboundary;
-      const SolVarT& ql = face_into_domain ? qboundary : qinterior;
-
-   // left/right/average states aligned with boundary face
-      const StateT stateL = set2State(  species, rotateToFace( face, ql ) );
-      const StateT stateR = set2State(  species, rotateToFace( face, qr ) );
-      const StateT stateA = roeAverage( species, stateL, stateR );
+   // interior/exterior/average states aligned with boundary face
+      const StateT stateA = roeAverage( species,
+                                        rotateToFace( face, qinterior ),
+                                        rotateToFace( face, qfarfield ) );
 
    // boundary mach number
       const Real ma = stateA.velocity(0) / sqrt( stateA.speedOfSound2() );
 
-   // supersonic cases, return fully upwinded value
-      if( ma<-1. ){ return qr; }
-      if( ma> 1. ){ return ql; }
+      const bool inflow = ma > 0;
 
-   // subsonic cases
-      const bool flow_to_right = ma > 0
+   // Upwind variables
+      const SolVarT& quw = inflow ? qfarfield : qinterior;
+
+   // supersonic cases, return fully upwinded value
+      if( std::abs(ma)>1. ){ return quw; }
+
+   // subsonic cases:
+
+   // interior/farfield states for linear fields
+      const StateT stateI = set2State( species, rotateToFace( face, qinterior ) );
+      const StateT stateF = set2State( species, rotateToFace( face, qfarfield ) );
 
       // acoustic and convective speeds
-      const Real al = sqrt( stateL.speedOfSound2() );
-      const Real ar = sqrt( stateR.speedOfSound2() );
+      const Real ai = sqrt( stateI.speedOfSound2() );
+      const Real af = sqrt( stateF.speedOfSound2() );
 
-      const Real unl = stateL.velocity(0);
-      const Real unr = stateR.velocity(0);
+      const Real uni = stateI.velocity(0);
+      const Real unf = stateF.velocity(0);
 
-      // left/right travelling acoustic riemann invariants
-      const Real ril = flow_to_right ? (unl + 2.*al*gam1) : (unr + 2.*ar*gam1);
-      const Real rir = flow_to_right ? (unr - 2.*ar*gam1) : (unl - 2.*al*gam1);
+   // u+/-a travelling acoustic riemann invariants
+      const Real rim = uni - 2.*ai*gam1;
+      const Real rip = unf + 2.*af*gam1;
 
-      // boundary values
-         // normal velocity and speed of sound at boundary
-      const Real ub = 0.5*( ril + rir );
-      const Real ab = 0.25*(gam-1.)*( ril - rir );
+      // boundary values of normal velocity and speed of sound
+      const Real ub = 0.5*( rim + rip );
+      const Real ab = 0.25*(gam-1.)*( rip - rim );
 
-      // entropy at boundary is upwind value
-      const Real sb = flow_to_right ? al2/( gam*pow( stateL.density(), gam-1. ) )
-                                    : ar2/( gam*pow( stateR.density(), gam-1. ) );
+   // linear riemann invariants (entropy and vorticity) are upwind values
 
-      // vorticity at boundary is upwind value
-      const auto get_vorticity = []( const StateT& s ) -> std:array<Real,nDim-1>
+   // upwind state for linear fields
+      const StateT stateU = set2State( species, rotateToFace( face, quw ) );
+
+   // entropy
+      const Real sb =   stateU.speedOfSound2()
+                     /( gam*pow( stateU.density(), gam-1. ) );
+
+      // vorticity
+      const auto vb = [&]() -> std::array<Real,nDim-1>
      {
          std::array<Real,nDim-1> v;
-         for( int i=0; i<nDim-1; ++i )
-        {
-            v[i]=s.velocity(i+1);
-        }
+         for( int i=0; i<nDim-1; ++i ){ v[i]=stateU.velocity(i+1); }
          return v;
-     };
-      const auto vb = flow_to_right ? get_vorticity( stateL )
-                                    : get_vorticity( stateR );
+     }();
 
       // density, pressure at boundary
       const Real rb  = pow( ab*ab/(gam*sb), gam1 );
@@ -96,11 +100,11 @@
 
       PrimVarT qb;
 
-      qb[0]  = ub;
+      qb[0] = ub;
       for( int i=0; i<nDim-1; ++i ){ qb[i+1]=vb[i]; }
       qb[nDim] = rb;
       qb[nDim+1] = pb;
 
+//    return qfarfield;
       return rotateFromFace( face, set2Set<SolVarT>( species, qb ) );
   }
-

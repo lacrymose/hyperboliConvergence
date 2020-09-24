@@ -3,6 +3,7 @@
 
 # include <conservationLaws/base/base.h>
 
+# include <utils/concepts.h>
 # include <utils/utils.h>
 
 # include <array>
@@ -83,19 +84,17 @@
    auto make_boundary_flux_lambda()
   {
       return [] <int                    nDim,
-                 size_t                    N,
                  floating_point         Real,
                  ImplementedVarSet   SolVarT,
                  ImplementedVarSet   SolDelT>
                ( const Species<Law,Real>&            spc,
                  const geom::Surface<nDim,Real>&    face,
                  const geom::Volume<nDim,Real>&    celli,
-                 const std::array<SolDelT,N>          dq,
+                 const SolDelT                        dq,
                  const SolVarT&                qinterior,
                  const SolVarT&                qboundary,
-                 const SolVarT&                qfarfield ) -> SolVarT
+                 const SolVarT&                qfarfield ) -> FluxResult<Law,nDim,Real>
 //       requires ConsistentTypes<Law,nDim,Real,SolVarSet,SolDelT>
-//                && N=nDim
      {
          using tag = std::integral_constant<BoundaryType<Law>,BCType>;
          return boundaryFlux( tag{}, spc, face, celli, dq, qinterior, qboundary, qfarfield );

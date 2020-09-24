@@ -27,33 +27,14 @@
   {
       using StateT = State<LawType::ScalarAdvection,nDim,Real>;
 
-   // direction from interior cell to boundary face
-      const geom::Direction<nDim,Real> toBoundary = face.centre - cellinterior.centre;
-
-   // face normal points into or out of domain?
-      const bool face_into_domain = dot( toBoundary, face.metric[0] ) < 0;
-
-   // face normal points to right value
-      const SolVarT& qr = face_into_domain ? qinterior : qboundary;
-      const SolVarT& ql = face_into_domain ? qboundary : qinterior;
-
    // face aligned average
       const StateT stateA = set2State( species,
                                        rotateToFace( face,
-                                                     ql+0.5*(qr-ql) ) );
+                                                     qinterior+0.5*(qboundary-qinterior) ) );
 
-      if( stateA.velocity(0) > 0 ) // flow in direction of face normal
-     {
-         return ql;
-     }
-      else if( stateA.velocity(0) < 0 ) // flow in opposite direction to face normal
-     {
-         return ql;
-     }
-      else
-     {
-         return rotateFromFace( face,
-                                state2Set<SolVarT>( species,
-                                                    stateA ) );
-     }
+   // face normal points into domain
+      const bool inflow = projectedVelocity( face, stateA )>0;
+
+      if    (  inflow )  { return qboundary; }
+      else /* outflow */ { return qinterior; }
   }

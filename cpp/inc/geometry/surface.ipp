@@ -16,7 +16,7 @@ namespace geom
       const Real l = length(tangent);
       return Surface<2,Real>{.area   = l,
                              .centre = p0 + 0.5*tangent,
-                             .metric = Metric<2,Real>{ -1.*norm(orthog(tangent)),
-                                                           norm(       tangent ) }};
+                             .metric = Metric<2,Real>{ flip(norm(orthog(tangent))),
+                                                            norm(       tangent ) }};
   }
 }

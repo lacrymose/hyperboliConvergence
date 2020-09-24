@@ -5,6 +5,8 @@
 
 # include <geometry/geometry.h>
 
+# include <limiters/limiter.h>
+
    template<LawType            Law,
             typename       Limiter,
             FluxFunctor<Law>  Flux>
@@ -38,3 +40,27 @@
                                      qr-0.5*sloper );
      };
   }
+
+   template<LawType            Law,
+            FluxFunctor<Law>  Flux>
+   auto make_muscl_flux( const Limiters::NoLimit1&,
+                         const Flux&          flux )
+  {
+      return [flux]
+             <int                      nDim,
+              floating_point           Real,
+              ImplementedVarSet   SolVarSet,
+              ImplementedVarDelta SolVarDel>
+            ( const Species<Law,Real>&    species,
+              const geom::Surface<nDim,Real> face,
+              const SolVarDel&,
+              const SolVarDel&,
+              const SolVarSet&                 ql,
+              const SolVarSet&                 qr ) -> FluxResult<Law,nDim,Real>
+//       requires ConsistentTypes<Law,nDim,Real,SolVarSet,SolVarDel>
+     {
+      // first order inviscid flux
+         return flux( species, face, ql, qr );
+     };
+  }
+

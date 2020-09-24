@@ -54,14 +54,15 @@
                                                     const WaveSpeeds<LawType::Euler,nDim,Real>& lr )
   {
       WaveSpeeds<LawType::Euler,nDim,Real> speeds;
+
    // no fix needed for convective speeds
       const Real ua = fabs(la[0]);
       speeds[0]=ua;
       for( unsigned int i=0; i<nDim-1; i++ ){ speeds[3+i] = ua; }
 
    // harten's fix for nonlinear speeds
-      speeds[1]=fabs(speeds[1]);
-      speeds[2]=fabs(speeds[2]);
+      speeds[1]=fabs(la[1]);
+      speeds[2]=fabs(la[2]);
 
       constexpr Real eps=0.05;
       for( unsigned int i=1; i<3; i++ )

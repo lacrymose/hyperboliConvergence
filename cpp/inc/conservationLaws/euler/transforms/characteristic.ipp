@@ -56,9 +56,9 @@
       const Real r1= 1./state.density();
       const Real a1= 1./sqrt( state.speedOfSound2() );
 
+      const Real du = dqp[0];
       const Real dr = dqp[nDim  ];
       const Real dp = dqp[nDim+1];
-      const Real du = dqp[0];
 
       CharDelT dqw;
 

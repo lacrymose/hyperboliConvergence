@@ -9,6 +9,13 @@ namespace geom
                             .centre=p0+0.5*dir};
   }
 
+   // corners of standard quad
+   //
+   //   2 ---- 3
+   //   |      |
+   //   |      |
+   //   0 ---- 1
+   //
    template<floating_point Real>
    Volume<2,Real> volume( const Point<2,Real>& p0, const Point<2,Real>& p1,
                           const Point<2,Real>& p2, const Point<2,Real>& p3 )

@@ -38,7 +38,7 @@ using Real = double;
 // ------- User Inputs -------
 
 // Convecting velocity - angle and magnitude
-constexpr Real theta = 0.20*M_PI;
+constexpr Real theta = 1.20*M_PI;
 constexpr Real speed = 1.0;
 
 // lo/hi x/y coordinates of scalar top-hat
@@ -50,9 +50,10 @@ constexpr Real th_hy = 0.625;
 
 
 // discretisation
-constexpr int  nx  = 32;
-constexpr int  nt  = 90;
-constexpr Real cfl = 0.5;
+constexpr int  nx  = 30;
+constexpr int  ny  = 20;
+constexpr int  nt  = 20;
+constexpr Real cfl = 1.5;
 
 constexpr BasisT SolBasis = BasisT::Conserved;
 
@@ -63,20 +64,14 @@ using Limiter = Limiters::NoLimit3;
 
 // ------ typedefs -------------------
 
-using SolVarSet  = VariableSet<  Law,nDim,SolBasis,Real>;
-using SolVarDel  = VariableDelta<Law,nDim,SolBasis,Real>;
-using SolVarGrad = std::array<SolVarDel,nDim>;
-using SolField   = SolutionField<SolVarSet,nDim>;
-
-using FluxRes = FluxResult<Law,nDim,Real>;
-
-using MeshT = Mesh<nDim,Real>;
-using Face  = MeshT::Face;
+using SolVarSet = VariableSet<  Law,nDim,SolBasis,Real>;
+using SolField  = SolutionField<SolVarSet,nDim>;
+using MeshT     = Mesh<nDim,Real>;
 
 
 // ------- i/o -------
 
-   void writeState( std::ofstream& os,
+   void writeState( std::ostream& os,
                     const MeshT::Cell&                                    cell,
                     const Species<LawType::ScalarAdvection,Real>&      species,
                     const State<  LawType::ScalarAdvection,nDim,Real>&   state )
@@ -108,7 +103,7 @@ using Face  = MeshT::Face;
       const Species<Law,Real> species{};
 
    // initialise mesh
-      const MeshT mesh = make_linspace_mesh<Real>( cellShape, 0,nx, 0,nx );
+      const MeshT mesh = make_linspace_mesh<Real>( cellShape, 0,nx, 0,ny );
 
    // initialise solution
       SolField q( cellShape );
@@ -116,7 +111,10 @@ using Face  = MeshT::Face;
                                                         species,
                                                         theta,speed,
                                                         th_lx*nx,th_hx*nx,
-                                                        th_ly*nx,th_hy*nx );
+                                                        th_ly*ny,th_hy*ny );
+
+//    const SolVarSet qref{cos(theta)*speed,sin(theta)*speed,1.};
+//    par::fill( q.interior, qref );
 
    // initialise boundaries
       for( SolField::VarField& v : q.boundary ){ par::fill( v, q.interior[{0,0}] ); }
@@ -140,7 +138,7 @@ using Face  = MeshT::Face;
 
    // write solution to file
      {
-      std::ofstream solutionFile("data/scalarPeriodic2D.dat");
+      std::ofstream solutionFile("data/scalar/cartesian2D/result.dat");
 
       if( solutionFile.is_open() )
      {
@@ -158,7 +156,7 @@ using Face  = MeshT::Face;
      }
       else
      {
-         std::cout << "cannot open \"data/scalarPeriodic2D.dat\" for writing\n" << std::endl;
+         std::cout << "cannot open \"data/scalar/cartesian2D/result.dat\" for writing\n" << std::endl;
          return 1;
      }
       solutionFile.close();

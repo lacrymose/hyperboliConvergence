@@ -1,6 +1,8 @@
 
 # pragma once
 
+# include <spatial/boundary/boundaryCondition.h>
+
 # include <solutionField/solutionField.h>
 # include <conservationLaws/base/base.h>
 
@@ -98,8 +100,8 @@
       const size_t bID = boundaryId;
       if( boundaryId==0 ) // left boundary
      {
-         const par::Idx<1> ic{0};   // interior cell
-         const par::Idx<1> ip{0};   // node on boundary
+         const par::Idx<1> ic{0};    // interior cell
+         const par::Idx<1> ip{0};    // node on boundary
          const par::Idx<1> ibv{0};   // boundary value
          const par::Idx<1> ibr{1};   // boundary reference value
 
@@ -112,12 +114,13 @@
          const size_t nc = q.interior.shape(0);
 
          const par::Idx<1> ic{nc-1};   // interior cell
-         const par::Idx<1> ip{nc};   // node on boundary
-         const par::Idx<1> ibv{0};   // boundary value
-         const par::Idx<1> ibr{1};   // boundary reference value
+         const par::Idx<1> ip{nc};     // node on boundary
+         const par::Idx<1> ibv{0};     // boundary value
+         const par::Idx<1> ibr{1};     // boundary reference value
 
+      // boundary surface must face into domain
          q.boundary[bID][ibv] = updateBC( species,
-                                          surface( mesh.nodes[ip] ), mesh.cells[ic],
+                                          flip( surface( mesh.nodes[ip] ) ), mesh.cells[ic],
                                           q.interior[ic], q.boundary[bID][ibr] );
      }
       else{ assert( false && "invalid boundary id for 1D boundary update, must be 0 or 1" ); }
@@ -195,8 +198,8 @@
             const par::Idx<2> ibr{j,1};
    
          // face node indices
-            const par::Idx<2> ip0{i+1,j  };
-            const par::Idx<2> ip1{i+1,j+1};
+            const par::Idx<2> ip0{i+1,j+1};
+            const par::Idx<2> ip1{i+1,j  };
    
             q.boundary[bID][ibv] = updateBC( species,
                                              surface( mesh.nodes[ip0],
@@ -241,8 +244,8 @@
             const par::Idx<2> ibr{i,1};
    
          // face node indices
-            const par::Idx<2> ip0{i+1,j+1};
-            const par::Idx<2> ip1{i  ,j+1};
+            const par::Idx<2> ip0{i  ,j+1};
+            const par::Idx<2> ip1{i+1,j+1};
    
             q.boundary[bID][ibv] = updateBC( species,
                                              surface( mesh.nodes[ip0],

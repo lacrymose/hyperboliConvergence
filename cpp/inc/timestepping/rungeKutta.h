@@ -62,7 +62,6 @@
       using SolVarGrad = std::array<SolVarDel,nDim>;
 
       par::Array<SolVarGrad,nDim> dq( q0.interior.shape(), SolVarGrad{} );
-//    par::fill( dq, SolVarGrad{} );
 
       for( size_t tstep=0; tstep<timeControls.nTimesteps; tstep++ )
      {

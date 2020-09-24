@@ -33,13 +33,13 @@
               && std::is_same_v<FluxRes,
                                 fluxresult_t<SolVarT>>
    void boundaryResidual( const BoundaryCondition<Law,BCType,UpdateFunc>&,
-                          const size_t                     boundaryId,
-                          const Mesh<1,Real>&                    mesh,
-                          const HighOrderFlux&                 hoflux,
-                          const Species<Law,Real>&            species,
-                          const SolutionField<SolVarT,1>&           q,
-                          const par::Array<std::array<SolDelT,1>,1>&          dq,
-                                par::Array<   FluxRes,1>&         res )
+                          const size_t                       boundaryId,
+                          const Mesh<1,Real>&                      mesh,
+                          const HighOrderFlux&                   hoflux,
+                          const Species<Law,Real>&              species,
+                          const SolutionField<SolVarT,1>&             q,
+                          const par::Array<std::array<SolDelT,1>,1>& dq,
+                                par::Array<FluxRes,1>&              res )
   {
    // check mesh sizes match
       assert( mesh.cells.shape() == res.shape() );
@@ -58,7 +58,6 @@
          const FluxRes fr = hoflux( species,
                                     surface( mesh.nodes[ip] ),
                                     SolDelT{},         dq[ir][0],
-//                                  SolDelT{},      SolDelT{},
                                     q.boundary[0][ib], q.interior[ir] );
          res[ir]+=fr;
      }
@@ -73,7 +72,6 @@
          const FluxRes fr = hoflux( species,
                                     surface( mesh.nodes[ip] ),
                                     dq[il][0],      SolDelT{},
-//                                  SolDelT{},      SolDelT{},
                                     q.interior[il], q.boundary[1][ib] );
          res[il]-=fr;
      }

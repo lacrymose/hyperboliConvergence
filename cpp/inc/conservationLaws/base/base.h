@@ -119,7 +119,7 @@
   {
       constexpr int nv = nVar<Law,nDim>;
       VariableDelta<Law,nDim,BasisType<Law>::Characteristic,Real> result;
-      for( int i=0; i<nv; i++ ){ result[i]=speeds[i]*waves[i]; }
+      for( int i=0; i<nv; ++i ){ result[i]=speeds[i]*waves[i]; }
       return result;
   }
 
@@ -155,6 +155,13 @@
          un+= dir[i]*state.velocity(i);
      }
       return un;
+  }
+
+   template<LawType Law, int nDim, floating_point Real>
+   Real projectedVelocity( const geom::Surface<nDim,Real>& face,
+                           const State<Law,nDim,Real>&    state )
+  {
+      return projectedVelocity( face.metric[0], state );
   }
 
 /*
@@ -323,8 +330,11 @@
             floating_point      Real>
       requires   (   ImplementedVarSet<VarT>
                   || is_State_v<VarT> )
-              && ConsistentTypes<Law,dim_of_v<DelT>,Real,
-                                 DelT,VarT>
+              && ConsistentTypes<Law,
+                                 dim_of_v<DelT>,
+                                 Real,
+                                 DelT,
+                                 VarT>
    DelT delta2Delta( const Species<Law,Real>&      species,
                      const VarT&                        q0,
                      const DelT&                       dq0 )
@@ -332,6 +342,22 @@
       return DelT(dq0);
   }
 
+
+   template<LawType            Law,
+            ImplementedVarSet VarT,
+            floating_point    Real>
+      requires ConsistentTypes<Law,
+                               dim_of_v<VarT>,
+                               Real,
+                               VarT>
+   state_t<VarT> roeAverage( const Species<Law,Real>& species,
+                             const VarT&                   ql,
+                             const VarT&                   qr )
+  {
+      return roeAverage( species,
+                         set2State( species, ql ),
+                         set2State( species, qr ) );
+  }
 
 
 // ---------- generic flux functions ----------

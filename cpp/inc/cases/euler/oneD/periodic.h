@@ -10,7 +10,8 @@
    enum struct Periodic1D
   {
       Soundwave,
-      AcousticEntropy
+      AcousticEntropy,
+      Other
   };
 
 //   template<EulerVarSet VarT, floating_point Real>

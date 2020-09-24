@@ -22,16 +22,11 @@ CSCRIPT = test/test.cpp \
 	test/testArray.cpp \
 	test/testArray2.cpp \
 	test/testField.cpp \
-	sodsExplicitEuler1.cpp \
-	sodsDualTime.cpp \
-	sods.cpp \
-	riemannProblem.cpp \
-	riemannProblemRK.cpp \
-	shocktube.cpp \
-	eulerPeriodic1D.cpp \
-	scalarPeriodic1D.cpp \
-	scalarPeriodic2D.cpp \
-	periodic2D.cpp
+	scalar/oneD.cpp \
+	scalar/cartesian2D.cpp \
+	euler/shocktube.cpp \
+	euler/oneD.cpp \
+	euler/channelBump2D.cpp
 
 # compiler
 CCMP = g++-8
@@ -40,9 +35,9 @@ CCMP = g++-8
 #COPT = -Og -D_GLIBCXX_DEBUG -fsanitize=address -fno-omit-frame-pointer
 COPT = -O3 -fno-exceptions
 
-CWARN = -Wall -Wextra -Wpedantic -Wno-unused-parameter -Wshadow
+CWARN = -Wall -Wextra -Wpedantic -Wno-unused-parameter
 
-CSTD = -std=c++2a -fconcepts
+CSTD = -std=c++2a -fconcepts -fopenmp
 
 # external libraries, eg lapack, blas, openmp ...
 LIBS =

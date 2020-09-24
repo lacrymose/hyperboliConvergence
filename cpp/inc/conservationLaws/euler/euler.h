@@ -34,7 +34,8 @@
    enum struct EulerBCs
   {
       Periodic,
-      Riemann
+      Riemann,
+      InviscidWall
   };
 
    template<>

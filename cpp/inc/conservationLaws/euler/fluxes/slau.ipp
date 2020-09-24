@@ -1,8 +1,8 @@
 
 # include <conservationLaws/euler/fluxes/machSplittings.ipp>
 
-      template<LowMachScaling VFluxScaling,                       // struct template parameters
-               LowMachScaling PFluxScaling>
+      template<LowMachScaling VFluxScaling,
+               LowMachScaling PFluxScaling>                       // struct template parameters
 
       template<EulerState StateT, int nDim, floating_point Real>  // member function template parameters
          requires   SameDim<   StateT,dim_constant<nDim>>
@@ -25,8 +25,8 @@
       const Real ma_hat = fmin( 1.0,ma );
 
 // left/right mach numbers
-      const Real unl = projectedVelocity( face.metric[0], sl );
-      const Real unr = projectedVelocity( face.metric[0], sr );
+      const Real unl = projectedVelocity( face, sl );
+      const Real unr = projectedVelocity( face, sr );
 
       const Real ml = unl*aa1;
       const Real mr = unr*aa1;
@@ -48,7 +48,7 @@
       [[maybe_unused]] const Real m0_a = std::clamp<Real>( fmax( ma, mu ), minf, 1. );
 
    // scaling parameter for pressure diffusion in mass flux
-      const Real m0_p = [&]() -> Real
+      [[maybe_unused]] const Real m0_p = [&]() -> Real
      {
          if      constexpr( PFluxScaling == LowMachScaling::Convective ){ return m0_c; }
          else if constexpr( PFluxScaling == LowMachScaling::Acoustic   ){ return 1.0;  }
@@ -56,7 +56,7 @@
      }();
 
    // scaling parameter for velocity diffusion in pressure flux
-      const Real m0_u = [&]() -> Real
+      [[maybe_unused]] const Real m0_u = [&]() -> Real
      {
          if      constexpr( VFluxScaling == LowMachScaling::Convective ){ return m0_c; }
          else if constexpr( VFluxScaling == LowMachScaling::Acoustic   ){ return 1.0;  }
@@ -78,8 +78,8 @@
       const Real mdot_dr = una*dr;
    // const Real mdot_dr = 0.;
 
-   // const Real mdot_dp = chi*dp*aa1;       // slau
-      const Real mdot_dp = chi*dp/(aa*m0_p); // slau-p'
+      const Real mdot_dp = chi*dp*aa1;       // slau
+   // const Real mdot_dp = chi*dp/(aa*m0_p); // slau-p'
    // const Real mdot_dp = 0.;
 
    // assemble
@@ -109,8 +109,8 @@
    // const Real p_dp = 0.;
 
    // const Real p_du =-(1. - chi )*( betal + betar - 1. )*( p_c );  // slau
-   // const Real p_du =         -ma*( betal + betar - 1. )*( p_c );  // slau2
-      const Real p_du =       -m0_u*( betal + betar - 1. )*( p_c );  // slau-u'
+      const Real p_du =         -ma*( betal + betar - 1. )*( p_c );  // slau2
+   // const Real p_du =       -m0_u*( betal + betar - 1. )*( p_c );  // slau-u'
    // const Real p_du = 0.;
 
    // assemble

@@ -260,6 +260,79 @@ namespace par
   }
 
 
+   template<typename Functor, typename    ElemT0, ArraySizing    AS0,
+                              typename... ElemTs, ArraySizing... ASs>
+   void for_each_idx(       Functor                   func,
+                      const Array<ElemT0,1,AS0>&    array0,
+                      const Array<ElemTs,1,ASs>&... arrays )
+  {
+      (( assert(   (array0.shape() == arrays.shape())
+                && "par::for_each - arrays must be the same shape" ) ),... );
+
+      const size_t n = array0.shape(0);
+
+      for( size_t i=0; i<n; i++ )
+     {
+         const par::Idx<1> idx{i};
+         func( idx, array0[idx],
+                    arrays[idx]... );
+     }
+      return;
+  }
+
+   template<typename Functor, typename    ElemT0, ArraySizing    AS0,
+                              typename... ElemTs, ArraySizing... ASs>
+   void for_each_idx(       Functor                   func,
+                      const Array<ElemT0,2,AS0>&    array0,
+                      const Array<ElemTs,2,ASs>&... arrays )
+  {
+      (( assert(   (array0.shape() == arrays.shape())
+                && "par::for_each - arrays must be the same shape" ) ),... );
+
+      const size_t ni = array0.shape(0);
+      const size_t nj = array0.shape(1);
+
+      for( size_t i=0; i<ni; i++ )
+     {
+         for( size_t j=0; j<nj; j++ )
+        {
+            const par::Idx<2> idx{i,j};
+            func( idx, array0[idx],
+                       arrays[idx]... );
+        }
+     }
+      return;
+  }
+
+   template<typename Functor, typename    ElemT0, ArraySizing    AS0,
+                              typename... ElemTs, ArraySizing... ASs>
+   void for_each_idx(       Functor                   func,
+                      const Array<ElemT0,3,AS0>&    array0,
+                      const Array<ElemTs,3,ASs>&... arrays )
+  {
+      (( assert(   (array0.shape() == arrays.shape())
+                && "par::for_each - arrays must be the same shape" ) ),... );
+
+      const size_t ni = array0.shape(0);
+      const size_t nj = array0.shape(1);
+      const size_t nk = array0.shape(2);
+
+      for( size_t i=0; i<ni; i++ )
+     {
+         for( size_t j=0; j<nj; j++ )
+        {
+            for( size_t k=0; k<nk; k++ )
+           {
+               const par::Idx<3> idx{i,j,k};
+               func( idx, array0[idx],
+                          arrays[idx]... );
+           }
+        }
+     }
+      return;
+  }
+
+
 /*
  * ------------------------- par::transform ------------------------
  */

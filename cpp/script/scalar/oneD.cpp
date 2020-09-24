@@ -3,14 +3,14 @@
 # include <controls.h>
 
 # include <spatial/muscl.h>
-
-# include <spatial/boundary/boundaryCondition.h>
+# include <limiters/limiter.h>
 
 # include <timestepping/rungeKutta.h>
 
-# include <limiters/limiter.h>
 # include <conservationLaws/scalarAdvection/scalarAdvection.h>
 # include <conservationLaws/scalarAdvection/boundaryConditions.h>
+
+# include <spatial/boundary/boundaryCondition.h>
 
 # include <solutionField/solutionField.h>
 
@@ -58,25 +58,19 @@ using Limiter = Limiters::NoLimit1;
 
 // ------ typedefs -------------------
 
-using SolVarSet   = VariableSet<  Law,nDim,SolutionBasis,Real>;
-using SolVarDelta = VariableDelta<Law,nDim,SolutionBasis,Real>;
-using SolVarGrad  = std::array<SolVarDelta,nDim>;
-using SolField    = SolutionField<SolVarSet,nDim>;
-
-using FluxRes = FluxResult<Law,nDim,Real>;
-
-using MeshT = Mesh<nDim,Real>;
-using Face  = MeshT::Face;
+using SolVarSet = VariableSet<Law,nDim,SolutionBasis,Real>;
+using SolField  = SolutionField<SolVarSet,nDim>;
+using MeshT     = Mesh<nDim,Real>;
 
 
 // ------- i/o -------
 
-   void writeState( std::ofstream& os,
+   void writeState( std::ostream& os,
                     const Species<Law,  Real>& species,
                     const State<  Law,1,Real>&   state )
   {
       os << state.velocity(0) << " "
-         << state.scalar()    << std::endl;
+         << state.scalar()    << "\n";
   }
 
 

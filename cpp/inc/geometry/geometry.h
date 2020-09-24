@@ -156,6 +156,19 @@ namespace geom
    Point<2,Real> mass_centroid( const Point<2,Real>& p0, const Point<2,Real>& p1,
                                 const Point<2,Real>& p2, const Point<2,Real>& p3 );
 
+/*
+ * Flip a direction to face the opposite way
+ */
+   template<int nDim, floating_point Real>
+   Direction<nDim,Real> flip ( const Direction<nDim,Real>& d0 );
+
+/*
+ * Flip a surface so normal faces opposite way (maintaining right-handedness of coordinate metric)
+ */
+   template<int nDim, floating_point Real>
+   Surface<nDim,Real> flip ( const Surface<nDim,Real>& s0 );
+
+
 
 // ----------------- generation of geometric entities from Points ----------------- 
 

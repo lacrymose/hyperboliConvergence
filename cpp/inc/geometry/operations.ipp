@@ -43,7 +43,7 @@ namespace geom
    template<floating_point Real>
    Direction<2,Real> orthog( const Direction<2,Real>& d )
   {
-      return Direction<2,Real>{-d[1],d[0]};
+      return {-d[1],d[0]};
   }
 
    template<int nDim, floating_point Real>
@@ -57,5 +57,37 @@ namespace geom
   {
       const Real a = d[1]/d[0];
       return {a, p[1] - a*p[0]};
+  }
+
+   template<int nDim, floating_point Real>
+   Direction<nDim,Real> flip ( const Direction<nDim,Real>& d0 )
+  {
+      return -1.*d0;
+  }
+
+   template<int nDim, floating_point Real>
+   Surface<nDim,Real> flip ( const Surface<nDim,Real>& s0 )
+  {
+      Surface<nDim,Real> s1(s0);
+      if constexpr( nDim==1 )
+     {
+         s1.metric[0] = flip( s0.metric[0] );
+     }
+      else if constexpr( nDim==2 )
+     {
+         s1.metric[0] = flip( s0.metric[0] );
+         s1.metric[1] = flip( s0.metric[1] );
+     }
+      else if constexpr( nDim==3 )
+     {
+         s1.metric[0] = flip( s0.metric[0] );
+         s1.metric[1] = flip( s0.metric[1] );
+     }
+      else
+     {
+         constexpr bool validDim = nDim==1 or nDim==2 or nDim==3;
+         static_assert( validDim, "flipping Surface<nDim,Real> with nDim>3 not defined" );
+     }
+      return s1;
   }
 }
