@@ -102,9 +102,12 @@
       const size_t nj = mesh.cells.shape(1);
 
    // derivatives over i-normal faces
-      for( size_t i=0; i<ni-1; i++ )
+# ifdef _OPENMP
+   # pragma omp parallel for
+# endif
+      for( size_t j=0; j<nj; j++ )
      {
-         for( size_t j=0; j<nj; j++ )
+         for( size_t i=0; i<ni-1; i++ )
         {
             const par::Idx<2> icl{i  ,j};
             const par::Idx<2> icr{i+1,j};
@@ -117,6 +120,9 @@
      }
 
    // derivatives over i-normal faces
+# ifdef _OPENMP
+   # pragma omp parallel for
+# endif
       for( size_t i=0; i<ni; i++ )
      {
          for( size_t j=0; j<nj-1; j++ )

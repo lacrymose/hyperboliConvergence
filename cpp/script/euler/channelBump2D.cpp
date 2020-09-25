@@ -26,6 +26,8 @@
 # include <iostream>
 # include <fstream>
 
+# include <omp.h>
+
 # include <cases/euler/oneD/periodic.h>
 
 // ------- i/o -------
@@ -84,9 +86,9 @@ using Real = double;
 //    l is length of channel before/after bump
 //    w is width of bump
 //    h is height of bump
-constexpr size_t nl = 64;
-constexpr size_t nw = 32;
-constexpr size_t nd = 64;
+constexpr size_t nl = 32;
+constexpr size_t nw = 24;
+constexpr size_t nd = 48;
 
 constexpr Real d = 2.0;
 constexpr Real l = 4.0;
@@ -99,8 +101,12 @@ constexpr size_t ny = nd;
 //constexpr size_t ny = 30;
 
 // time discretisation
-constexpr size_t nt = 16000;
+constexpr size_t nt = 1000;
 constexpr Real  cfl = 0.4;
+
+# ifdef _OPENMP
+constexpr int nthreads=1;
+# endif
 
 // flow conditions
 constexpr Real mach     = 0.3;
@@ -134,9 +140,15 @@ using MeshT      = Mesh<nDim,Real>;
 
 // ------ setup -------------------
 
+   // openMP
+# ifdef _OPENMP
+      omp_set_num_threads(nthreads);
+      std::cout << "OpenMP enabled with: " << nthreads << " threads" << std::endl;
+# endif
+
       const par::Shape<nDim> cellShape{nx,ny};
 
-      const ODE::Explicit::RungeKutta<Real> rk = ODE::Explicit::ssp22<Real>();
+      const ODE::Explicit::RungeKutta<Real> rk = ODE::Explicit::ssp11<Real>();
       const UnsteadyTimeControls<Real> timeControls{.nTimesteps=nt, .cfl=cfl};
 
       const Species<Law,Real> species = []() -> Species<Law,Real>
@@ -167,10 +179,10 @@ using MeshT      = Mesh<nDim,Real>;
       for( SolField::VarField& qb : q.boundary ){ par::fill( qb, qref ); }
 //    par::fill( q.boundary[0], qref );
 //    par::fill( q.boundary[1], qref );
-      q.bcTypes[0] = BCType::Riemann;
-      q.bcTypes[1] = BCType::Riemann;
+      q.bcTypes[0] = BCType::Periodic;
+      q.bcTypes[1] = BCType::Periodic;
       q.bcTypes[2] = BCType::InviscidWall;
-      q.bcTypes[3] = BCType::InviscidWall;
+      q.bcTypes[3] = BCType::Riemann;
 
    // high order reconstruction and flux functions
       const auto hoflux = make_muscl_flux<Law>( Limiter{}, Flux{} );

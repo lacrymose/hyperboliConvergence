@@ -8,6 +8,8 @@
 # include <cassert>
 # include <cstring>
 
+# include <omp.h>
+
 namespace par
 {
 
@@ -26,6 +28,9 @@ namespace par
 
       const size_t len = dst.flattened_length();
 
+# ifdef _OPENMP
+   # pragma omp parallel for
+# endif
       for( size_t i=0; i<len; i++ ){ dst.flatten(i) = src.flatten(i); }
 
       return;
@@ -75,6 +80,9 @@ namespace par
   {
       const size_t len = dst.flattened_length();
 
+# ifdef _OPENMP
+   # pragma omp parallel for
+# endif
       for( size_t i=0; i<len; i++ ){ dst.flatten(i) = value; }
 
       return;
@@ -93,6 +101,9 @@ namespace par
   {
       const size_t len = dst.flattened_length();
 
+# ifdef _OPENMP
+   # pragma omp parallel for
+# endif
       for( size_t i=0; i<len; i++ ){ dst.flatten(i) = generator(); }
 
       return;
@@ -120,6 +131,9 @@ namespace par
       const size_t ni = dst.shape(0);
       const size_t nj = dst.shape(1);
 
+# ifdef _OPENMP
+   # pragma omp parallel for
+# endif
       for( size_t i=0; i<ni; i++ )
      {
          for( size_t j=0; j<nj; j++ )
@@ -138,6 +152,9 @@ namespace par
       const size_t nj = dst.shape(1);
       const size_t nk = dst.shape(2);
 
+# ifdef _OPENMP
+   # pragma omp parallel for
+# endif
       for( size_t i=0; i<ni; i++ )
      {
          for( size_t j=0; j<nj; j++ )
@@ -357,6 +374,9 @@ namespace par
 
       const size_t len = dst.flattened_length();
    
+# ifdef _OPENMP
+   # pragma omp parallel for
+# endif
       for( size_t i=0; i<len; i++ )
      {
          dst.flatten(i) = func( src0.flatten(i),

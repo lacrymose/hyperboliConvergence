@@ -19,10 +19,14 @@
 # include <parallalg/algorithm.h>
 # include <parallalg/array.h>
 
+# include <utils/utils.h>
+
 # include <tuple>
 # include <array>
 # include <vector>
 # include <cassert>
+
+# include <unistd.h>
 
 /*
  * integrates dq/dt = rhs forward in time using an explicit runge kutta scheme
@@ -63,6 +67,7 @@
 
       par::Array<SolVarGrad,nDim> dq( q0.interior.shape(), SolVarGrad{} );
 
+      utils::Timer timer( std::cout, "main loop time: " );
       for( size_t tstep=0; tstep<timeControls.nTimesteps; tstep++ )
      {
          Real lmax{};

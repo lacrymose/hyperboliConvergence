@@ -144,9 +144,12 @@
       const size_t nj = mesh.cells.shape(1);
 
    // accumulate cell residual contributions from fluxes across i-normal faces
-      for( size_t i=0; i<ni-1; ++i )
+# ifdef _OPENMP
+   # pragma omp parallel for
+# endif
+      for( size_t j=0; j<nj; ++j )
      {
-         for( size_t j=0; j<nj; ++j )
+         for( size_t i=0; i<ni-1; ++i )
         {
          // cell left/right indices
             const par::Idx<2> icl{i,  j};
@@ -167,6 +170,9 @@
      }
 
    // accumulate cell residual contributions from fluxes across j-normal faces
+# ifdef _OPENMP
+   # pragma omp parallel for
+# endif
       for( size_t i=0; i<ni; ++i )
      {
          for( size_t j=0; j<nj-1; ++j )

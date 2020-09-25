@@ -24,6 +24,8 @@
 # include <iostream>
 # include <fstream>
 
+# include <omp.h>
+
 # include <cases/scalarAdvection/twoD/periodic.h>
 
 /*
@@ -50,8 +52,8 @@ constexpr Real th_hy = 0.625;
 
 
 // discretisation
-constexpr int  nx  = 30;
-constexpr int  ny  = 20;
+constexpr int  nx  = 160;
+constexpr int  ny  = 80;
 constexpr int  nt  = 20;
 constexpr Real cfl = 1.5;
 
@@ -94,12 +96,18 @@ using MeshT     = Mesh<nDim,Real>;
 
    int main()
   {
+   // openMP
+# ifdef _OPENMP
+      omp_set_num_threads(2);
+      std::cout << "OpenMP enabled" << std::endl;
+# endif
+
+   // setup
       const par::Shape<nDim> cellShape{nx,nx};
 
       const ODE::Explicit::RungeKutta<Real> rk = ODE::Explicit::ssp34<Real>();
       const UnsteadyTimeControls<Real> timeControls{.nTimesteps=nt, .cfl=cfl};
 
-   // setup
       const Species<Law,Real> species{};
 
    // initialise mesh
