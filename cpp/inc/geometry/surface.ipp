@@ -12,11 +12,19 @@ namespace geom
    template<floating_point Real>
    Surface<2,Real> surface( const Point<2,Real>& p0, const Point<2,Real>& p1 )
   {
-      const Direction<2,Real> tangent=p1-p0;
-      const Real l = length(tangent);
-      return Surface<2,Real>{.area   = l,
-                             .centre = p0 + 0.5*tangent,
-                             .metric = Metric<2,Real>{ flip(norm(orthog(tangent))),
-                                                            norm(       tangent ) }};
+      using Mtrc = Metric<2,Real>;
+      using Dir  = Direction<2,Real>;
+
+      const Dir tangent0=p1-p0;
+      const Dir tangent1=p0-p1;
+      const Real l = length(tangent0);
+      const Real l1= 1./l;
+
+   // using orthog(tangent1) gives a right-handed system using fewer operations than using flip(orthog(tangent0))
+
+      return {.area   = l,
+              .centre = p0 + 0.5*tangent0,
+              .metric = Mtrc{ orthog(l1*tangent1),
+                                     l1*tangent0 }};
   }
 }

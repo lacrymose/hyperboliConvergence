@@ -412,7 +412,7 @@
   };
 
 /*
- * Interface flux using a central average of the exact fluxes with scalar upwind dissipation proportional to the spectral radius of the central flux
+ * Interface flux using a central average of the exact fluxes with scalar upwind dissipation proportional to the spectral radius
  *    Uses CRTP to provide interface to call flux with any VariableSet basis
  */
    template<LawType Law>
@@ -427,7 +427,7 @@
   };
 
 /*
- * Interface dissipative flux of scalar dissipation proportional to the spectral radius of the central flux
+ * Interface dissipative flux with scalar upwind dissipation proportional to the spectral radius
  *    Uses CRTP to provide interface to call flux with any VariableSet basis
  */
    template<LawType Law>
@@ -442,12 +442,27 @@
   };
 
 /*
- * Interface flux using a central average of the exact fluxes with scalar upwind dissipation proportional to the spectral radius of the central flux
+ * Interface flux using a central average of the exact fluxes with matrix upwind dissipation using Roe's linearisation
  *    Uses CRTP to provide interface to call flux with any VariableSet basis
  */
    template<LawType Law>
       requires ImplementedLawType<Law>
    struct RoeFlux : FluxInterface<RoeFlux<Law>,Law>
+  {
+      template<int nDim, floating_point Real>
+      static FluxResult<Law,nDim,Real> flux( const Species<Law,Real>&     species,
+                                             const geom::Surface<nDim,Real>& face,
+                                             const State<Law,nDim,Real>&       sl,
+                                             const State<Law,nDim,Real>&       sr );
+  };
+
+/*
+ * Interface dissipative flux with matrix upwind dissipation using Roe's linearisation
+ *    Uses CRTP to provide interface to call flux with any VariableSet basis
+ */
+   template<LawType Law>
+      requires ImplementedLawType<Law>
+   struct RoeDissipation : FluxInterface<RoeDissipation<Law>,Law>
   {
       template<int nDim, floating_point Real>
       static FluxResult<Law,nDim,Real> flux( const Species<Law,Real>&     species,

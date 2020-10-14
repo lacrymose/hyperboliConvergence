@@ -160,7 +160,7 @@
             res[ic]+=fr;
         }
      }
-      if( boundaryId==1 ) // right face
+      else if( boundaryId==1 ) // right face
      {
          const size_t i=ni-1;
          for( size_t j=0; j<nj; ++j )
@@ -241,7 +241,7 @@
             res[ic]+=fr;
         }
      }
-      else{ assert( false && "invalid boundary id for 2D periodic flux, must be 0 or 2" ); }
+      else{ std::cout << boundaryId << "\n"; assert( false && "invalid boundary id for 2D, must be 0,1,2 or 3" ); }
 
       return;
   }

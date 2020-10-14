@@ -26,6 +26,8 @@
 # include <iostream>
 # include <fstream>
 
+# include <omp.h>
+
 # include <cases/euler/oneD/periodic.h>
 
 /*
@@ -37,6 +39,7 @@ constexpr int nDim = 1;
 using BasisT = BasisType<Law>;
 using BCType = BoundaryType<Law>;
 using Real = double;
+
 
 // ------- User Inputs -------
 
@@ -58,8 +61,8 @@ constexpr Periodic1D problem = Periodic1D::Other;
 
 // discretisation
 constexpr int  nx  = 24;
-constexpr int  nt  = 60;
-constexpr Real cfl = 1.6;
+constexpr int  nt  = 6000;
+constexpr Real cfl = 0.8;
 
 // left/right contact wave
 constexpr Real mach      = 0.4;
@@ -78,7 +81,7 @@ using Flux = RoeFlux<Law>;
 
 //using Limiter = Limiters::Cada3;
 //using Limiter = Limiters::MonotonizedCentral2;
-using Limiter = Limiters::NoLimit3;
+using Limiter = Limiters::NoLimit1;
 
 
 // ------ typedefs -------------------
@@ -119,9 +122,12 @@ using MeshT      = Mesh<nDim,Real>;
    int main()
   {
 
+# ifdef _OPENMP
+      omp_set_num_threads(1);
+# endif
       const par::Shape<nDim> cellShape{nx};
 
-      const ODE::Explicit::RungeKutta<Real> rk = ODE::Explicit::ssp34<Real>();
+      const ODE::Explicit::RungeKutta<Real> rk = ODE::Explicit::ssp11<Real>();
       const UnsteadyTimeControls<Real> timeControls{.nTimesteps=nt, .cfl=cfl};
 
    // setup
@@ -169,15 +175,20 @@ using MeshT      = Mesh<nDim,Real>;
          return set2Set<SolVarSet>( species, PrimVarSet{{u,r,p}} );
      };
 
-      par::transform( acoustic,
+      [[maybe_unused]]
+      const auto constant = [&]( const MeshT::Cell& ) -> SolVarSet { return qr; };
+
+      par::transform( constant,
                       q.interior,
                       mesh.cells );
 
    // boundary conditions
       const std::tuple boundaryConditions{make_ghostCell_BCond<Law,BCType::Riemann>(),
+                                          make_ghostCell_BCond<Law,BCType::Entropy>(),
                                           make_periodic_BCond<Law>()};
 
       const SolVarSet qref{velocity,density,pressure};
+      par::fill( q.interior,    qref );
       par::fill( q.boundary[0], qref );
       par::fill( q.boundary[1], qref );
       q.bcTypes[0] = BCType::Riemann;

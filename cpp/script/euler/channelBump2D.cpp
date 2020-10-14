@@ -49,8 +49,8 @@
 
       const Real density  = sref.density();
       const Real pressure = sref.pressure();
-//    const Real velocity = std::sqrt( sref.velocity2() );
-      const Real velocity = 1.;
+      const Real velocity = std::sqrt( sref.velocity2() );
+//    const Real velocity = 1.;
       const Real sonic    = std::sqrt( sref.speedOfSound2() );
       const Real entropy  = sonic*sonic / ( gamma*pow(density,gamma-1) );
 
@@ -86,14 +86,14 @@ using Real = double;
 //    l is length of channel before/after bump
 //    w is width of bump
 //    h is height of bump
-constexpr size_t nl = 32;
-constexpr size_t nw = 24;
-constexpr size_t nd = 48;
+constexpr size_t nl = 48;
+constexpr size_t nw = 48;
+constexpr size_t nd = 96;
 
 constexpr Real d = 2.0;
-constexpr Real l = 4.0;
+constexpr Real l = 3.0;
 constexpr Real w = 2.0;
-constexpr Real h = 0.05;
+constexpr Real h = 0.100;
 
 constexpr size_t nx = 2*nl+nw;
 constexpr size_t ny = nd;
@@ -101,19 +101,22 @@ constexpr size_t ny = nd;
 //constexpr size_t ny = 30;
 
 // time discretisation
-constexpr size_t nt = 1000;
+constexpr size_t nt = 6500;
 constexpr Real  cfl = 0.4;
 
 # ifdef _OPENMP
-constexpr int nthreads=1;
+constexpr int nthreads=8;
 # endif
 
 // flow conditions
-constexpr Real mach     = 0.3;
+constexpr Real mach     = 0.4;
 constexpr Real pressure = 1.;
 constexpr Real density  = 1.;
+constexpr Real angle = 0.00*M_PI;
 
-constexpr Real velocity  = mach*std::sqrt( 1.4*pressure/density );
+constexpr Real speed = mach*std::sqrt( 1.4*pressure/density );
+constexpr Real velx  = speed*cos( angle );
+constexpr Real vely  = speed*sin( angle );
 
 constexpr BasisT SolutionBasis = BasisT::Primitive;
 
@@ -123,7 +126,7 @@ using Flux = RusanovFlux<Law>;
 //using Flux = Slau<LowMachScaling::Convective,
 //                  LowMachScaling::Acoustic>;
 
-//using Limiter = Limiters::VanAlbada2;
+//using Limiter = Limiters::Cada3;
 //using Limiter = Limiters::MonotonizedCentral2;
 using Limiter = Limiters::NoLimit1;
 
@@ -159,30 +162,30 @@ using MeshT      = Mesh<nDim,Real>;
      }();
 
    // initialise mesh
-//    const MeshT mesh = make_linspace_mesh<Real>( cellShape, 0,(2*l+w), 0,d );
+//    const MeshT mesh = make_linspace_mesh<Real>( cellShape, -(l+0.5*w),(l+0.5*w), 0,d );
       const MeshT mesh = make_channelbump_mesh<Real>( {d,l,w,h}, {nd,nl,nw} );
 
    // initialise solution
-      const SolVarSet q0   = set2Set<SolVarSet>( species, PrimVarSet{Real(0.),Real(0.),density,pressure} );
-//    const SolVarSet qref = set2Set<SolVarSet>( species, PrimVarSet{Real(0.),Real(0.),density,pressure} );
-      const SolVarSet qref = set2Set<SolVarSet>( species, PrimVarSet{velocity, Real(0.), density, pressure} );
-//    const SolVarSet qref = set2Set<SolVarSet>( species, PrimVarSet{Real(0.), velocity, density, pressure} );
-//    const SolVarSet qref = set2Set<SolVarSet>( species, PrimVarSet{velocity, velocity, density, pressure} );
+      const SolVarSet qref = set2Set<SolVarSet>( species,
+                                                 PrimVarSet{velx,
+                                                            vely,
+                                                            density,
+                                                            pressure} );
       SolField q(cellShape);
       par::fill( q.interior, qref );
 
    // boundary conditions
       const std::tuple boundaryConditions{make_ghostCell_BCond<Law,BCType::Riemann>(),
+                                          make_ghostCell_BCond<Law,BCType::Entropy>(),
                                           make_flux_BCond<Law,BCType::InviscidWall>(),
-                                          make_periodic_BCond<Law>()};
+                                          make_periodic_BCond<Law>(),
+                                          make_fixed_BCond<Law>()};
 
       for( SolField::VarField& qb : q.boundary ){ par::fill( qb, qref ); }
-//    par::fill( q.boundary[0], qref );
-//    par::fill( q.boundary[1], qref );
-      q.bcTypes[0] = BCType::Periodic;
-      q.bcTypes[1] = BCType::Periodic;
+      q.bcTypes[0] = BCType::Fixed;
+      q.bcTypes[1] = BCType::Fixed;
       q.bcTypes[2] = BCType::InviscidWall;
-      q.bcTypes[3] = BCType::Riemann;
+      q.bcTypes[3] = BCType::InviscidWall;
 
    // high order reconstruction and flux functions
       const auto hoflux = make_muscl_flux<Law>( Limiter{}, Flux{} );
@@ -193,21 +196,21 @@ using MeshT      = Mesh<nDim,Real>;
                  species,
                  mesh, q );
 
-   // write solution to file
-      if( true )
+   // write 1D solution to file
+      if( false )
      {
          std::ofstream solutionFile( "data/euler/channelBump2D/result.dat" );
    
          if( solutionFile.is_open() )
         {
-            auto writeCell = [&]( const auto& c ) -> void
+            auto writePoint = [&]( const auto& p ) -> void
            {
-               solutionFile << c.centre[0] << " "
-                            << c.centre[1] << " ";
+               solutionFile << p[0] << " "
+                            << p[1] << " ";
            };
 
             solutionFile << std::scientific;
-            solutionFile.precision(8);
+            solutionFile.precision(20);
 
             const auto sref = set2State( species, qref );
 
@@ -215,12 +218,43 @@ using MeshT      = Mesh<nDim,Real>;
                                 const MeshT::Cell& c0,
                                 const SolVarSet&   qc ) -> void
            {
-               writeCell(c0);
+               if( idx[1]!=0 ){ return; }
+               writePoint(c0.centre);
                writeState( solutionFile, species, set2State( species, qc ), sref );
-               if( idx[1]==ny-1 ){ solutionFile << "\n"; }
+//             if( idx[1]==ny-1 ){ solutionFile << "\n"; }
                return;
            };
    
+//          for( size_t i=0; i<q.interior.shape(1); ++i )
+            for( size_t i=0; i<1; ++i )
+           {
+               const auto dcentre =  mesh.cells[{1,i}].centre
+                                   - mesh.cells[{0,i}].centre;
+
+               const auto ghost_centre = mesh.cells[{0,i}].centre - 2.*dcentre;
+               writePoint(ghost_centre);
+
+               writeState( solutionFile,
+                           species,
+                           set2State( species,
+                                      q.boundary[0][{i,1}] ),
+                           sref );
+           }
+//          for( size_t i=0; i<q.interior.shape(1); ++i )
+            for( size_t i=0; i<1; ++i )
+           {
+               const auto dcentre =  mesh.cells[{1,i}].centre
+                                   - mesh.cells[{0,i}].centre;
+
+               const auto ghost_centre = mesh.cells[{0,i}].centre - dcentre;
+               writePoint(ghost_centre);
+
+               writeState( solutionFile,
+                           species,
+                           set2State( species,
+                                      q.boundary[0][{i,0}] ),
+                           sref );
+           }
             par::for_each_idx( writer,
                                mesh.cells,
                                q.interior );
@@ -233,7 +267,82 @@ using MeshT      = Mesh<nDim,Real>;
          solutionFile.close();
      }
 
+   // write solution to file
       if( true )
+     {
+         std::ofstream solutionFile( "data/euler/channelBump2D/result.dat" );
+   
+         if( solutionFile.is_open() )
+        {
+            auto writePoint = [&]( const auto& p ) -> void
+           {
+               solutionFile << p[0] << " "
+                            << p[1] << " ";
+           };
+
+            solutionFile << std::scientific;
+            solutionFile.precision(20);
+
+            const auto sref = set2State( species, qref );
+
+            auto writer = [&] ( const par::Idx<2> idx,
+                                const MeshT::Cell& c0,
+                                const SolVarSet&   qc ) -> void
+           {
+               writePoint(c0.centre);
+               writeState( solutionFile, species, set2State( species, qc ), sref );
+               if( idx[1]==ny-1 ){ solutionFile << "\n"; }
+               return;
+           };
+   
+            if( false ) // write left boundary
+           {
+            for( size_t i=0; i<q.interior.shape(1); ++i )
+           {
+               const auto dcentre =  mesh.cells[{1,i}].centre
+                                   - mesh.cells[{0,i}].centre;
+
+               const auto ghost_centre = mesh.cells[{0,i}].centre - 2.*dcentre;
+               writePoint(ghost_centre);
+
+               writeState( solutionFile,
+                           species,
+                           set2State( species,
+                                      q.boundary[0][{i,1}] ),
+                           sref );
+               if( i==ny-1 ){ solutionFile << "\n"; }
+           }
+            for( size_t i=0; i<q.interior.shape(1); ++i )
+           {
+               const auto dcentre =  mesh.cells[{1,i}].centre
+                                   - mesh.cells[{0,i}].centre;
+
+               const auto ghost_centre = mesh.cells[{0,i}].centre - dcentre;
+               writePoint(ghost_centre);
+
+               writeState( solutionFile,
+                           species,
+                           set2State( species,
+                                      q.boundary[0][{i,0}] ),
+                           sref );
+               if( i==ny-1 ){ solutionFile << "\n"; }
+           }
+           }
+
+            par::for_each_idx( writer,
+                               mesh.cells,
+                               q.interior );
+        }
+         else
+        {
+            std::cout << "cannot open \"data/euler/channelBump2D/result.dat\" for writing\n" << std::endl;
+            return 1;
+        }
+         solutionFile.close();
+     }
+
+   // write mesh to file
+      if( false )
      {
          std::ofstream meshFile( "data/euler/channelBump2D/mesh.dat" );
    

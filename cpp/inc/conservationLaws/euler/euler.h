@@ -35,6 +35,8 @@
   {
       Periodic,
       Riemann,
+      Entropy,
+      Fixed,
       InviscidWall
   };
 

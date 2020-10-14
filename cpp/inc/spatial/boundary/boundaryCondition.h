@@ -60,6 +60,25 @@
       return make_BCond<Law,BoundaryType<Law>::Periodic>();
   }
 
+   template<LawType Law>
+   auto make_fixed_BCond()
+  {
+      const auto fixed_bc_upd = []
+                <int                    nDim,
+                 floating_point         Real,
+                 ImplementedVarSet   SolVarT>
+               ( const Species<Law,Real>&            spc,
+                 const geom::Surface<nDim,Real>&    face,
+                 const geom::Volume<nDim,Real>&    celli,
+                 const SolVarT&                qinterior,
+                 const SolVarT&                qboundary ) -> SolVarT
+//       requires ConsistentTypes<Law,nDim,Real,SolVarT>
+     {
+         return qboundary;
+     };
+      return make_BCond<Law,BoundaryType<Law>::Fixed>(fixed_bc_upd);
+  }
+
    template<LawType              Law,
             BoundaryType<Law> BCType>
    auto make_boundary_update_lambda()

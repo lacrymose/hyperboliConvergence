@@ -26,7 +26,8 @@ CSCRIPT = test/test.cpp \
 	scalar/cartesian2D.cpp \
 	euler/shocktube.cpp \
 	euler/oneD.cpp \
-	euler/channelBump2D.cpp
+	euler/channelBump2D.cpp \
+	euler/cylinder2D.cpp
 
 # compiler
 CCMP = g++-8

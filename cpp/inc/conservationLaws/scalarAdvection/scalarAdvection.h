@@ -31,7 +31,8 @@
    enum struct ScalarAdvectionBCs
   {
       Periodic,
-      Riemann
+      Riemann,
+      Fixed
   };
 
    template<>

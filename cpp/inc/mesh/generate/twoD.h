@@ -129,3 +129,51 @@
       return mesh;
   }
 
+/*
+ * create a 2D mesh of a circular cylinder
+ *    rc is radius of cylinder
+ *    rb is radius of outer boundary
+ *    th is theta direction around cylinder
+ */
+   template<floating_point Real>
+   Mesh<2,Real> make_cylinder_mesh( const std::array<Real,2>  lengths,
+                                    const std::array<size_t,2> ncells )
+  {
+   // number of cells in each direction
+      const size_t nr  = ncells[0];
+      const size_t nth = ncells[1];
+
+      const par::Shape<2> shape{nr,nth};
+
+      Mesh<2,Real> mesh(shape);
+
+   // lengths
+      const Real rc = lengths[0];
+      const Real rb = lengths[1];
+
+      const Real dr  = ( rb - rc ) / nr;
+      const Real dth = ( 2.*M_PI ) / nth;
+
+      using Pt = typename Mesh<2,Real>::Node;
+
+   // generate node in cylindrical coordinates
+      const auto cyl_node = [=]( const par::Idx<2> ij ) -> Pt
+     {
+         const Real r  = rc + ij[0]*dr;
+         const Real th =      ij[1]*dth;
+
+         const Real x = r*cos(th);
+         const Real y = r*sin(th);
+
+         return {x,y};
+     };
+
+      par::generate_idx( mesh.nodes,
+                         cyl_node );
+
+   // initialise cell array
+      mesh.cells = dual( mesh.nodes );
+
+      return mesh;
+  }
+

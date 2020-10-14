@@ -8,23 +8,13 @@
   {
 
    // types needed for upwind diffusion calculation
-      using ConservedSet   = VariableSet<  Law,nDim,BasisType<Law>::Conserved,Real>;
-      using ConservedDelta = VariableDelta<Law,nDim,BasisType<Law>::Conserved,Real>;
       using FluxRes = FluxResult<Law,nDim,Real>;
 
    // central flux
       FluxRes result = CentralFlux<Law>::flux( species, face, sl,sr );
 
    // scalar upwind diffusion
-
-      // jump in conserved variables
-      const ConservedDelta dq = state2Set<ConservedSet>( species, sr )
-                               -state2Set<ConservedSet>( species, sl );
-
-      // spectral radius diffusion coefficient
-      const Real la = result.lambda*face.area;
-
-      result.flux-=0.5*la*dq;
+      result.flux+=RusanovDissipation<Law>::flux( species, face, sl,sr ).flux;
 
       return result;
   }

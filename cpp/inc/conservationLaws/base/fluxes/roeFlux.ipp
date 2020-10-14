@@ -1,11 +1,30 @@
 
-
    template<LawType Law>
    template<int nDim, floating_point Real>
    FluxResult<Law,nDim,Real> RoeFlux<Law>::flux( const Species<Law,Real>&     species,
                                                  const geom::Surface<nDim,Real>& face,
                                                  const State<Law,nDim,Real>&       sl,
                                                  const State<Law,nDim,Real>&       sr )
+  {
+      using FluxRes = FluxResult<Law,nDim,Real>;
+
+   // central flux
+      const FluxRes central = CentralFlux<Law>::flux( species, face, sl,sr );
+
+   // matrix upwind dissipation
+      const FluxRes dissip = RoeDissipation<Law>::flux( species, face, sl,sr );
+
+      return FluxRes{ central.flux+dissip.flux,
+                      fmax( central.lambda, dissip.lambda ) };
+  }
+
+
+   template<LawType Law>
+   template<int nDim, floating_point Real>
+   FluxResult<Law,nDim,Real> RoeDissipation<Law>::flux( const Species<Law,Real>&     species,
+                                                        const geom::Surface<nDim,Real>& face,
+                                                        const State<Law,nDim,Real>&       sl,
+                                                        const State<Law,nDim,Real>&       sr )
   {
 
    // types needed for upwind diffusion calculation
@@ -14,9 +33,6 @@
       using CharDel = VariableDelta<Law,nDim,BasisType<Law>::Characteristic,Real>;
       using FluxRes = FluxResult<Law,nDim,Real>;
       using StateT  = State<Law,nDim,Real>;
-
-   // central flux
-      FluxRes result = CentralFlux<Law>::flux( species, face, sl,sr );
 
    // matrix upwind diffusion
 
@@ -37,14 +53,8 @@
       // roe dissipation in conserved variables
       const ConsDel fd = rotateFromFace( face, delta2Delta<ConsDel>( species, ravg, dqw ) );
 
-   // flux is sum of central and dissipative components
-      result.flux-=0.5*fd;
-
-   // spectral radius
-      result.lambda = fmax( result.lambda,
-                            spectralRadius( face, ravg )*face.area );
-
-      return result;
+      return FluxRes{ (-0.5*face.area)*fd,
+                      spectralRadius( face, ravg )*face.area };
   }
 
 

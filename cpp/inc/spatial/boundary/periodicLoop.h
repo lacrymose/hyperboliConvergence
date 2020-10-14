@@ -98,6 +98,7 @@
                           const par::Array<std::array<SolDelT,2>,2>&  dq,
                                 par::Array<FluxRes,2>&               res )
   {
+//    return;
    // valid boundary?
       assert((   (boundaryId==0)
               or (boundaryId==1)
