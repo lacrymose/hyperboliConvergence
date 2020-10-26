@@ -126,7 +126,10 @@ namespace utils
 
    public:
 
-      Timer( std::ostream& o, const std::string& m )
+      Timer( const std::string& m )
+             : out(std::clog), message(m), start(Clock::now()) {}
+
+      Timer( const std::ostream& o, const std::string& m )
              : out(o), message(m), start(Clock::now()) {}
 
      ~Timer()

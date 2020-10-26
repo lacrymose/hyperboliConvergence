@@ -101,6 +101,27 @@
       const size_t ni = mesh.cells.shape(0);
       const size_t nj = mesh.cells.shape(1);
 
+/*
+      const auto dq_calc = []( const VarSetT& ql,
+                               const VarSetT& qr ) -> VarDelT
+     {
+         return qr-ql;
+     };
+
+      const auto accumulator = []( const VarDelT& acc_old,
+                                   const VarDelT& dq_new ) -> VarDelT
+     {
+         return acc_old+=dq_new;
+     };
+
+      par::accumulate_edge( parallel_schedule,
+                            dq_calc,
+                            accumulator,
+                            accumulator,
+                            dq,
+                            q.interior );
+*/
+
    // derivatives over i-normal faces
 # ifdef _OPENMP
    # pragma omp parallel for

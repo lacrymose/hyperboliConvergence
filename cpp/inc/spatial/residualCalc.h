@@ -143,6 +143,38 @@
       const size_t ni = mesh.cells.shape(0);
       const size_t nj = mesh.cells.shape(1);
 
+/*
+      const auto flux = [hoflux,species]( const Node& n0,
+                                          const Node& n1,
+                                          auto...   args ) -> FluxRes
+     {
+         return hoflux( species,
+                        surface( n0,n1 ),
+                        args... );
+     };
+
+      const auto acc_left = []( const FluxRes& acc_old,
+                                const FluxRes& new_flx ) -> FluxRes
+     {
+         return acc_old-=new_flx;
+     }
+
+      const auto acc_right = []( const FluxRes& acc_old,
+                                 const FluxRes& new_flx ) -> FluxRes
+     {
+         return acc_old+=new_flx;
+     }
+
+      par::accumulate_edge( parallel_schedule,
+                            flux,
+                            acc_left,
+                            acc_right,
+                            res,
+                            mesh.nodes,
+                            dq,
+                            q.interior );
+*/
+
    // accumulate cell residual contributions from fluxes across i-normal faces
 # ifdef _OPENMP
    # pragma omp parallel for

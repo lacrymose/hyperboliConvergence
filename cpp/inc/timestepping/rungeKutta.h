@@ -124,8 +124,8 @@
    template<int              nDim,
             typename      FluxRes,
             floating_point   Real>
-   void rungeKuttaAccumulation( const ODE::Explicit::RungeKutta<Real>&    rungeKutta,
-                                const size_t                                     stg,
+   void rungeKuttaAccumulation( const ODE::Explicit::RungeKutta<Real>&     rungeKutta,
+                                const size_t                                      stg,
                                 const std::vector<par::Array<FluxRes,nDim>>& resStage,
                                       par::Array<FluxRes,nDim>&              resTotal )
   {

@@ -1,0 +1,116 @@
+===========================================================
+===   To do list for Hyperbolic Sandbox - Development   ===
+===========================================================
+
+parallalg
+   primal/dual grid types
+      node-based algorithms with mixed argument lists (all primal nodes to corresponding dual node)
+      edge-based algorithms for uniform and mixed argument lists
+
+   Indexable arguments (iterator equivalent)
+      array access operator to bracket access operator
+      Indexable concepts
+      algorithms take bounding-box index range
+      overloads for algorithms with Array class arguments use Array min/max indices
+
+   Structure-of-Arrays
+      take parameter pack of types
+      store array of each type
+      can return:
+         element of particular type at index
+         tuple of all elements at index
+
+conservationLaws
+   rename transform functions
+      set2Set     ->   set2set
+      delta2Delta ->   del2del
+      set2State   ->   set2state
+      state2Set   -> state2set
+
+fvm
+   move functionality from other modules
+      muscl reconstructions from limiters
+      interface fluxes and concepts from conservationLaws
+      muscl flux lambda factory from spatial
+
+   concepts for function signatures
+      inviscid interface flux function
+      full interface flux (with gradient arguments)
+
+   include lsq functionality
+      rewrite full flux lambda factories to include lsq
+      use in viscous fluxes
+
+   viscous fluxes
+      viscous flux calculations
+      lambda factories
+
+lsq
+   metric classes
+      grid metric
+      solution metric
+
+   1D operations
+      create metric - grid
+      create metric - solution
+      factorise grid metric
+      solve for solution gradient
+
+   2D operations
+      create metric - grid
+      create metric - solution
+      factorise grid metric
+      solve for solution gradient
+
+   3D operations
+      create metric - grid
+      create metric - solution
+      factorise grid metric
+      solve for solution gradient
+
+preconditioning
+   preconditioning function - Weiss & Smith?
+
+   concept for preconditioning function signature
+
+   spatial/timestepping
+      loop over residual applying preconditioning
+      integrate function overloads that take preconditioning function object
+
+spatial
+   steady-state methods
+      local timestepping euler forward (need SoA class for residual)
+      port residual smoothing over
+      multi-grid...
+
+   gradient functions with lsq
+      grid metric calculation
+      solution metric calculation
+
+explicit timestepping
+   steady-state convergence stepping
+      local timestepping
+      residual smoothing
+      preconditioning
+
+   dual timestepping
+      port over from old .ipp file
+
+      outer iterations
+         BDF or trapezium
+         extrapolation for initial guess
+
+      inner iterations
+         local timestepping
+         residual smoothing
+         preconditioning
+
+implicit timestepping
+   residual jacobian calculation
+      function signature for flux residual jacobian
+      approximate FDM calculation from flux functions
+
+   iterations
+      newton iterations for non-linear solve
+      jacobian iterations for linear solve at each newton step
+
