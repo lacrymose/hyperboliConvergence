@@ -121,9 +121,9 @@
 
    template<EulerVarSet VarT, floating_point Real>
       requires SameFPType<VarT,Real>
-   SolutionField<VarT,1> shocktube_initial_solution( const ShockTube1D                    problem,
-                                                  const Species<LawType::Euler,Real>&  species,
-                                                  const par::Shape<1>                meshShape )
+   SolutionField<VarT,1> shocktube_initial_solution( const ShockTube1D                      problem,
+                                                     const Species<LawType::Euler,Real>&    species,
+                                                     const par::DualShape1                meshShape )
   {
       const VarT ql = shocktube_initial_left< VarT>( problem, species );
       const VarT qr = shocktube_initial_right<VarT>( problem, species );

@@ -20,10 +20,10 @@
                                nDim,
                                Real,
                                VarSetT>
-   par::Array<vardelta_t<VarSetT>,nDim> gradientCalc( const Mesh<nDim,Real>&          mesh,
-                                                      const SolutionField<VarSetT,nDim>& q )
+   par::DualArray<vardelta_t<VarSetT>,nDim> gradientCalc( const Mesh<nDim,Real>&          mesh,
+                                                          const SolutionField<VarSetT,nDim>& q )
   {
-      par::Array<vardelta_t<VarSetT>,nDim> dq(q.shape());
+      par::DualArray<vardelta_t<VarSetT>,nDim> dq(q.shape());
       gradientCalc( mesh,q, dq );
       return dq;
   }
@@ -39,9 +39,9 @@
                                VarSetT,
                                VarDelT>
                && N==nDim
-   void gradientCalc( const Mesh<nDim,Real>&           mesh,
-                      const SolutionField<VarSetT,nDim>&  q,
-                            par::Array<std::array<VarDelT,N>,nDim>& dq )
+   void gradientCalc( const Mesh<nDim,Real>&                          mesh,
+                      const SolutionField<VarSetT,nDim>&                 q,
+                            par::DualArray<std::array<VarDelT,N>,nDim>& dq )
   {
       par::fill( dq, std::array<VarDelT,N>{} );
       interiorGradient( mesh,q, dq );
@@ -59,20 +59,26 @@
                                Real,
                                VarSetT,
                                VarDelT>
-   void interiorGradient( const Mesh<1,Real>&           mesh,
-                          const SolutionField<VarSetT,1>&  q,
-                                par::Array<std::array<VarDelT,1>,1>& dq )
+   void interiorGradient( const Mesh<1,Real>&                          mesh,
+                          const SolutionField<VarSetT,1>&                 q,
+                                par::DualArray<std::array<VarDelT,1>,1>& dq )
   {
 
       assert( mesh.cells.shape() == q.interior.shape() );
       assert( mesh.cells.shape() == dq.shape() );
       const size_t nc = mesh.cells.shape(0);
 
-      for( size_t i=0; i<nc-1; i++ )
+      using CellIdx = typename SolutionField<VarSetT,1>::VarField::IdxType;
+
+      for( size_t i=0; i<nc-1; ++i )
      {
-         const VarDelT d = q.interior[{i+1}] - q.interior[{i}];
-         dq[{i  }][0]+=d;
-         dq[{i+1}][0]+=d;
+         const CellIdx idx0{i};
+         const CellIdx idx1{i+1};
+
+         const VarDelT d = q.interior[idx1] - q.interior[idx0];
+
+         dq[idx0][0]+=d;
+         dq[idx1][0]+=d;
      }
 
       return;
@@ -89,9 +95,9 @@
                                Real,
                                VarSetT,
                                VarDelT>
-   void interiorGradient( const Mesh<2,Real>&                      mesh,
-                          const SolutionField<VarSetT,2>&             q,
-                                par::Array<std::array<VarDelT,2>,2>& dq )
+   void interiorGradient( const Mesh<2,Real>&                          mesh,
+                          const SolutionField<VarSetT,2>&                 q,
+                                par::DualArray<std::array<VarDelT,2>,2>& dq )
   {
       assert( mesh.cells.shape() == dq.shape() );
       assert( mesh.cells.shape() == q.interior.shape() );
@@ -100,6 +106,8 @@
 
       const size_t ni = mesh.cells.shape(0);
       const size_t nj = mesh.cells.shape(1);
+
+      using CellIdx = typename SolutionField<VarSetT,2>::VarField::IdxType;
 
 /*
       const auto dq_calc = []( const VarSetT& ql,
@@ -126,12 +134,12 @@
 # ifdef _OPENMP
    # pragma omp parallel for
 # endif
-      for( size_t j=0; j<nj; j++ )
+      for( size_t j=0; j<nj; ++j )
      {
-         for( size_t i=0; i<ni-1; i++ )
+         for( size_t i=0; i<ni-1; ++i )
         {
-            const par::Idx<2> icl{i  ,j};
-            const par::Idx<2> icr{i+1,j};
+            const CellIdx icl{i  ,j};
+            const CellIdx icr{i+1,j};
 
             const VarDelT d = q.interior[icr] - q.interior[icl];
    
@@ -144,12 +152,12 @@
 # ifdef _OPENMP
    # pragma omp parallel for
 # endif
-      for( size_t i=0; i<ni; i++ )
+      for( size_t i=0; i<ni; ++i )
      {
-         for( size_t j=0; j<nj-1; j++ )
+         for( size_t j=0; j<nj-1; ++j )
         {
-            const par::Idx<2> icl{i,j  };
-            const par::Idx<2> icr{i,j+1};
+            const CellIdx icl{i,j  };
+            const CellIdx icr{i,j+1};
 
             const VarDelT d = q.interior[icr] - q.interior[icl];
    
@@ -172,14 +180,16 @@
                                Real,
                                VarSetT,
                                VarDelT>
-   void boundaryGradient( const Mesh<1,Real>&           mesh,
-                          const SolutionField<VarSetT,1>&  q,
-                                par::Array<std::array<VarDelT,1>,1>& dq )
+   void boundaryGradient( const Mesh<1,Real>&                          mesh,
+                          const SolutionField<VarSetT,1>&                 q,
+                                par::DualArray<std::array<VarDelT,1>,1>& dq )
   {
       assert( mesh.cells.shape() == q.interior.shape() );
       assert( mesh.cells.shape() == dq.shape() );
 
       const size_t nc = mesh.cells.shape(0);
+
+      using CellIdx = typename SolutionField<VarSetT,1>::VarField::IdxType;
 
    // non-zero gradients only over periodic boundary
       using BCType = BoundaryType<law_of_v<VarSetT>>;
@@ -187,13 +197,13 @@
      {
          assert( q.bcTypes[1] == BCType::Periodic );
 
-         const size_t il = nc-1;
-         const size_t ir = 0;
+         const CellIdx il{nc-1};
+         const CellIdx ir{0};
 
-         const VarDelT d = q.interior[{ir}] - q.interior[{il}];
+         const VarDelT d = q.interior[ir] - q.interior[il];
 
-         dq[{il}][0]+=d;
-         dq[{ir}][0]+=d;
+         dq[il][0]+=d;
+         dq[ir][0]+=d;
      }
 
       return;
@@ -210,15 +220,17 @@
                                Real,
                                VarSetT,
                                VarDelT>
-   void boundaryGradient( const Mesh<2,Real>&                      mesh,
-                          const SolutionField<VarSetT,2>&             q,
-                                par::Array<std::array<VarDelT,2>,2>& dq )
+   void boundaryGradient( const Mesh<2,Real>&                          mesh,
+                          const SolutionField<VarSetT,2>&                 q,
+                                par::DualArray<std::array<VarDelT,2>,2>& dq )
   {
       assert( mesh.cells.shape() == dq.shape() );
       assert( mesh.cells.shape() == q.interior.shape() );
 
       const size_t ni = mesh.cells.shape(0);
       const size_t nj = mesh.cells.shape(1);
+
+      using CellIdx = typename SolutionField<VarSetT,2>::VarField::IdxType;
 
    // non-zero gradients only over periodic boundary
       using BCType = BoundaryType<law_of_v<VarSetT>>;
@@ -228,14 +240,14 @@
       // check consistency
          assert( q.bcTypes[1] == BCType::Periodic );
 
-         for( size_t j=0; j<nj-1; j++ )
+         for( size_t j=0; j<nj-1; ++j )
         {
             const size_t il = ni-1;
             const size_t ir = 0;
    
          // cell left/right indices
-            const par::Idx<2> icl{il,j};
-            const par::Idx<2> icr{ir,j};
+            const CellIdx icl{il,j};
+            const CellIdx icr{ir,j};
    
             const VarDelT d = q.interior[icr] - q.interior[icl];
    
@@ -249,14 +261,14 @@
       // check consistency
          assert( q.bcTypes[3] == BCType::Periodic );
 
-         for( size_t i=0; i<ni-1; i++ )
+         for( size_t i=0; i<ni-1; ++i )
         {
             const size_t jl = nj-1;
             const size_t jr = 0;
    
          // cell left/right indices
-            const par::Idx<2> icl{i,jl};
-            const par::Idx<2> icr{i,jr};
+            const CellIdx icl{i,jl};
+            const CellIdx icr{i,jr};
    
             const VarDelT d = q.interior[icr] - q.interior[icl];
    

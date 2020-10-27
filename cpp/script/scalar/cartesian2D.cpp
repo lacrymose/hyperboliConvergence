@@ -103,7 +103,7 @@ using MeshT     = Mesh<nDim,Real>;
 # endif
 
    // setup
-      const par::Shape<nDim> cellShape{nx,nx};
+      const par::DualShape<nDim> cellShape{nx,nx};
 
       const ODE::Explicit::RungeKutta<Real> rk = ODE::Explicit::ssp34<Real>();
       const UnsteadyTimeControls<Real> timeControls{.nTimesteps=nt, .cfl=cfl};
@@ -153,9 +153,9 @@ using MeshT     = Mesh<nDim,Real>;
          solutionFile << std::scientific;
          solutionFile.precision(8);
 
-         for( size_t i=0; i<q.interior.shape(0); i++ )
+         for( size_t i=0; i<q.interior.shape(0); ++i )
         {
-            for( size_t j=0; j<q.interior.shape(1); j++ )
+            for( size_t j=0; j<q.interior.shape(1); ++j )
            {
                writeState( solutionFile, mesh.cells[{i,j}], species, set2State( species, q.interior[{i,j}] ) );
            }

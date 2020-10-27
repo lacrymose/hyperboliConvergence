@@ -151,7 +151,7 @@ using MeshT      = Mesh<nDim,Real>;
    // initialise mesh
 //    const MeshT mesh = make_linspace_mesh<Real>( cellShape, -(l+0.5*w),(l+0.5*w), 0,d );
       const MeshT mesh = make_cylinder_mesh<Real>( {rc,rb}, {nr,nth} );
-      const par::Shape<nDim> cellShape(mesh.cells.shape());
+      const par::DualShape<nDim> cellShape(mesh.cells.shape());
 
    // initialise solution
 //    const SolVarSet q0   = set2Set<SolVarSet>( species, PrimVarSet{Real(0.),Real(0.),density,pressure} );
@@ -195,7 +195,7 @@ using MeshT      = Mesh<nDim,Real>;
             const Real dr  = ( rb - rc ) / nr;
             const Real dth = ( 2.*M_PI ) / nth;
 
-            auto writeCylindricalCell = [&]( const par::Idx<2>& idx ) -> void
+            auto writeCylindricalCell = [&]( const par::DualIdx2& idx ) -> void
            {
                const Real theta = (idx[1]+0.5)*dth;
                const Real z = 0.;
@@ -210,9 +210,9 @@ using MeshT      = Mesh<nDim,Real>;
 
             const auto sref = set2State( species, qref );
 
-            auto writer = [&] ( const par::Idx<2> idx,
-                                const MeshT::Cell& c0,
-                                const SolVarSet&   qc ) -> void
+            auto writer = [&] ( const par::DualIdx2 idx,
+                                const MeshT::Cell&   c0,
+                                const SolVarSet&     qc ) -> void
            {
                writeCylindricalCell(idx);
                writeState( solutionFile, species, set2State( species, qc ), sref );
@@ -232,6 +232,7 @@ using MeshT      = Mesh<nDim,Real>;
          solutionFile.close();
      }
 
+   // write mesh to file
       if( true )
      {
          std::ofstream meshFile( "data/euler/cylinder2D/mesh.dat" );
@@ -247,8 +248,8 @@ using MeshT      = Mesh<nDim,Real>;
             meshFile << std::scientific;
             meshFile.precision(8);
 
-            auto writer = [&] ( const par::Idx<2> idx,
-                                const MeshT::Node&  p ) -> void
+            auto writer = [&] ( const par::PrimalIdx2 idx,
+                                const MeshT::Node&      p ) -> void
            {
                writePoint(p);
                meshFile << "\n";

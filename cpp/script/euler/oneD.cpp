@@ -125,7 +125,7 @@ using MeshT      = Mesh<nDim,Real>;
 # ifdef _OPENMP
       omp_set_num_threads(1);
 # endif
-      const par::Shape<nDim> cellShape{nx};
+      const par::DualShape<nDim> cellShape{nx};
 
       const ODE::Explicit::RungeKutta<Real> rk = ODE::Explicit::ssp11<Real>();
       const UnsteadyTimeControls<Real> timeControls{.nTimesteps=nt, .cfl=cfl};

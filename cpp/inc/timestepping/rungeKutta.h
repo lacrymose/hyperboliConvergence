@@ -57,17 +57,19 @@
 
    // residual arrays
       using FluxRes = FluxResult<Law,nDim,Real>;
+      using ResidualArray = par::DualArray<FluxRes,nDim>;
 
-      par::Array<FluxRes,nDim>  resTotal(q0.interior.shape());
-      std::vector<par::Array<FluxRes,nDim>>  resStage = par::vec_of_Arrays<FluxRes,nDim>(rungeKutta.nstages,q0.interior.shape());
+      ResidualArray resTotal(q0.interior.shape());
+      std::vector<ResidualArray> resStage = par::vec_of_Arrays<FluxRes,nDim>(rungeKutta.nstages,q0.interior.shape());
 
    // gradient arrays
       using SolVarDel = vardelta_t<SolVarSet>;
       using SolVarGrad = std::array<SolVarDel,nDim>;
+      using GradientArray = par::DualArray<SolVarGrad,nDim>;
 
-      par::Array<SolVarGrad,nDim> dq( q0.interior.shape(), SolVarGrad{} );
+      GradientArray dq( q0.interior.shape(), SolVarGrad{} );
 
-      utils::Timer timer( std::cout, "main loop time: " );
+      utils::Timer timer( "main loop time: " );
       for( size_t tstep=0; tstep<timeControls.nTimesteps; tstep++ )
      {
          Real lmax{};
@@ -124,14 +126,14 @@
    template<int              nDim,
             typename      FluxRes,
             floating_point   Real>
-   void rungeKuttaAccumulation( const ODE::Explicit::RungeKutta<Real>&     rungeKutta,
-                                const size_t                                      stg,
-                                const std::vector<par::Array<FluxRes,nDim>>& resStage,
-                                      par::Array<FluxRes,nDim>&              resTotal )
+   void rungeKuttaAccumulation( const ODE::Explicit::RungeKutta<Real>&         rungeKutta,
+                                const size_t                                          stg,
+                                const std::vector<par::DualArray<FluxRes,nDim>>& resStage,
+                                      par::DualArray<FluxRes,nDim>&              resTotal )
   {
    // runge kutta residual accumulation for each cell
-      auto rkacc = [&]( const par::Idx<nDim>&  idx,
-                              FluxRes&     frtotal ) -> void
+      auto rkacc = [&]( const par::DualIdx<nDim>&  idx,
+                              FluxRes&         frtotal ) -> void
      {
          for( unsigned int k=0; k<=stg; k++ )
         {

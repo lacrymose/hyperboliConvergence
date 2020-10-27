@@ -18,8 +18,8 @@
 
    template<floating_point Real, int nDim, LawType Law>
       requires ImplementedLawType<Law>
-   Real spectralRadius( const par::Array<geom::Volume<  nDim,Real>,nDim>& cells,
-                        const par::Array<FluxResult<Law,nDim,Real>,nDim>& resid )
+   Real spectralRadius( const par::DualArray<geom::Volume<  nDim,Real>,nDim>& cells,
+                        const par::DualArray<FluxResult<Law,nDim,Real>,nDim>& resid )
   {
       assert( cells.shape() == resid.shape() );
 

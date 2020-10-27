@@ -97,13 +97,16 @@
 
       const auto& updateBC = std::get<0>(bc.funcs);
 
+      using CellIdx = typename SolutionField<SolVarT,1>::VarField::IdxType;
+      using NodeIdx = typename Mesh<1,Real>::NodeArray::IdxType;
+
       const size_t bID = boundaryId;
       if( boundaryId==0 ) // left boundary
      {
-         const par::Idx<1> ic{0};    // interior cell
-         const par::Idx<1> ip{0};    // node on boundary
-         const par::Idx<1> ibv{0};   // boundary value
-         const par::Idx<1> ibr{1};   // boundary reference value
+         const NodeIdx ip{0};    // node on boundary
+         const CellIdx ic{0};    // interior cell
+         const CellIdx ibv{0};   // boundary value
+         const CellIdx ibr{1};   // boundary reference value
 
          q.boundary[bID][ibv] = updateBC( species,
                                           surface( mesh.nodes[ip] ), mesh.cells[ic],
@@ -113,10 +116,10 @@
      {
          const size_t nc = q.interior.shape(0);
 
-         const par::Idx<1> ic{nc-1};   // interior cell
-         const par::Idx<1> ip{nc};     // node on boundary
-         const par::Idx<1> ibv{0};     // boundary value
-         const par::Idx<1> ibr{1};     // boundary reference value
+         const NodeIdx ip{nc};     // node on boundary
+         const CellIdx ic{nc-1};   // interior cell
+         const CellIdx ibv{0};     // boundary value
+         const CellIdx ibr{1};     // boundary reference value
 
       // boundary surface must face into domain
          q.boundary[bID][ibv] = updateBC( species,
@@ -161,6 +164,9 @@
       const size_t ni = mesh.cells.shape(0);
       const size_t nj = mesh.cells.shape(1);
 
+      using CellIdx = typename SolutionField<SolVarT,2>::VarField::IdxType;
+      using NodeIdx = typename Mesh<2,Real>::NodeArray::IdxType;
+
       const size_t bID = boundaryId;
       if( boundaryId==0 ) // left boundary
      {
@@ -168,15 +174,15 @@
          for( size_t j=0; j<nj; ++j )
         {
          // interior cell  index
-            const par::Idx<2> ic{i,j};
+            const CellIdx ic{i,j};
 
          // boundary cell index
-            const par::Idx<2> ibv{j,0};
-            const par::Idx<2> ibr{j,1};
+            const CellIdx ibv{j,0};
+            const CellIdx ibr{j,1};
    
          // face node indices
-            const par::Idx<2> ip0{i,j  };
-            const par::Idx<2> ip1{i,j+1};
+            const NodeIdx ip0{i,j  };
+            const NodeIdx ip1{i,j+1};
    
             q.boundary[bID][ibv] = updateBC( species,
                                              surface( mesh.nodes[ip0],
@@ -191,15 +197,15 @@
          for( size_t j=0; j<nj; ++j )
         {
          // interior cell  index
-            const par::Idx<2> ic{i,j};
+            const CellIdx ic{i,j};
 
          // boundary cell index
-            const par::Idx<2> ibv{j,0};
-            const par::Idx<2> ibr{j,1};
+            const CellIdx ibv{j,0};
+            const CellIdx ibr{j,1};
    
          // face node indices
-            const par::Idx<2> ip0{i+1,j+1};
-            const par::Idx<2> ip1{i+1,j  };
+            const NodeIdx ip0{i+1,j+1};
+            const NodeIdx ip1{i+1,j  };
    
             q.boundary[bID][ibv] = updateBC( species,
                                              surface( mesh.nodes[ip0],
@@ -214,15 +220,15 @@
          for( size_t i=0; i<ni; ++i )
         {
          // interior cell  index
-            const par::Idx<2> ic{i,j};
+            const CellIdx ic{i,j};
 
          // boundary cell index
-            const par::Idx<2> ibv{i,0};
-            const par::Idx<2> ibr{i,1};
+            const CellIdx ibv{i,0};
+            const CellIdx ibr{i,1};
    
          // face node indices
-            const par::Idx<2> ip0{i+1,j};
-            const par::Idx<2> ip1{i  ,j};
+            const NodeIdx ip0{i+1,j};
+            const NodeIdx ip1{i  ,j};
    
             q.boundary[bID][ibv] = updateBC( species,
                                              surface( mesh.nodes[ip0],
@@ -237,15 +243,15 @@
          for( size_t i=0; i<ni; ++i )
         {
          // interior cell  index
-            const par::Idx<2> ic{i,j};
+            const CellIdx ic{i,j};
 
          // boundary cell index
-            const par::Idx<2> ibv{i,0};
-            const par::Idx<2> ibr{i,1};
+            const CellIdx ibv{i,0};
+            const CellIdx ibr{i,1};
    
          // face node indices
-            const par::Idx<2> ip0{i  ,j+1};
-            const par::Idx<2> ip1{i+1,j+1};
+            const NodeIdx ip0{i  ,j+1};
+            const NodeIdx ip1{i+1,j+1};
    
             q.boundary[bID][ibv] = updateBC( species,
                                              surface( mesh.nodes[ip0],

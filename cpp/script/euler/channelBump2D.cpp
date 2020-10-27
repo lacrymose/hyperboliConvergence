@@ -149,7 +149,7 @@ using MeshT      = Mesh<nDim,Real>;
       std::cout << "OpenMP enabled with: " << nthreads << " threads" << std::endl;
 # endif
 
-      const par::Shape<nDim> cellShape{nx,ny};
+      const par::DualShape<nDim> cellShape{nx,ny};
 
       const ODE::Explicit::RungeKutta<Real> rk = ODE::Explicit::ssp11<Real>();
       const UnsteadyTimeControls<Real> timeControls{.nTimesteps=nt, .cfl=cfl};
@@ -196,7 +196,7 @@ using MeshT      = Mesh<nDim,Real>;
                  species,
                  mesh, q );
 
-   // write 1D solution to file
+   // write solution to file
       if( false )
      {
          std::ofstream solutionFile( "data/euler/channelBump2D/result.dat" );
@@ -214,9 +214,9 @@ using MeshT      = Mesh<nDim,Real>;
 
             const auto sref = set2State( species, qref );
 
-            auto writer = [&] ( const par::Idx<2> idx,
-                                const MeshT::Cell& c0,
-                                const SolVarSet&   qc ) -> void
+            auto writer = [&] ( const par::DualIdx2 idx,
+                                const MeshT::Cell&   c0,
+                                const SolVarSet&     qc ) -> void
            {
                if( idx[1]!=0 ){ return; }
                writePoint(c0.centre);
@@ -285,9 +285,9 @@ using MeshT      = Mesh<nDim,Real>;
 
             const auto sref = set2State( species, qref );
 
-            auto writer = [&] ( const par::Idx<2> idx,
-                                const MeshT::Cell& c0,
-                                const SolVarSet&   qc ) -> void
+            auto writer = [&] ( const par::DualIdx2 idx,
+                                const MeshT::Cell&   c0,
+                                const SolVarSet&     qc ) -> void
            {
                writePoint(c0.centre);
                writeState( solutionFile, species, set2State( species, qc ), sref );
@@ -357,8 +357,8 @@ using MeshT      = Mesh<nDim,Real>;
             meshFile << std::scientific;
             meshFile.precision(8);
 
-            auto writer = [&] ( const par::Idx<2> idx,
-                                const MeshT::Node&  p ) -> void
+            auto writer = [&] ( const par::PrimalIdx2 idx,
+                                const MeshT::Node&      p ) -> void
            {
                writePoint(p);
                meshFile << "\n";

@@ -3,9 +3,9 @@
  * return value form
  */
    template<int nDim, floating_point Real>
-   par::Array<geom::Volume<nDim,Real>,nDim> dual( const par::Array<geom::Point<nDim,Real>,nDim>& nodes )
+   MeshCellArray<nDim,Real> dual( const MeshNodeArray<nDim,Real>& nodes )
   {
-      par::Array<geom::Volume<nDim,Real>,nDim> cells(cellDims_from_nodeDims(nodes.shape()));
+      MeshCellArray<nDim,Real> cells(dualShape(nodes.shape()));
       dual( nodes, cells );
       return cells;
   }
@@ -14,15 +14,24 @@
  * 1D dual calculation
  */
    template<floating_point Real>
-   void dual( const par::Array<geom::Point< 1,Real>,1>& nodes,
-                    par::Array<geom::Volume<1,Real>,1>& cells )
+   void dual( const MeshNodeArray<1,Real>& nodes,
+                    MeshCellArray<1,Real>& cells )
   {
-      const auto n=cells.shape(0);
-      assert( n+1 == nodes.shape(0) );
+      assert( cells.shape() == par::dualShape( nodes.shape() ) );
 
-      for( size_t i=0; i<n; i++ )
+      using Idx_n = typename MeshNodeArray<1,Real>::IdxType;
+      using Idx_c = typename MeshCellArray<1,Real>::IdxType;
+
+      const auto n = cells.shape(0);
+
+      for( size_t i=0; i<n; ++i )
      {
-         cells[{i}] = geom::volume( nodes[{i}], nodes[{i+1}] );
+         const Idx_n i_n0{i};
+         const Idx_n i_n1{i+1};
+         const Idx_c i_c{i};
+
+         cells[i_c] = geom::volume( nodes[i_n0],
+                                    nodes[i_n1] );
      }
       return;
   }
@@ -31,13 +40,15 @@
  * 2D dual calculation
  */
    template<floating_point Real>
-   void dual( const par::Array<geom::Point< 2,Real>,2>& nodes,
-                    par::Array<geom::Volume<2,Real>,2>& cells )
+   void dual( const MeshNodeArray<2,Real>& nodes,
+                    MeshCellArray<2,Real>& cells )
   {
-      assert( cells.shape() == cellDims_from_nodeDims(nodes.shape()) );
+      assert( cells.shape() == par::dualShape( nodes.shape() ) );
 
-      const size_t ncx = cells.shape(0);
-      const size_t ncy = cells.shape(1);
+      using Idx_n = typename MeshNodeArray<2,Real>::IdxType;
+      using Idx_c = typename MeshCellArray<2,Real>::IdxType;
+
+      using Off_n = typename MeshNodeArray<2,Real>::OffsetType;
 
    // corners of standard quad
    //
@@ -46,19 +57,25 @@
    //   |      |
    //   0 ---- 1
 
-      const par::Offset<2> o0{0,0};
-      const par::Offset<2> o1{1,0};
-      const par::Offset<2> o2{0,1};
-      const par::Offset<2> o3{1,1};
+      constexpr Off_n o0{0,0};
+      constexpr Off_n o1{1,0};
+      constexpr Off_n o2{0,1};
+      constexpr Off_n o3{1,1};
 
-      for( size_t i=0; i<ncx; i++ )
+      const auto ncx = cells.shape(0);
+      const auto ncy = cells.shape(1);
+
+      for( size_t i=0; i<ncx; ++i )
      {
-         for( size_t j=0; j<ncy; j++ )
+         for( size_t j=0; j<ncy; ++j )
         {
-            const par::Idx<2> ij{i,j};
+            const Idx_c ij_c{i,j};
+            const Idx_n ij_n{i,j};
 
-            cells[ij] = geom::volume( nodes[ ij+o0 ], nodes[ ij+o1 ],
-                                      nodes[ ij+o2 ], nodes[ ij+o3 ] );
+            cells[ij_c] = geom::volume( nodes[ ij_n+o0 ],
+                                        nodes[ ij_n+o1 ],
+                                        nodes[ ij_n+o2 ],
+                                        nodes[ ij_n+o3 ] );
         }
      }
 

@@ -13,8 +13,9 @@
  * create a 2D mesh over domain [lo0:hi0]x[lo1:hi1] with linear spacing
  */
    template<floating_point Real>
-   Mesh<2,Real> make_linspace_mesh( const par::Shape<2>& cellDims, const Real lox, const Real hix,
-                                                                   const Real loy, const Real hiy )
+   Mesh<2,Real> make_linspace_mesh( const par::DualShape2& cellDims,
+                                    const Real lox, const Real hix,
+                                    const Real loy, const Real hiy )
   {
       Mesh<2,Real> mesh(cellDims);
 
@@ -28,8 +29,8 @@
       using Pt = typename Mesh<2,Real>::Node;
       par::generate_idx( mesh.nodes,
                          // return linear spacing in x and y
-                          [=]( par::Idx<2> i ) -> Pt
-                         { return Pt{lox+i[0]*dx,loy+i[1]*dy}; }
+                         [=]( par::PrimalIdx2 i ) -> Pt
+                        { return Pt{lox+i[0]*dx,loy+i[1]*dy}; }
                        );
 
    // initialise cell array
@@ -64,7 +65,7 @@
       const size_t nx = 2*nl+nw;
       const size_t ny = nd;
 
-      Mesh<2,Real> mesh( par::Shape<2>{nx,ny} );
+      Mesh<2,Real> mesh( par::DualShape2{nx,ny} );
       assert( mesh.nodes.shape(0) == 2*nl+nw+1 );
       assert( mesh.nodes.shape(1) ==      ny+1 );
 
@@ -143,7 +144,7 @@
       const size_t nr  = ncells[0];
       const size_t nth = ncells[1];
 
-      const par::Shape<2> shape{nr,nth};
+      const par::DualShape2 shape{nr,nth};
 
       Mesh<2,Real> mesh(shape);
 

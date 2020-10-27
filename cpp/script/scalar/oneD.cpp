@@ -43,8 +43,8 @@ constexpr unsigned int nwavelengths=1;
 constexpr Real velocity = 1.;
 
 // discretisation
-constexpr int  nx  = 8;
-constexpr int  nt  = 5;
+constexpr int  nx  = 24;
+constexpr int  nt  = 10;
 constexpr Real cfl = 0.9;
 
 constexpr BasisT SolutionBasis = BasisT::Conserved;
@@ -78,7 +78,7 @@ using MeshT     = Mesh<nDim,Real>;
 
    int main()
   {
-      const par::Shape<nDim> cellShape{nx};
+      const par::DualShape<nDim> cellShape{nx};
 
       const ODE::Explicit::RungeKutta<Real> rk = ODE::Explicit::ssp34<Real>();
       const UnsteadyTimeControls<Real> timeControls{.nTimesteps=nt, .cfl=cfl};
@@ -105,8 +105,8 @@ using MeshT     = Mesh<nDim,Real>;
 
    // initialise boundaries
       for( SolField::VarField& v : q.boundary ){ par::fill( v, SolVarSet{velocity,1.} ); }
-//    for( SolField::BCType&  bc : q.bcTypes ){ bc = SolField::BCType::Periodic; }
-      for( SolField::BCType&  bc : q.bcTypes ){ bc = SolField::BCType::Riemann; }
+//    for( SolField::BCType&  bc : q.bcTypes  ){ bc = SolField::BCType::Periodic; }
+      for( SolField::BCType&  bc : q.bcTypes  ){ bc = SolField::BCType::Riemann; }
 
    // boundary condition set
       const std::tuple boundaryConditions{make_periodic_BCond<Law>(),

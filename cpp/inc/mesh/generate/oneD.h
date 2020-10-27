@@ -9,7 +9,7 @@
  * create a 1D mesh over domain [lo:hi] with linear spacing and nc cells
  */
    template<floating_point Real>
-   Mesh<1,Real> make_linspace_mesh( const par::Shape<1>& cellDims, const Real lo, const Real hi )
+   Mesh<1,Real> make_linspace_mesh( const par::DualShape1& cellDims, const Real lo, const Real hi )
   {
       Mesh<1,Real> mesh(cellDims);
 
@@ -18,15 +18,19 @@
 
       const Real dx = ( hi - lo ) / nc;
 
-      for( size_t i=0; i<np; i++ ){ mesh.nodes[{i}][0] = lo + i*dx; }
-      mesh.cells = dual( mesh.nodes );
+      using Pt = typename Mesh<1,Real>::Node;
+
+      for( size_t i=0; i<np; i++ ){ mesh.nodes[{i}] = Pt{lo+i*dx}; }
 
 /*
-      par::generate_by_index( [=]( par::Idx<1> i ){ return lo+i[0]*dx; },
-                              mesh.nodes
-                            );
-      mesh.cells = dual( mesh.nodes );
+      par::generate_idx( mesh.nodes,
+                         // return linear spacing in x and y
+                         [=]( par::PrimalIdx1 i ) -> Pt
+                        { return Pt{lo+i[0]*dx}; }
+                       );
 */
+
+      mesh.cells = dual( mesh.nodes );
 
       return mesh;
   }

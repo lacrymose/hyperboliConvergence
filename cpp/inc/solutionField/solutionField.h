@@ -7,38 +7,38 @@
 # include <parallalg/array.h>
 
    template<typename ElemT>
-   auto makeBoundaryArray( const par::Shape<1>& s )
+   auto makeBoundaryArray( const par::DualShape1& s )
   {
-      using ArrayT = par::Array<ElemT,1>;
+      using ArrayT = par::DualArray1<ElemT>;
       using BoundaryArrays = std::array<ArrayT,2>;
 
-      par::Shape<1> s01{2};
+      par::DualShape1 s01{2};
 
       return BoundaryArrays{ArrayT(s01),ArrayT(s01)};
   }
 
    template<typename ElemT>
-   auto makeBoundaryArray( const par::Shape<2>& s )
+   auto makeBoundaryArray( const par::DualShape2& s )
   {
-      using ArrayT = par::Array<ElemT,2>;
+      using ArrayT = par::DualArray2<ElemT>;
       using BoundaryArrays = std::array<ArrayT,4>;
 
-      par::Shape<2> s01{s[1],2};
-      par::Shape<2> s23{s[0],2};
+      par::DualShape2 s01{s[1],2};
+      par::DualShape2 s23{s[0],2};
 
       return BoundaryArrays{ArrayT(s01),ArrayT(s01),
                             ArrayT(s23),ArrayT(s23)};
   }
 
    template<typename ElemT>
-   auto makeBoundaryArray( const par::Shape<3>& s )
+   auto makeBoundaryArray( const par::DualShape3& s )
   {
-      using ArrayT = par::Array<ElemT,3>;
+      using ArrayT = par::DualArray3<ElemT>;
       using BoundaryArrays = std::array<ArrayT,6>;
 
-      par::Shape<3> s01{s[1],s[2],2};
-      par::Shape<3> s23{s[0],s[2],2};
-      par::Shape<3> s45{s[0],s[1],2};
+      par::DualShape3 s01{s[1],s[2],2};
+      par::DualShape3 s23{s[0],s[2],2};
+      par::DualShape3 s45{s[0],s[1],2};
 
       return BoundaryArrays{ArrayT(s01),ArrayT(s01),
                             ArrayT(s23),ArrayT(s23),
@@ -62,7 +62,7 @@
       using VarDel = vardelta_t<VarSet>;
 
    // array type for field
-      using VarField = par::Array<VarSet,nDim>;
+      using VarField = par::DualArray<VarSet,nDim>;
 
    // enum for specifying boundary condition
       using BCType = BoundaryType<Law>;
@@ -84,7 +84,7 @@
       SolutionField& operator=(       SolutionField&& ) = default;
 
    // must be initialised with shape of domain
-      SolutionField( const par::Shape<nDim>& s )
+      SolutionField( const par::DualShape<nDim>& s )
                      : interior(s),
                        boundary(makeBoundaryArray<VarSet>(s)){}
   };

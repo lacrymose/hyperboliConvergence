@@ -12,21 +12,21 @@
  *    velocity has angle theta from x axis and magnitude speed
  */
    template<ScalarVarSet VarT, floating_point Real>
-   par::Array<VarT,2> initialise_scalar_tophat( const Mesh<2,Real>& mesh,
-                                                const Species<LawType::ScalarAdvection,Real>& species,
-                                                const Real theta,
-                                                const Real speed,
-                                                const Real lox,
-                                                const Real hix,
-                                                const Real loy,
-                                                const Real hiy )
+   par::DualArray2<VarT> initialise_scalar_tophat( const Mesh<2,Real>& mesh,
+                                                   const Species<LawType::ScalarAdvection,Real>& species,
+                                                   const Real theta,
+                                                   const Real speed,
+                                                   const Real lox,
+                                                   const Real hix,
+                                                   const Real loy,
+                                                   const Real hiy )
   {
       constexpr LawType Law = LawType::ScalarAdvection;
       constexpr BasisType<Law> ConsBasis = BasisType<Law>::Conserved;
 
       using ConsVarT = VariableSet<Law,2,ConsBasis,Real>;
 
-      par::Array<VarT,2> q(mesh.cells.shape());
+      par::DualArray2<VarT> q(mesh.cells.shape());
 
    // background velocity
       const Real u = speed*cos( theta );
@@ -36,11 +36,13 @@
       const size_t nx = mesh.cells.shape(0);
       const size_t ny = mesh.cells.shape(1);
 
-      for( size_t i=0; i<nx; i++ )
+      using CellIdx = typename Mesh<2,Real>::CellArray::IdxType;
+
+      for( size_t i=0; i<nx; ++i )
      {
-         for( size_t j=0; j<ny; j++ )
+         for( size_t j=0; j<ny; ++j )
         {
-            const par::Idx<2> ij{i,j};
+            const CellIdx ij{i,j};
 
             const Real x = mesh.cells[ij].centre[0];
             const Real y = mesh.cells[ij].centre[1];

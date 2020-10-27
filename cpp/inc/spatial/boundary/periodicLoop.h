@@ -33,13 +33,13 @@
               && std::is_same_v<FluxRes,
                                 fluxresult_t<SolVarT>>
    void boundaryResidual( const BoundaryCondition<Law,BoundaryType<Law>::Periodic>&,
-                          const size_t                     boundaryId,
-                          const Mesh<1,Real>&                    mesh,
-                          const HighOrderFlux&                 hoflux,
-                          const Species<Law,Real>&            species,
-                          const SolutionField<SolVarT,1>&           q,
-                          const par::Array<std::array<SolDelT,1>,1>&          dq,
-                                par::Array<   FluxRes,1>&         res )
+                          const size_t                           boundaryId,
+                          const Mesh<1,Real>&                          mesh,
+                          const HighOrderFlux&                       hoflux,
+                          const Species<Law,Real>&                  species,
+                          const SolutionField<SolVarT,1>&                 q,
+                          const par::DualArray<std::array<SolDelT,1>,1>& dq,
+                                par::DualArray<FluxRes,1>&              res )
   {
    // valid boundary?
       assert( (boundaryId==0 or boundaryId==1)
@@ -59,9 +59,12 @@
    // periodic boundary
       const size_t nc = q.interior.shape(0);
 
-      const par::Idx<1> ip{0};
-      const par::Idx<1> il{nc-1};
-      const par::Idx<1> ir{0};
+      using CellIdx = typename SolutionField<SolVarT,1>::VarField::IdxType;
+      using NodeIdx = typename Mesh<1,Real>::NodeArray::IdxType;
+
+      const NodeIdx ip{0};
+      const CellIdx il{nc-1};
+      const CellIdx ir{0};
 
       const FluxRes fr = hoflux( species,
                                  surface( mesh.nodes[ip] ),
@@ -90,13 +93,13 @@
               && std::is_same_v<FluxRes,
                                 fluxresult_t<SolVarT>>
    void boundaryResidual( const BoundaryCondition<Law,BoundaryType<Law>::Periodic>&,
-                          const size_t                        boundaryId,
-                          const Mesh<2,Real>&                       mesh,
-                          const HighOrderFlux&                    hoflux,
-                          const Species<Law,Real>&               species,
-                          const SolutionField<SolVarT,2>&              q,
-                          const par::Array<std::array<SolDelT,2>,2>&  dq,
-                                par::Array<FluxRes,2>&               res )
+                          const size_t                            boundaryId,
+                          const Mesh<2,Real>&                           mesh,
+                          const HighOrderFlux&                        hoflux,
+                          const Species<Law,Real>&                   species,
+                          const SolutionField<SolVarT,2>&                  q,
+                          const par::DualArray<std::array<SolDelT,2>,2>&  dq,
+                                par::DualArray<FluxRes,2>&               res )
   {
 //    return;
    // valid boundary?
@@ -120,20 +123,23 @@
       const size_t ni = q.interior.shape(0);
       const size_t nj = q.interior.shape(1);
 
+      using CellIdx = typename SolutionField<SolVarT,2>::VarField::IdxType;
+      using NodeIdx = typename Mesh<2,Real>::NodeArray::IdxType;
+
       if( boundaryId==0 ) // periodic boundary along +/- i direction
      {
-         for( size_t j=0; j<nj; j++ )
+         for( size_t j=0; j<nj; ++j )
         {
             const size_t il=ni-1;
             const size_t ir=0;
    
          // cell left/right indices
-            const par::Idx<2> icl{il,j};
-            const par::Idx<2> icr{ir,j};
+            const CellIdx icl{il,j};
+            const CellIdx icr{ir,j};
    
          // face node indices
-            const par::Idx<2> ip0{0,j  };
-            const par::Idx<2> ip1{0,j+1};
+            const NodeIdx ip0{0,j  };
+            const NodeIdx ip1{0,j+1};
    
             const FluxRes fr = hoflux( species,
                                        surface( mesh.nodes[ip0],
@@ -146,18 +152,18 @@
      }
       else if ( boundaryId==2 ) // periodic boundary along +/- j direction
      { 
-         for( size_t i=0; i<ni; i++ )
+         for( size_t i=0; i<ni; ++i )
         {
             const size_t jl=nj-1;
             const size_t jr=0;
    
          // cell left/right indices
-            const par::Idx<2> icl{i,jl};
-            const par::Idx<2> icr{i,jr};
+            const CellIdx icl{i,jl};
+            const CellIdx icr{i,jr};
    
          // face node indices
-            const par::Idx<2> ip0{i+1,0};
-            const par::Idx<2> ip1{i  ,0};
+            const NodeIdx ip0{i+1,0};
+            const NodeIdx ip1{i  ,0};
    
             const FluxRes fr = hoflux( species,
                                        surface( mesh.nodes[ip0],

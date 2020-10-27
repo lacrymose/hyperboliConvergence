@@ -34,13 +34,13 @@
               && std::is_same_v<FluxRes,
                                 fluxresult_t<SolVarT>>
    void boundaryResidual( const BoundaryCondition<Law,BCType,UpdateFunc,BCFluxFunc>& bc,
-                          const size_t                     boundaryId,
-                          const Mesh<1,Real>&                    mesh,
-                          const HighOrderFlux&                 hoflux,
-                          const Species<Law,Real>&            species,
-                          const SolutionField<SolVarT,1>&           q,
-                          const par::Array<std::array<SolDelT,1>,1>&          dq,
-                                par::Array<   FluxRes,1>&         res )
+                          const size_t                                       boundaryId,
+                          const Mesh<1,Real>&                                      mesh,
+                          const HighOrderFlux&                                   hoflux,
+                          const Species<Law,Real>&                              species,
+                          const SolutionField<SolVarT,1>&                             q,
+                          const par::DualArray<std::array<SolDelT,1>,1>&             dq,
+                                par::DualArray<FluxRes,1>&                          res )
   {
    // check mesh sizes match
       assert( mesh.cells.shape() == res.shape() );
@@ -52,13 +52,16 @@
 
       auto& boundaryFlux = std::get<1>(bc.funcs);
 
+      using CellIdx = typename SolutionField<SolVarT,1>::VarField::IdxType;
+      using NodeIdx = typename Mesh<1,Real>::NodeArray::IdxType;
+
    // first order boundaries
       if( boundaryId==0 ) // left boundary
      {
-         const par::Idx<1> ip{0};
-         const par::Idx<1> ic{0};
-         const par::Idx<1> ib0{0};
-         const par::Idx<1> ib1{1};
+         const NodeIdx ip{0};
+         const CellIdx ic{0};
+         const CellIdx ib0{0};
+         const CellIdx ib1{1};
 
          const FluxRes fr = boundaryFlux( species,
                                           surface( mesh.nodes[ip] ),
@@ -73,10 +76,10 @@
      {
          const size_t nc = q.interior.shape(0);
 
-         const par::Idx<1> ip{nc-1};
-         const par::Idx<1> ic{nc-1};
-         const par::Idx<1> ib0{0};
-         const par::Idx<1> ib1{1};
+         const NodeIdx ip{nc-1};
+         const CellIdx ic{nc-1};
+         const CellIdx ib0{0};
+         const CellIdx ib1{1};
 
          const FluxRes fr = boundaryFlux( species,
                                           flip( surface( mesh.nodes[ip] ) ),
@@ -112,13 +115,13 @@
               && std::is_same_v<FluxRes,
                                 fluxresult_t<SolVarT>>
    void boundaryResidual( const BoundaryCondition<Law,BCType,UpdateFunc,BCFluxFunc>& bc,
-                          const size_t                     boundaryId,
-                          const Mesh<2,Real>&                    mesh,
-                          const HighOrderFlux&                 hoflux,
-                          const Species<Law,Real>&            species,
-                          const SolutionField<SolVarT,2>&           q,
-                          const par::Array<std::array<SolDelT,2>,2>& dq,
-                                par::Array<FluxRes,2>&            res )
+                          const size_t                           boundaryId,
+                          const Mesh<2,Real>&                          mesh,
+                          const HighOrderFlux&                       hoflux,
+                          const Species<Law,Real>&                  species,
+                          const SolutionField<SolVarT,2>&                 q,
+                          const par::DualArray<std::array<SolDelT,2>,2>& dq,
+                                par::DualArray<FluxRes,2>&              res )
   {
    // check mesh sizes match
       assert( mesh.cells.shape() == res.shape() );
@@ -131,6 +134,9 @@
       const size_t ni = q.interior.shape(0);
       const size_t nj = q.interior.shape(1);
 
+      using CellIdx = typename SolutionField<SolVarT,2>::VarField::IdxType;
+      using NodeIdx = typename Mesh<2,Real>::NodeArray::IdxType;
+
       auto& boundaryFlux = std::get<1>(bc.funcs);
 
       if( boundaryId==0 ) // left face
@@ -139,15 +145,15 @@
          for( size_t j=0; j<nj; ++j )
         {
          // interior cell  index
-            const par::Idx<2> ic{i,j};
+            const CellIdx ic{i,j};
 
          // boundary cell index
-            const par::Idx<2> ib0{j,0};
-            const par::Idx<2> ib1{j,1};
+            const CellIdx ib0{j,0};
+            const CellIdx ib1{j,1};
    
          // face node indices
-            const par::Idx<2> ip0{i,j  };
-            const par::Idx<2> ip1{i,j+1};
+            const NodeIdx ip0{i,j  };
+            const NodeIdx ip1{i,j+1};
    
             const FluxRes fr = boundaryFlux( species,
                                              surface( mesh.nodes[ip0],
@@ -166,15 +172,15 @@
          for( size_t j=0; j<nj; ++j )
         {
          // interior cell  index
-            const par::Idx<2> ic{i,j};
+            const CellIdx ic{i,j};
 
          // boundary cell index
-            const par::Idx<2> ib0{j,0};
-            const par::Idx<2> ib1{j,1};
+            const CellIdx ib0{j,0};
+            const CellIdx ib1{j,1};
    
          // face node indices
-            const par::Idx<2> ip0{i+1,j+1};
-            const par::Idx<2> ip1{i+1,j  };
+            const NodeIdx ip0{i+1,j+1};
+            const NodeIdx ip1{i+1,j  };
    
             const FluxRes fr = boundaryFlux( species,
                                              surface( mesh.nodes[ip0],
@@ -193,15 +199,15 @@
          for( size_t i=0; i<ni; ++i )
         {
          // interior cell  index
-            const par::Idx<2> ic{i,j};
+            const CellIdx ic{i,j};
 
          // boundary cell index
-            const par::Idx<2> ib0{i,0};
-            const par::Idx<2> ib1{i,1};
+            const CellIdx ib0{i,0};
+            const CellIdx ib1{i,1};
    
          // face node indices
-            const par::Idx<2> ip0{i+1,j};
-            const par::Idx<2> ip1{i  ,j};
+            const NodeIdx ip0{i+1,j};
+            const NodeIdx ip1{i  ,j};
    
             const FluxRes fr = boundaryFlux( species,
                                              surface( mesh.nodes[ip0],
@@ -220,15 +226,15 @@
          for( size_t i=0; i<ni; ++i )
         {
          // interior cell  index
-            const par::Idx<2> ic{i,j};
+            const CellIdx ic{i,j};
 
          // boundary cell index
-            const par::Idx<2> ib0{i,0};
-            const par::Idx<2> ib1{i,1};
+            const CellIdx ib0{i,0};
+            const CellIdx ib1{i,1};
    
          // face node indices
-            const par::Idx<2> ip0{i  ,j+1};
-            const par::Idx<2> ip1{i+1,j+1};
+            const NodeIdx ip0{i  ,j+1};
+            const NodeIdx ip1{i+1,j+1};
    
             const FluxRes fr = boundaryFlux( species,
                                              surface( mesh.nodes[ip0],

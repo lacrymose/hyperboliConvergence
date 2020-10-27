@@ -15,25 +15,25 @@
 // overload with return value (must be used to construct vector to use RVO)
    template<LawType Law, int nDim, ImplementedVarSet SolVarT, floating_point Real>
       requires ConsistentTypes<Law,nDim,Real,SolVarT>
-   par::Array<SolVarT,nDim> eulerForwardUpdate( const par::Array<geom::Volume<nDim,Real>,nDim>& cells,
-                                                const Species<Law,Real>&                      species,
-                                                const Real                                         dt,
-                                                const par::Array<FluxResult<Law,nDim,Real>,nDim>&   r,
-                                                const par::Array<SolVarT,nDim>&                    q0 )
+   par::Array<SolVarT,nDim> eulerForwardUpdate( const par::DualArray<geom::Volume<nDim,Real>,nDim>& cells,
+                                                const Species<Law,Real>&                          species,
+                                                const Real                                             dt,
+                                                const par::DualArray<FluxResult<Law,nDim,Real>,nDim>&   r,
+                                                const par::DualArray<SolVarT,nDim>&                    q0 )
   {
-      par::Array<SolVarT,nDim> q1(q0.shape());
+      par::DualArray<SolVarT,nDim> q1(q0.shape());
       eulerForwardUpdate( cells, species, dt, r, q0, q1 );
       return q1;
   }
 
    template<LawType Law, int nDim, ImplementedVarSet SolVarT, floating_point Real>
       requires ConsistentTypes<Law,nDim,Real,SolVarT>
-   void eulerForwardUpdate( const par::Array<geom::Volume<nDim,Real>,nDim>& cells,
-                            const Species<Law,Real>&                      species,
-                            const Real                                         dt,
-                            const par::Array<FluxResult<Law,nDim,Real>,nDim>&   r,
-                            const par::Array<SolVarT,nDim>&                    q0,
-                                  par::Array<SolVarT,nDim>&                    q1 )
+   void eulerForwardUpdate( const par::DualArray<geom::Volume<nDim,Real>,nDim>& cells,
+                            const Species<Law,Real>&                          species,
+                            const Real                                             dt,
+                            const par::DualArray<FluxResult<Law,nDim,Real>,nDim>&   r,
+                            const par::DualArray<SolVarT,nDim>&                    q0,
+                                  par::DualArray<SolVarT,nDim>&                    q1 )
   {
    // conserved variables/deltas needed for correct shock speeds
       constexpr BasisType<Law> ConservedBasis = BasisType<Law>::Conserved;

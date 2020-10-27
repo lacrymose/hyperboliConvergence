@@ -33,8 +33,8 @@ CSCRIPT = test/test.cpp \
 CCMP = g++-8
 
 # debug/optimisation, warning and language standard flags
-#COPT = -Og -D_GLIBCXX_DEBUG -fsanitize=address -fno-omit-frame-pointer
-COPT = -O3 -fno-exceptions
+#COPT = -Og -fno-exceptions -D_GLIBCXX_DEBUG -fsanitize=address -fno-omit-frame-pointer
+COPT = -O3 -fno-exceptions -ffast-math
 
 CWARN = -Wall -Wextra -Wpedantic -Wno-unused-parameter
 
