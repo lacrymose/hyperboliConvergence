@@ -139,7 +139,7 @@ namespace par
  * return Shape of primal array, given Shape of dual array
  */
    template<int NDIM>
-   auto primalShape( const Shape<NDIM,Dual>& dual_shape )
+   Shape<NDIM,Primal> primalShape( const Shape<NDIM,Dual>& dual_shape )
   {
       Shape<NDIM,Primal> primal_shape;
       for( unsigned int i=0; i<NDIM; ++i ){ primal_shape.shape[i]=dual_shape[i]+1; }
@@ -150,7 +150,7 @@ namespace par
  * return Shape of dual array, given Shape of primal array
  */
    template<int NDIM>
-   auto dualShape( const Shape<NDIM,Primal>& primal_shape )
+   Shape<NDIM,Dual> dualShape( const Shape<NDIM,Primal>& primal_shape )
   {
       Shape<NDIM,Dual> dual_shape;
       for( unsigned int i=0; i<NDIM; i++ ){ dual_shape.shape[i]=primal_shape[i]-1; }
@@ -205,7 +205,9 @@ namespace par
    public: /* typedefs and static members */
 
       using ElemType = ElemT;
-      constexpr static int nDim=NDIM;
+      constexpr static int         nDim        = NDIM;
+      constexpr static GridType    gridType    = GRIDTYPE;
+      constexpr static ArraySizing arraySizing = SIZING;
 
       using IdxType    = Idx<   NDIM,GRIDTYPE>;
       using OffsetType = Offset<NDIM,GRIDTYPE>;
@@ -251,8 +253,8 @@ namespace par
 
    // accessors
       // elements of array
-      const ElemT& operator[]( const IdxType& idx ) const { return elems_array[ stride_array*idx ]; }
-            ElemT& operator[]( const IdxType& idx )       { return elems_array[ stride_array*idx ]; }
+      const ElemT& operator()( const IdxType& idx ) const { return elems_array[ stride_array*idx ]; }
+            ElemT& operator()( const IdxType& idx )       { return elems_array[ stride_array*idx ]; }
 
       // flattened elements of array
       const ElemT& flatten( const size_t i ) const { return elems_array[i]; }

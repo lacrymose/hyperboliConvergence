@@ -30,8 +30,8 @@
          const Idx_n i_n1{i+1};
          const Idx_c i_c{i};
 
-         cells[i_c] = geom::volume( nodes[i_n0],
-                                    nodes[i_n1] );
+         cells(i_c) = geom::volume( nodes(i_n0),
+                                    nodes(i_n1) );
      }
       return;
   }
@@ -72,10 +72,10 @@
             const Idx_c ij_c{i,j};
             const Idx_n ij_n{i,j};
 
-            cells[ij_c] = geom::volume( nodes[ ij_n+o0 ],
-                                        nodes[ ij_n+o1 ],
-                                        nodes[ ij_n+o2 ],
-                                        nodes[ ij_n+o3 ] );
+            cells(ij_c) = geom::volume( nodes( ij_n+o0 ),
+                                        nodes( ij_n+o1 ),
+                                        nodes( ij_n+o2 ),
+                                        nodes( ij_n+o3 ) );
         }
      }
 

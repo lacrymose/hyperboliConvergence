@@ -23,7 +23,7 @@
               const SolVarDel&              gradl,
               const SolVarDel&              gradr,
               const SolVarSet&                 ql,
-              const SolVarSet&                 qr ) -> FluxResult<Law,nDim,Real>
+              const SolVarSet&                 qr ) -> fluxresult_t<SolVarSet>
 //       requires ConsistentTypes<Law,nDim,Real,SolVarSet,SolVarDel>
      {
       // central and l/r biased differences in solution basis
@@ -56,7 +56,7 @@
               const SolVarDel&,
               const SolVarDel&,
               const SolVarSet&                 ql,
-              const SolVarSet&                 qr ) -> FluxResult<Law,nDim,Real>
+              const SolVarSet&                 qr ) -> fluxresult_t<SolVarSet>
 //       requires ConsistentTypes<Law,nDim,Real,SolVarSet,SolVarDel>
      {
       // first order inviscid flux

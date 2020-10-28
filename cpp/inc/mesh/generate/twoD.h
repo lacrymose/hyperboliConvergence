@@ -91,8 +91,8 @@
             const Node pt0{ xin , y };
             const Node pt1{ xout, y };
 
-            mesh.nodes[{     i, j }] = pt0;
-            mesh.nodes[{ off+i, j }] = pt1;
+            mesh.nodes({     i, j }) = pt0;
+            mesh.nodes({ off+i, j }) = pt1;
         }
      }
 
@@ -111,8 +111,8 @@
          const Node pl = Node{ x, yl };
          const Node ph = Node{ x, yh };
 
-         mesh.nodes[{ ii, 0  }] = pl;
-         mesh.nodes[{ ii, ny }] = ph;
+         mesh.nodes({ ii, 0  }) = pl;
+         mesh.nodes({ ii, ny }) = ph;
 
       // delta between lower and higher walls
          const auto dp = (ph-pl)*(1./ny);
@@ -120,7 +120,7 @@
       // linear distribution from bottom to top
          for( size_t j=0; j<ny; ++j )
         {
-            mesh.nodes[{ ii, j }] = pl + Real(j)*dp;
+            mesh.nodes({ ii, j }) = pl + Real(j)*dp;
         }
      }
 

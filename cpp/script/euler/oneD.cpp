@@ -146,8 +146,8 @@ using MeshT      = Mesh<nDim,Real>;
       const SolVarSet qr{velocity,                density, pressure};
 
       SolField q(cellShape);
-//    for( size_t i=0;    i<nx/2; ++i ){ q.interior[{i}]=ql; }
-//    for( size_t i=nx/2; i<nx;   ++i ){ q.interior[{i}]=qr; }
+//    for( size_t i=0;    i<nx/2; ++i ){ q.interior({i})=ql; }
+//    for( size_t i=nx/2; i<nx;   ++i ){ q.interior({i})=qr; }
 
       [[maybe_unused]]
       const auto contact = [&]( const MeshT::Cell& cell ) -> SolVarSet
@@ -255,15 +255,15 @@ using MeshT      = Mesh<nDim,Real>;
             solutionFile << std::scientific;
             solutionFile.precision(12);
    
-            writeState( solutionFile, species, set2State( species, q.boundary[0][{1}] ) );
-            writeState( solutionFile, species, set2State( species, q.boundary[0][{0}] ) );
+            writeState( solutionFile, species, set2State( species, q.boundary[0]({1}) ) );
+            writeState( solutionFile, species, set2State( species, q.boundary[0]({0}) ) );
             par::for_each( // write state to file
                            [&]( const SolVarSet& q0 ) -> void
                               { writeState( solutionFile, species, set2State( species, q0 ) ); },
                            // solution array
                            q.interior );
-            writeState( solutionFile, species, set2State( species, q.boundary[1][{0}] ) );
-            writeState( solutionFile, species, set2State( species, q.boundary[1][{1}] ) );
+            writeState( solutionFile, species, set2State( species, q.boundary[1]({0}) ) );
+            writeState( solutionFile, species, set2State( species, q.boundary[1]({1}) ) );
         }
          else
         {

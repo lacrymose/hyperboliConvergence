@@ -125,7 +125,7 @@ using MeshT     = Mesh<nDim,Real>;
 //    par::fill( q.interior, qref );
 
    // initialise boundaries
-      for( SolField::VarField& v : q.boundary ){ par::fill( v, q.interior[{0,0}] ); }
+      for( SolField::VarField& v : q.boundary ){ par::fill( v, q.interior({0,0}) ); }
       q.bcTypes[0] = SolField::BCType::Periodic;
       q.bcTypes[1] = SolField::BCType::Periodic;
       q.bcTypes[2] = SolField::BCType::Riemann;
@@ -157,7 +157,7 @@ using MeshT     = Mesh<nDim,Real>;
         {
             for( size_t j=0; j<q.interior.shape(1); ++j )
            {
-               writeState( solutionFile, mesh.cells[{i,j}], species, set2State( species, q.interior[{i,j}] ) );
+               writeState( solutionFile, mesh.cells({i,j}), species, set2State( species, q.interior({i,j}) ) );
            }
             solutionFile << std::endl;
         }

@@ -67,11 +67,11 @@
       const CellIdx ir{0};
 
       const FluxRes fr = hoflux( species,
-                                 surface( mesh.nodes[ip] ),
-                                 dq[il][0],      dq[ir][0],
-                                 q.interior[il], q.interior[ir] );
-      res[il]-=fr;
-      res[ir]+=fr;
+                                 surface( mesh.nodes(ip) ),
+                                 dq(il)[0],      dq(ir)[0],
+                                 q.interior(il), q.interior(ir) );
+      res(il)-=fr;
+      res(ir)+=fr;
 
       return;
   }
@@ -142,12 +142,12 @@
             const NodeIdx ip1{0,j+1};
    
             const FluxRes fr = hoflux( species,
-                                       surface( mesh.nodes[ip0],
-                                                mesh.nodes[ip1] ),
-                                       dq[icl][0],      dq[icr][0],
-                                       q.interior[icl], q.interior[icr] );
-            res[icl]-=fr;
-            res[icr]+=fr;
+                                       surface( mesh.nodes(ip0),
+                                                mesh.nodes(ip1) ),
+                                       dq(icl)[0],      dq(icr)[0],
+                                       q.interior(icl), q.interior(icr) );
+            res(icl)-=fr;
+            res(icr)+=fr;
         }
      }
       else if ( boundaryId==2 ) // periodic boundary along +/- j direction
@@ -166,12 +166,12 @@
             const NodeIdx ip1{i  ,0};
    
             const FluxRes fr = hoflux( species,
-                                       surface( mesh.nodes[ip0],
-                                                mesh.nodes[ip1] ),
-                                       dq[icl][1],      dq[icr][1],
-                                       q.interior[icl], q.interior[icr] );
-            res[icl]-=fr;
-            res[icr]+=fr;
+                                       surface( mesh.nodes(ip0),
+                                                mesh.nodes(ip1) ),
+                                       dq(icl)[1],      dq(icr)[1],
+                                       q.interior(icl), q.interior(icr) );
+            res(icl)-=fr;
+            res(icr)+=fr;
         }
      }
 

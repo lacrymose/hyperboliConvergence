@@ -108,9 +108,9 @@
          const CellIdx ibv{0};   // boundary value
          const CellIdx ibr{1};   // boundary reference value
 
-         q.boundary[bID][ibv] = updateBC( species,
-                                          surface( mesh.nodes[ip] ), mesh.cells[ic],
-                                          q.interior[ic], q.boundary[bID][ibr] );
+         q.boundary[bID](ibv) = updateBC( species,
+                                          surface( mesh.nodes(ip) ), mesh.cells(ic),
+                                          q.interior(ic), q.boundary[bID](ibr) );
      }
       else if ( boundaryId==1 ) // right boundary
      {
@@ -122,9 +122,9 @@
          const CellIdx ibr{1};     // boundary reference value
 
       // boundary surface must face into domain
-         q.boundary[bID][ibv] = updateBC( species,
-                                          flip( surface( mesh.nodes[ip] ) ), mesh.cells[ic],
-                                          q.interior[ic], q.boundary[bID][ibr] );
+         q.boundary[bID](ibv) = updateBC( species,
+                                          flip( surface( mesh.nodes(ip) ) ), mesh.cells(ic),
+                                          q.interior(ic), q.boundary[bID](ibr) );
      }
       else{ assert( false && "invalid boundary id for 1D boundary update, must be 0 or 1" ); }
 
@@ -184,11 +184,11 @@
             const NodeIdx ip0{i,j  };
             const NodeIdx ip1{i,j+1};
    
-            q.boundary[bID][ibv] = updateBC( species,
-                                             surface( mesh.nodes[ip0],
-                                                      mesh.nodes[ip1] ),
-                                             mesh.cells[ic],
-                                             q.interior[ic], q.boundary[bID][ibr] );
+            q.boundary[bID](ibv) = updateBC( species,
+                                             surface( mesh.nodes(ip0),
+                                                      mesh.nodes(ip1) ),
+                                             mesh.cells(ic),
+                                             q.interior(ic), q.boundary[bID](ibr) );
         }
      }
       else if ( boundaryId==1 ) // right boundary
@@ -207,11 +207,11 @@
             const NodeIdx ip0{i+1,j+1};
             const NodeIdx ip1{i+1,j  };
    
-            q.boundary[bID][ibv] = updateBC( species,
-                                             surface( mesh.nodes[ip0],
-                                                      mesh.nodes[ip1] ),
-                                             mesh.cells[ic],
-                                             q.interior[ic], q.boundary[bID][ibr] );
+            q.boundary[bID](ibv) = updateBC( species,
+                                             surface( mesh.nodes(ip0),
+                                                      mesh.nodes(ip1) ),
+                                             mesh.cells(ic),
+                                             q.interior(ic), q.boundary[bID](ibr) );
         }
      }
       else if ( boundaryId==2 ) // bottom face
@@ -230,11 +230,11 @@
             const NodeIdx ip0{i+1,j};
             const NodeIdx ip1{i  ,j};
    
-            q.boundary[bID][ibv] = updateBC( species,
-                                             surface( mesh.nodes[ip0],
-                                                      mesh.nodes[ip1] ),
-                                             mesh.cells[ic],
-                                             q.interior[ic], q.boundary[bID][ibr] );
+            q.boundary[bID](ibv) = updateBC( species,
+                                             surface( mesh.nodes(ip0),
+                                                      mesh.nodes(ip1) ),
+                                             mesh.cells(ic),
+                                             q.interior(ic), q.boundary[bID](ibr) );
         }
      }
       else if ( boundaryId==3 ) // top face
@@ -253,11 +253,11 @@
             const NodeIdx ip0{i  ,j+1};
             const NodeIdx ip1{i+1,j+1};
    
-            q.boundary[bID][ibv] = updateBC( species,
-                                             surface( mesh.nodes[ip0],
-                                                      mesh.nodes[ip1] ),
-                                             mesh.cells[ic],
-                                             q.interior[ic], q.boundary[bID][ibr] );
+            q.boundary[bID](ibv) = updateBC( species,
+                                             surface( mesh.nodes(ip0),
+                                                      mesh.nodes(ip1) ),
+                                             mesh.cells(ic),
+                                             q.interior(ic), q.boundary[bID](ibr) );
         }
      }
       else{ assert( false && "invalid boundary id for 2D boundary update, must be 0,1,2 or 3" ); }

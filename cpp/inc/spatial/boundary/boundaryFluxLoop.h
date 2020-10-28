@@ -64,13 +64,13 @@
          const CellIdx ib1{1};
 
          const FluxRes fr = boundaryFlux( species,
-                                          surface( mesh.nodes[ip] ),
-                                          mesh.cells[ic],
-                                          dq[ic][0],
-                                          q.interior[ic],
-                                          q.boundary[0][ib0],
-                                          q.boundary[0][ib1] );
-         res[ic]+=fr;
+                                          surface( mesh.nodes(ip) ),
+                                          mesh.cells(ic),
+                                          dq(ic)[0],
+                                          q.interior(ic),
+                                          q.boundary[0](ib0),
+                                          q.boundary[0](ib1) );
+         res(ic)+=fr;
      }
       else if( boundaryId==1 ) // right boundary
      {
@@ -82,13 +82,13 @@
          const CellIdx ib1{1};
 
          const FluxRes fr = boundaryFlux( species,
-                                          flip( surface( mesh.nodes[ip] ) ),
-                                          mesh.cells[ic],
-                                          dq[ic][0],
-                                          q.interior[ic],
-                                          q.boundary[0][ib0],
-                                          q.boundary[0][ib1] );
-         res[ic]+=fr;
+                                          flip( surface( mesh.nodes(ip) ) ),
+                                          mesh.cells(ic),
+                                          dq(ic)[0],
+                                          q.interior(ic),
+                                          q.boundary[0](ib0),
+                                          q.boundary[0](ib1) );
+         res(ic)+=fr;
      }
       else{ assert( false && "invalid boundary id for 1D ghost cell flux, must be 0 or 1" ); }
 
@@ -156,14 +156,14 @@
             const NodeIdx ip1{i,j+1};
    
             const FluxRes fr = boundaryFlux( species,
-                                             surface( mesh.nodes[ip0],
-                                                      mesh.nodes[ip1] ),
-                                             mesh.cells[ic],
-                                             dq[ic][0],
-                                             q.interior[ic],
-                                             q.boundary[0][ib0],
-                                             q.boundary[0][ib1] );
-            res[ic]+=fr;
+                                             surface( mesh.nodes(ip0),
+                                                      mesh.nodes(ip1) ),
+                                             mesh.cells(ic),
+                                             dq(ic)[0],
+                                             q.interior(ic),
+                                             q.boundary[0](ib0),
+                                             q.boundary[0](ib1) );
+            res(ic)+=fr;
         }
      }
       else if( boundaryId==1 ) // right face
@@ -183,14 +183,14 @@
             const NodeIdx ip1{i+1,j  };
    
             const FluxRes fr = boundaryFlux( species,
-                                             surface( mesh.nodes[ip0],
-                                                      mesh.nodes[ip1] ),
-                                             mesh.cells[ic],
-                                             dq[ic][0],
-                                             q.interior[ic],
-                                             q.boundary[1][ib0],
-                                             q.boundary[1][ib1] );
-            res[ic]+=fr;
+                                             surface( mesh.nodes(ip0),
+                                                      mesh.nodes(ip1) ),
+                                             mesh.cells(ic),
+                                             dq(ic)[0],
+                                             q.interior(ic),
+                                             q.boundary[1](ib0),
+                                             q.boundary[1](ib1) );
+            res(ic)+=fr;
         }
      }
       else if ( boundaryId==2 ) // bottom face
@@ -210,14 +210,14 @@
             const NodeIdx ip1{i  ,j};
    
             const FluxRes fr = boundaryFlux( species,
-                                             surface( mesh.nodes[ip0],
-                                                      mesh.nodes[ip1] ),
-                                             mesh.cells[ic],
-                                             dq[ic][1],
-                                             q.interior[ic],
-                                             q.boundary[2][ib0],
-                                             q.boundary[2][ib1] );
-            res[ic]+=fr;
+                                             surface( mesh.nodes(ip0),
+                                                      mesh.nodes(ip1) ),
+                                             mesh.cells(ic),
+                                             dq(ic)[1],
+                                             q.interior(ic),
+                                             q.boundary[2](ib0),
+                                             q.boundary[2](ib1) );
+            res(ic)+=fr;
         }
      }
       else if ( boundaryId==3 ) // top face
@@ -237,14 +237,14 @@
             const NodeIdx ip1{i+1,j+1};
    
             const FluxRes fr = boundaryFlux( species,
-                                             surface( mesh.nodes[ip0],
-                                                      mesh.nodes[ip1] ),
-                                             mesh.cells[ic],
-                                             dq[ic][1],
-                                             q.interior[ic],
-                                             q.boundary[3][ib0],
-                                             q.boundary[3][ib1] );
-            res[ic]+=fr;
+                                             surface( mesh.nodes(ip0),
+                                                      mesh.nodes(ip1) ),
+                                             mesh.cells(ic),
+                                             dq(ic)[1],
+                                             q.interior(ic),
+                                             q.boundary[3](ib0),
+                                             q.boundary[3](ib1) );
+            res(ic)+=fr;
         }
      }
       else{ std::cout << boundaryId << "\n"; assert( false && "invalid boundary id for 2D, must be 0,1,2 or 3" ); }

@@ -212,7 +212,7 @@ using Face  = MeshT::Face;
         {
             for( size_t j=0; j<q.shape(1); j++ )
            {
-               writeState( solutionFile, mesh.cells[{i,j}], species, set2State( species, q[{i,j}] ) );
+               writeState( solutionFile, mesh.cells({i,j}), species, set2State( species, q({i,j}) ) );
            }
             solutionFile << std::endl;
         }

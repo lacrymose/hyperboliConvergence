@@ -70,9 +70,10 @@
       GradientArray dq( q0.interior.shape(), SolVarGrad{} );
 
       utils::Timer timer( "main loop time: " );
+      Real t=0;
       for( size_t tstep=0; tstep<timeControls.nTimesteps; tstep++ )
      {
-         Real lmax{};
+         Real dt{};
          for( unsigned int stg=0; stg<rungeKutta.nstages; stg++ )
         {
          // update boundary conditions
@@ -96,7 +97,7 @@
                           resStage[stg] );
 
          // calculate maximum stable timestep for this timestep
-            if( stg==0 ){ lmax = spectralRadius( mesh.cells, resStage[stg] ); }
+            if( stg==0 ){ dt = timeControls.cfl/spectralRadius( mesh.cells, resStage[stg] ); }
 
          // accumulate stage residual
             par::fill( resTotal, {} );
@@ -110,14 +111,16 @@
          // integrate cell residuals forward by dt and average over cell volume
             eulerForwardUpdate( mesh.cells,
                                 species,
-                                rungeKutta.beta[stg]*timeControls.cfl/lmax,
+                                rungeKutta.beta[stg]*dt,
                                 resTotal,
                                 q0.interior,
                                 q2.interior );
             std::swap( q1,q2 );
         }
          copy( q0, q1 );
+         t+=dt;
      }
+      std::cout << "physical time elapsed: " << t << "\n";
   }
 
 /*
@@ -137,7 +140,7 @@
      {
          for( unsigned int k=0; k<=stg; k++ )
         {
-            frtotal.flux+=rungeKutta.alpha[stg][k]*resStage[k][idx].flux;
+            frtotal.flux+=rungeKutta.alpha[stg][k]*resStage[k](idx).flux;
         }
          return;
      };

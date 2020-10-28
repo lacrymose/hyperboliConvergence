@@ -20,7 +20,7 @@
 
       using Pt = typename Mesh<1,Real>::Node;
 
-      for( size_t i=0; i<np; i++ ){ mesh.nodes[{i}] = Pt{lo+i*dx}; }
+      for( size_t i=0; i<np; i++ ){ mesh.nodes({i}) = Pt{lo+i*dx}; }
 
 /*
       par::generate_idx( mesh.nodes,

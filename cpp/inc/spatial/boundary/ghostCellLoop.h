@@ -59,10 +59,10 @@
          const CellIdx ir{0};
          const CellIdx ib{0};
          const FluxRes fr = hoflux( species,
-                                    surface( mesh.nodes[ip] ),
-                                    SolDelT{},         dq[ir][0],
-                                    q.boundary[0][ib], q.interior[ir] );
-         res[ir]+=fr;
+                                    surface( mesh.nodes(ip) ),
+                                    SolDelT{},         dq(ir)[0],
+                                    q.boundary[0](ib), q.interior(ir) );
+         res(ir)+=fr;
      }
       else if( boundaryId==1 ) // right boundary
      {
@@ -73,10 +73,10 @@
          const CellIdx ib{0};
 
          const FluxRes fr = hoflux( species,
-                                    surface( mesh.nodes[ip] ),
-                                    dq[il][0],      SolDelT{},
-                                    q.interior[il], q.boundary[1][ib] );
-         res[il]-=fr;
+                                    surface( mesh.nodes(ip) ),
+                                    dq(il)[0],      SolDelT{},
+                                    q.interior(il), q.boundary[1](ib) );
+         res(il)-=fr;
      }
       else{ assert( false && "invalid boundary id for 1D ghost cell flux, must be 0 or 1" ); }
 
@@ -141,11 +141,11 @@
             const NodeIdx ip1{i,j+1};
    
             const FluxRes fr = hoflux( species,
-                                       surface( mesh.nodes[ip0],
-                                                mesh.nodes[ip1] ),
-                                       SolDelT{},           dq[ic][0],
-                                       q.boundary[bID][ib], q.interior[ic] );
-            res[ic]+=fr;
+                                       surface( mesh.nodes(ip0),
+                                                mesh.nodes(ip1) ),
+                                       SolDelT{},           dq(ic)[0],
+                                       q.boundary[bID](ib), q.interior(ic) );
+            res(ic)+=fr;
         }
      }
       else if( boundaryId==1 ) // right face
@@ -164,11 +164,11 @@
             const NodeIdx ip1{i+1,j+1};
    
             const FluxRes fr = hoflux( species,
-                                       surface( mesh.nodes[ip0],
-                                                mesh.nodes[ip1] ),
-                                       dq[ic][0],      SolDelT{},       
-                                       q.interior[ic], q.boundary[bID][ib] );
-            res[ic]-=fr;
+                                       surface( mesh.nodes(ip0),
+                                                mesh.nodes(ip1) ),
+                                       dq(ic)[0],      SolDelT{},       
+                                       q.interior(ic), q.boundary[bID](ib) );
+            res(ic)-=fr;
         }
      }
       else if ( boundaryId==2 ) // bottom face
@@ -187,11 +187,11 @@
             const NodeIdx ip1{i  ,j};
    
             const FluxRes fr = hoflux( species,
-                                       surface( mesh.nodes[ip0],
-                                                mesh.nodes[ip1] ),
-                                       SolDelT{},           dq[ic][0],
-                                       q.boundary[bID][ib], q.interior[ic] );
-            res[ic]+=fr;
+                                       surface( mesh.nodes(ip0),
+                                                mesh.nodes(ip1) ),
+                                       SolDelT{},           dq(ic)[0],
+                                       q.boundary[bID](ib), q.interior(ic) );
+            res(ic)+=fr;
         }
      }
       else if ( boundaryId==3 ) // top face
@@ -210,11 +210,11 @@
             const NodeIdx ip1{i  ,j+1};
    
             const FluxRes fr = hoflux( species,
-                                       surface( mesh.nodes[ip0],
-                                                mesh.nodes[ip1] ),
-                                        dq[ic][0],      SolDelT{},        
-                                        q.interior[ic], q.boundary[bID][ib] );
-            res[ic]-=fr;
+                                       surface( mesh.nodes(ip0),
+                                                mesh.nodes(ip1) ),
+                                        dq(ic)[0],      SolDelT{},        
+                                        q.interior(ic), q.boundary[bID](ib) );
+            res(ic)-=fr;
         }
      }
       else{ assert( false && "invalid boundary id for 2D ghost cell flux, must be 0,1,2 or 3" ); }

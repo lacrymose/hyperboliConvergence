@@ -145,7 +145,7 @@ namespace par
                       Generator      generator )
   {
       const size_t n = dst.shape(0);
-      for( size_t i=0; i<n; ++i ){ dst[{i}] = generator( par::Idx1<GT>{i} ); }
+      for( size_t i=0; i<n; ++i ){ dst({i}) = generator( par::Idx1<GT>{i} ); }
       return;
   }
 
@@ -167,7 +167,7 @@ namespace par
          for( size_t j=0; j<nj; ++j )
         {
             const par::Idx2<GT> idx{i,j};
-            dst[idx] = generator(idx);
+            dst(idx) = generator(idx);
         }
      }
       return;
@@ -194,7 +194,7 @@ namespace par
             for( size_t k=0; k<nk; ++k )
            {
                const par::Idx3<GT> idx{i,j,k};
-               dst[idx] = generator(idx);
+               dst(idx) = generator(idx);
            }
         }
      }
@@ -259,8 +259,8 @@ namespace par
       for( size_t i=0; i<n; ++i )
      {
          const par::Idx1<GT> idx{i};
-         func( idx, array0[idx],
-                    arrays[idx]... );
+         func( idx, array0(idx),
+                    arrays(idx)... );
      }
       return;
   }
@@ -286,8 +286,8 @@ namespace par
          for( size_t j=0; j<nj; ++j )
         {
             const par::Idx2<GT> idx{i,j};
-            func( idx, array0[idx],
-                       arrays[idx]... );
+            func( idx, array0(idx),
+                       arrays(idx)... );
         }
      }
       return;
@@ -317,8 +317,8 @@ namespace par
             for( size_t k=0; k<nk; ++k )
            {
                const par::Idx3<GT> idx{i,j,k};
-               func( idx, array0[idx],
-                          arrays[idx]... );
+               func( idx, array0(idx),
+                          arrays(idx)... );
            }
         }
      }
@@ -344,8 +344,8 @@ namespace par
       for( size_t i=0; i<n; ++i )
      {
          const par::Idx1<GT> idx{i};
-         func( idx, array0[idx],
-                    arrays[idx]... );
+         func( idx, array0(idx),
+                    arrays(idx)... );
      }
       return;
   }
@@ -371,8 +371,8 @@ namespace par
          for( size_t j=0; j<nj; ++j )
         {
             const par::Idx2<GT> idx{i,j};
-            func( idx, array0[idx],
-                       arrays[idx]... );
+            func( idx, array0(idx),
+                       arrays(idx)... );
         }
      }
       return;
@@ -402,8 +402,8 @@ namespace par
             for( size_t k=0; k<nk; ++k )
            {
                const par::Idx3<GT> idx{i,j,k};
-               func( idx, array0[idx],
-                          arrays[idx]... );
+               func( idx, array0(idx),
+                          arrays(idx)... );
            }
         }
      }

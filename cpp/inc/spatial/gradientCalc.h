@@ -75,10 +75,10 @@
          const CellIdx idx0{i};
          const CellIdx idx1{i+1};
 
-         const VarDelT d = q.interior[idx1] - q.interior[idx0];
+         const VarDelT d = q.interior(idx1) - q.interior(idx0);
 
-         dq[idx0][0]+=d;
-         dq[idx1][0]+=d;
+         dq(idx0)[0]+=d;
+         dq(idx1)[0]+=d;
      }
 
       return;
@@ -141,10 +141,10 @@
             const CellIdx icl{i  ,j};
             const CellIdx icr{i+1,j};
 
-            const VarDelT d = q.interior[icr] - q.interior[icl];
+            const VarDelT d = q.interior(icr) - q.interior(icl);
    
-            dq[icl][0]+=d;
-            dq[icr][0]+=d;
+            dq(icl)[0]+=d;
+            dq(icr)[0]+=d;
         }
      }
 
@@ -159,10 +159,10 @@
             const CellIdx icl{i,j  };
             const CellIdx icr{i,j+1};
 
-            const VarDelT d = q.interior[icr] - q.interior[icl];
+            const VarDelT d = q.interior(icr) - q.interior(icl);
    
-            dq[icl][1]+=d;
-            dq[icr][1]+=d;
+            dq(icl)[1]+=d;
+            dq(icr)[1]+=d;
         }
      }
 
@@ -200,10 +200,10 @@
          const CellIdx il{nc-1};
          const CellIdx ir{0};
 
-         const VarDelT d = q.interior[ir] - q.interior[il];
+         const VarDelT d = q.interior(ir) - q.interior(il);
 
-         dq[il][0]+=d;
-         dq[ir][0]+=d;
+         dq(il)[0]+=d;
+         dq(ir)[0]+=d;
      }
 
       return;
@@ -249,10 +249,10 @@
             const CellIdx icl{il,j};
             const CellIdx icr{ir,j};
    
-            const VarDelT d = q.interior[icr] - q.interior[icl];
+            const VarDelT d = q.interior(icr) - q.interior(icl);
    
-            dq[icl][0]+=d;
-            dq[icr][0]+=d;
+            dq(icl)[0]+=d;
+            dq(icr)[0]+=d;
         }
      }
 
@@ -270,10 +270,10 @@
             const CellIdx icl{i,jl};
             const CellIdx icr{i,jr};
    
-            const VarDelT d = q.interior[icr] - q.interior[icl];
+            const VarDelT d = q.interior(icr) - q.interior(icl);
    
-            dq[icl][1]+=d;
-            dq[icr][1]+=d;
+            dq(icl)[1]+=d;
+            dq(icr)[1]+=d;
         }
      }
 

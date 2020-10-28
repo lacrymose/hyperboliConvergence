@@ -28,8 +28,6 @@
 
 # include <omp.h>
 
-# include <cases/euler/oneD/periodic.h>
-
 // ------- i/o -------
 
    template<floating_point Real>
@@ -228,31 +226,31 @@ using MeshT      = Mesh<nDim,Real>;
 //          for( size_t i=0; i<q.interior.shape(1); ++i )
             for( size_t i=0; i<1; ++i )
            {
-               const auto dcentre =  mesh.cells[{1,i}].centre
-                                   - mesh.cells[{0,i}].centre;
+               const auto dcentre =  mesh.cells({1,i}).centre
+                                   - mesh.cells({0,i}).centre;
 
-               const auto ghost_centre = mesh.cells[{0,i}].centre - 2.*dcentre;
+               const auto ghost_centre = mesh.cells({0,i}).centre - 2.*dcentre;
                writePoint(ghost_centre);
 
                writeState( solutionFile,
                            species,
                            set2State( species,
-                                      q.boundary[0][{i,1}] ),
+                                      q.boundary[0]({i,1}) ),
                            sref );
            }
 //          for( size_t i=0; i<q.interior.shape(1); ++i )
             for( size_t i=0; i<1; ++i )
            {
-               const auto dcentre =  mesh.cells[{1,i}].centre
-                                   - mesh.cells[{0,i}].centre;
+               const auto dcentre =  mesh.cells({1,i}).centre
+                                   - mesh.cells({0,i}).centre;
 
-               const auto ghost_centre = mesh.cells[{0,i}].centre - dcentre;
+               const auto ghost_centre = mesh.cells({0,i}).centre - dcentre;
                writePoint(ghost_centre);
 
                writeState( solutionFile,
                            species,
                            set2State( species,
-                                      q.boundary[0][{i,0}] ),
+                                      q.boundary[0]({i,0}) ),
                            sref );
            }
             par::for_each_idx( writer,
@@ -299,31 +297,31 @@ using MeshT      = Mesh<nDim,Real>;
            {
             for( size_t i=0; i<q.interior.shape(1); ++i )
            {
-               const auto dcentre =  mesh.cells[{1,i}].centre
-                                   - mesh.cells[{0,i}].centre;
+               const auto dcentre =  mesh.cells({1,i}).centre
+                                   - mesh.cells({0,i}).centre;
 
-               const auto ghost_centre = mesh.cells[{0,i}].centre - 2.*dcentre;
+               const auto ghost_centre = mesh.cells({0,i}).centre - 2.*dcentre;
                writePoint(ghost_centre);
 
                writeState( solutionFile,
                            species,
                            set2State( species,
-                                      q.boundary[0][{i,1}] ),
+                                      q.boundary[0]({i,1}) ),
                            sref );
                if( i==ny-1 ){ solutionFile << "\n"; }
            }
             for( size_t i=0; i<q.interior.shape(1); ++i )
            {
-               const auto dcentre =  mesh.cells[{1,i}].centre
-                                   - mesh.cells[{0,i}].centre;
+               const auto dcentre =  mesh.cells({1,i}).centre
+                                   - mesh.cells({0,i}).centre;
 
-               const auto ghost_centre = mesh.cells[{0,i}].centre - dcentre;
+               const auto ghost_centre = mesh.cells({0,i}).centre - dcentre;
                writePoint(ghost_centre);
 
                writeState( solutionFile,
                            species,
                            set2State( species,
-                                      q.boundary[0][{i,0}] ),
+                                      q.boundary[0]({i,0}) ),
                            sref );
                if( i==ny-1 ){ solutionFile << "\n"; }
            }

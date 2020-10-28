@@ -133,8 +133,8 @@
 
       SolutionField<VarT,1> q(meshShape);
 
-      for( size_t i=0;    i<nx/2; ++i ){ q.interior[{i}] = ql; }
-      for( size_t i=nx/2; i<nx;   ++i ){ q.interior[{i}] = qr; }
+      for( size_t i=0;    i<nx/2; ++i ){ q.interior({i}) = ql; }
+      for( size_t i=nx/2; i<nx;   ++i ){ q.interior({i}) = qr; }
 
       for( EulerBCs& bc : q.bcTypes ){ bc=EulerBCs::Riemann; }
       par::fill( q.boundary[0], ql );

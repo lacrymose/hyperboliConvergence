@@ -44,15 +44,15 @@
         {
             const CellIdx ij{i,j};
 
-            const Real x = mesh.cells[ij].centre[0];
-            const Real y = mesh.cells[ij].centre[1];
+            const Real x = mesh.cells(ij).centre[0];
+            const Real y = mesh.cells(ij).centre[1];
 
             const Real sx = ((x>lox) and (x<hix)) ? 1 : 0;
             const Real sy = ((y>loy) and (y<hiy)) ? 1 : 0;
 
             const Real s = sx*sy;
 
-            q[ij] = set2Set<VarT>( species, ConsVarT{{u,v,s}} );
+            q(ij) = set2Set<VarT>( species, ConsVarT{{u,v,s}} );
         }
      }
 
