@@ -5,7 +5,6 @@
 # include <conservationLaws/base/base.h>
 
 # include <mesh/mesh.h>
-# include <geometry/geometry.h>
 
 # include <parallalg/algorithm.h>
 # include <parallalg/array.h>
@@ -59,9 +58,9 @@
                                Real,
                                VarSetT,
                                VarDelT>
-   void interiorGradient( const Mesh<1,Real>&                          mesh,
-                          const SolutionField<VarSetT,1>&                 q,
-                                par::DualArray<std::array<VarDelT,1>,1>& dq )
+   void interiorGradient( const Mesh<1,Real>&                         mesh,
+                          const SolutionField<VarSetT,1>&                q,
+                                par::DualArray1<std::array<VarDelT,1>>& dq )
   {
 
       assert( mesh.cells.shape() == q.interior.shape() );
@@ -95,9 +94,9 @@
                                Real,
                                VarSetT,
                                VarDelT>
-   void interiorGradient( const Mesh<2,Real>&                          mesh,
-                          const SolutionField<VarSetT,2>&                 q,
-                                par::DualArray<std::array<VarDelT,2>,2>& dq )
+   void interiorGradient( const Mesh<2,Real>&                         mesh,
+                          const SolutionField<VarSetT,2>&                q,
+                                par::DualArray2<std::array<VarDelT,2>>& dq )
   {
       assert( mesh.cells.shape() == dq.shape() );
       assert( mesh.cells.shape() == q.interior.shape() );
@@ -180,9 +179,9 @@
                                Real,
                                VarSetT,
                                VarDelT>
-   void boundaryGradient( const Mesh<1,Real>&                          mesh,
-                          const SolutionField<VarSetT,1>&                 q,
-                                par::DualArray<std::array<VarDelT,1>,1>& dq )
+   void boundaryGradient( const Mesh<1,Real>&                         mesh,
+                          const SolutionField<VarSetT,1>&                q,
+                                par::DualArray1<std::array<VarDelT,1>>& dq )
   {
       assert( mesh.cells.shape() == q.interior.shape() );
       assert( mesh.cells.shape() == dq.shape() );
@@ -220,9 +219,9 @@
                                Real,
                                VarSetT,
                                VarDelT>
-   void boundaryGradient( const Mesh<2,Real>&                          mesh,
-                          const SolutionField<VarSetT,2>&                 q,
-                                par::DualArray<std::array<VarDelT,2>,2>& dq )
+   void boundaryGradient( const Mesh<2,Real>&                         mesh,
+                          const SolutionField<VarSetT,2>&                q,
+                                par::DualArray2<std::array<VarDelT,2>>& dq )
   {
       assert( mesh.cells.shape() == dq.shape() );
       assert( mesh.cells.shape() == q.interior.shape() );

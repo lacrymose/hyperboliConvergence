@@ -80,6 +80,122 @@ namespace par
 
 
 /*
+ * ---------------- Convenience Atomic typedefs ---------------------
+ */
+
+// Idx types
+
+   // grid type
+   template<int NDIM>
+   using PrimalIdx = Idx<NDIM,Primal>;
+
+   template<int NDIM>
+   using DualIdx = Idx<NDIM,Dual>;
+
+   // dimension
+   template<GridType GRIDTYPE>
+   using Idx1 = Idx<1,GRIDTYPE>;
+
+   template<GridType GRIDTYPE>
+   using Idx2 = Idx<2,GRIDTYPE>;
+
+   template<GridType GRIDTYPE>
+   using Idx3 = Idx<3,GRIDTYPE>;
+
+   // grid type and dimension
+   using PrimalIdx1 = Idx<1,Primal>;
+   using PrimalIdx2 = Idx<2,Primal>;
+   using PrimalIdx3 = Idx<3,Primal>;
+
+   using DualIdx1 = Idx<1,Dual>;
+   using DualIdx2 = Idx<2,Dual>;
+   using DualIdx3 = Idx<3,Dual>;
+
+// Offset types
+
+   // grid type
+   template<int NDIM>
+   using PrimalOffset = Offset<NDIM,Primal>;
+
+   template<int NDIM>
+   using DualOffset = Offset<NDIM,Dual>;
+
+   // dimension
+   template<GridType GRIDTYPE>
+   using Offset1 = Offset<1,GRIDTYPE>;
+
+   template<GridType GRIDTYPE>
+   using Offset2 = Offset<2,GRIDTYPE>;
+
+   template<GridType GRIDTYPE>
+   using Offset3 = Offset<3,GRIDTYPE>;
+
+   // grid type and dimension
+   using PrimalOffset1 = Offset<1,Primal>;
+   using PrimalOffset2 = Offset<2,Primal>;
+   using PrimalOffset3 = Offset<3,Primal>;
+
+   using DualOffset1 = Offset<1,Dual>;
+   using DualOffset2 = Offset<2,Dual>;
+   using DualOffset3 = Offset<3,Dual>;
+
+// Shape types
+
+   // grid type
+   template<int NDIM>
+   using PrimalShape = Shape<NDIM,Primal>;
+
+   template<int NDIM>
+   using DualShape = Shape<NDIM,Dual>;
+
+   // dimension
+   template<GridType GRIDTYPE>
+   using Shape1 = Shape<1,GRIDTYPE>;
+
+   template<GridType GRIDTYPE>
+   using Shape2 = Shape<2,GRIDTYPE>;
+
+   template<GridType GRIDTYPE>
+   using Shape3 = Shape<3,GRIDTYPE>;
+
+   // grid type and dimension
+   using PrimalShape1 = Shape<1,Primal>;
+   using PrimalShape2 = Shape<2,Primal>;
+   using PrimalShape3 = Shape<3,Primal>;
+
+   using DualShape1 = Shape<1,Dual>;
+   using DualShape2 = Shape<2,Dual>;
+   using DualShape3 = Shape<3,Dual>;
+
+// Stride types
+
+   // grid type
+   template<int NDIM>
+   using PrimalStride = Stride<NDIM,Primal>;
+
+   template<int NDIM>
+   using DualStride = Stride<NDIM,Dual>;
+
+   // dimension
+   template<GridType GRIDTYPE>
+   using Stride1 = Stride<1,GRIDTYPE>;
+
+   template<GridType GRIDTYPE>
+   using Stride2 = Stride<2,GRIDTYPE>;
+
+   template<GridType GRIDTYPE>
+   using Stride3 = Stride<3,GRIDTYPE>;
+
+   // grid type and dimension
+   using PrimalStride1 = Stride<1,Primal>;
+   using PrimalStride2 = Stride<2,Primal>;
+   using PrimalStride3 = Stride<3,Primal>;
+
+   using DualStride1 = Stride<1,Dual>;
+   using DualStride2 = Stride<2,Dual>;
+   using DualStride3 = Stride<3,Dual>;
+
+/*
  * ---------------- Operator overloads on atomic types -----------------------------------------
  */
 
@@ -139,9 +255,9 @@ namespace par
  * return Shape of primal array, given Shape of dual array
  */
    template<int NDIM>
-   Shape<NDIM,Primal> primalShape( const Shape<NDIM,Dual>& dual_shape )
+   PrimalShape<NDIM> primalShape( const DualShape<NDIM>& dual_shape )
   {
-      Shape<NDIM,Primal> primal_shape;
+      PrimalShape<NDIM> primal_shape;
       for( unsigned int i=0; i<NDIM; ++i ){ primal_shape.shape[i]=dual_shape[i]+1; }
       return primal_shape;
   }
@@ -150,9 +266,9 @@ namespace par
  * return Shape of dual array, given Shape of primal array
  */
    template<int NDIM>
-   Shape<NDIM,Dual> dualShape( const Shape<NDIM,Primal>& primal_shape )
+   DualShape<NDIM> dualShape( const PrimalShape<NDIM>& primal_shape )
   {
-      Shape<NDIM,Dual> dual_shape;
+      DualShape<NDIM> dual_shape;
       for( unsigned int i=0; i<NDIM; i++ ){ dual_shape.shape[i]=primal_shape[i]-1; }
       return dual_shape;
   }
@@ -300,122 +416,8 @@ namespace par
   }
 
 /*
- * Convenience typedefs
+ * ---------------- Convenience Array typedefs -----------------------------------------
  */
-
-// Idx types
-
-   // grid type
-   template<int NDIM>
-   using PrimalIdx = Idx<NDIM,Primal>;
-
-   template<int NDIM>
-   using DualIdx = Idx<NDIM,Dual>;
-
-   // dimension
-   template<GridType GRIDTYPE>
-   using Idx1 = Idx<1,GRIDTYPE>;
-
-   template<GridType GRIDTYPE>
-   using Idx2 = Idx<2,GRIDTYPE>;
-
-   template<GridType GRIDTYPE>
-   using Idx3 = Idx<3,GRIDTYPE>;
-
-   // grid type and dimension
-   using PrimalIdx1 = Idx<1,Primal>;
-   using PrimalIdx2 = Idx<2,Primal>;
-   using PrimalIdx3 = Idx<3,Primal>;
-
-   using DualIdx1 = Idx<1,Dual>;
-   using DualIdx2 = Idx<2,Dual>;
-   using DualIdx3 = Idx<3,Dual>;
-
-// Offset types
-
-   // grid type
-   template<int NDIM>
-   using PrimalOffset = Offset<NDIM,Primal>;
-
-   template<int NDIM>
-   using DualOffset = Offset<NDIM,Dual>;
-
-   // dimension
-   template<GridType GRIDTYPE>
-   using Offset1 = Offset<1,GRIDTYPE>;
-
-   template<GridType GRIDTYPE>
-   using Offset2 = Offset<2,GRIDTYPE>;
-
-   template<GridType GRIDTYPE>
-   using Offset3 = Offset<3,GRIDTYPE>;
-
-   // grid type and dimension
-   using PrimalOffset1 = Offset<1,Primal>;
-   using PrimalOffset2 = Offset<2,Primal>;
-   using PrimalOffset3 = Offset<3,Primal>;
-
-   using DualOffset1 = Offset<1,Dual>;
-   using DualOffset2 = Offset<2,Dual>;
-   using DualOffset3 = Offset<3,Dual>;
-
-// Shape types
-
-   // grid type
-   template<int NDIM>
-   using PrimalShape = Shape<NDIM,Primal>;
-
-   template<int NDIM>
-   using DualShape = Shape<NDIM,Dual>;
-
-   // dimension
-   template<GridType GRIDTYPE>
-   using Shape1 = Shape<1,GRIDTYPE>;
-
-   template<GridType GRIDTYPE>
-   using Shape2 = Shape<2,GRIDTYPE>;
-
-   template<GridType GRIDTYPE>
-   using Shape3 = Shape<3,GRIDTYPE>;
-
-   // grid type and dimension
-   using PrimalShape1 = Shape<1,Primal>;
-   using PrimalShape2 = Shape<2,Primal>;
-   using PrimalShape3 = Shape<3,Primal>;
-
-   using DualShape1 = Shape<1,Dual>;
-   using DualShape2 = Shape<2,Dual>;
-   using DualShape3 = Shape<3,Dual>;
-
-// Stride types
-
-   // grid type
-   template<int NDIM>
-   using PrimalStride = Stride<NDIM,Primal>;
-
-   template<int NDIM>
-   using DualStride = Stride<NDIM,Dual>;
-
-   // dimension
-   template<GridType GRIDTYPE>
-   using Stride1 = Stride<1,GRIDTYPE>;
-
-   template<GridType GRIDTYPE>
-   using Stride2 = Stride<2,GRIDTYPE>;
-
-   template<GridType GRIDTYPE>
-   using Stride3 = Stride<3,GRIDTYPE>;
-
-   // grid type and dimension
-   using PrimalStride1 = Stride<1,Primal>;
-   using PrimalStride2 = Stride<2,Primal>;
-   using PrimalStride3 = Stride<3,Primal>;
-
-   using DualStride1 = Stride<1,Dual>;
-   using DualStride2 = Stride<2,Dual>;
-   using DualStride3 = Stride<3,Dual>;
-
-// Array types
 
    // grid type
    template<typename       ElemT,

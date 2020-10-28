@@ -38,8 +38,8 @@
                           const HighOrderFlux&                       hoflux,
                           const Species<Law,Real>&                  species,
                           const SolutionField<SolVarT,1>&                 q,
-                          const par::DualArray<std::array<SolDelT,1>,1>& dq,
-                                par::DualArray<FluxRes,1>&              res )
+                          const par::DualArray1<std::array<SolDelT,1>>&  dq,
+                                par::DualArray1<FluxRes>&               res )
   {
    // valid boundary?
       assert( (boundaryId==0 or boundaryId==1)
@@ -98,8 +98,8 @@
                           const HighOrderFlux&                        hoflux,
                           const Species<Law,Real>&                   species,
                           const SolutionField<SolVarT,2>&                  q,
-                          const par::DualArray<std::array<SolDelT,2>,2>&  dq,
-                                par::DualArray<FluxRes,2>&               res )
+                          const par::DualArray2<std::array<SolDelT,2>>&   dq,
+                                par::DualArray2<FluxRes>&                res )
   {
 //    return;
    // valid boundary?

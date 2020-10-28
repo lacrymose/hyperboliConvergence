@@ -25,23 +25,23 @@ namespace geom
   }
 
    template<floating_point Real>
-   Real cross( const Direction<2,Real>& a,
-               const Direction<2,Real>& b )
+   Real cross( const Direction2<Real>& a,
+               const Direction2<Real>& b )
   {
       return a[0]*b[1] - a[1]*b[0];
   }
 
    template<floating_point Real>
-   Direction<3,Real> cross( const Direction<3,Real>& a,
-                            const Direction<3,Real>& b )
+   Direction3<Real> cross( const Direction3<Real>& a,
+                           const Direction3<Real>& b )
   {
-      return Direction<3,Real>{ a[1]*b[2] - a[2]*b[1],
-                                a[2]*b[0] - a[0]*b[2],
-                                a[0]*b[1] - a[1]*b[0] };
+      return Direction3<Real>{ a[1]*b[2] - a[2]*b[1],
+                               a[2]*b[0] - a[0]*b[2],
+                               a[0]*b[1] - a[1]*b[0] };
   }
 
    template<floating_point Real>
-   Direction<2,Real> orthog( const Direction<2,Real>& d )
+   Direction2<Real> orthog( const Direction2<Real>& d )
   {
       return {-d[1],d[0]};
   }
@@ -53,7 +53,7 @@ namespace geom
   }
 
    template<floating_point Real>
-   std::array<Real,2> line_coefficients( const Point<2,Real>& p, const Direction<2,Real>& d )
+   std::array<Real,2> line_coefficients( const Point2<Real>& p, const Direction2<Real>& d )
   {
       const Real a = d[1]/d[0];
       return {a, p[1] - a*p[0]};

@@ -12,7 +12,9 @@
 
 namespace geom
 {
-// ----------------- geometry structs ----------------- 
+/*
+ * ----------------- geometry structs ----------------- 
+ */
 
 /*
  * {Point,Direction} form an affine space.
@@ -78,6 +80,75 @@ namespace geom
       Point<nDim,Real> centre;
   };
 
+/*
+ * Global Point object at coordinate origin
+ */
+   template<int nDim, floating_point Real>
+   constexpr Point<nDim,Real> origin{};
+
+   template<floating_point Real>
+   constexpr Point<1,Real> origin1{};
+
+   template<floating_point Real>
+   constexpr Point<2,Real> origin2{};
+
+   template<floating_point Real>
+   constexpr Point<3,Real> origin3{};
+
+/*
+ * ----------------- Convenience typedefs for geometry structs ------------
+ */
+
+// Point
+   template<floating_point Real>
+   using Point1 = Point<1,Real>;
+
+   template<floating_point Real>
+   using Point2 = Point<2,Real>;
+
+   template<floating_point Real>
+   using Point3 = Point<3,Real>;
+
+// Direction
+   template<floating_point Real>
+   using Direction1 = Direction<1,Real>;
+
+   template<floating_point Real>
+   using Direction2 = Direction<2,Real>;
+
+   template<floating_point Real>
+   using Direction3 = Direction<3,Real>;
+
+// Metric
+   template<floating_point Real>
+   using Metric1 = Metric<1,Real>;
+
+   template<floating_point Real>
+   using Metric2 = Metric<2,Real>;
+
+   template<floating_point Real>
+   using Metric3 = Metric<3,Real>;
+
+// Surface
+   template<floating_point Real>
+   using Surface1 = Surface<1,Real>;
+
+   template<floating_point Real>
+   using Surface2 = Surface<2,Real>;
+
+   template<floating_point Real>
+   using Surface3 = Surface<3,Real>;
+
+// Volume
+   template<floating_point Real>
+   using Volume1 = Volume<1,Real>;
+
+   template<floating_point Real>
+   using Volume2 = Volume<2,Real>;
+
+   template<floating_point Real>
+   using Volume3 = Volume<3,Real>;
+
 
 // ----------------- functions on metrics ----------------- 
 
@@ -122,24 +193,25 @@ namespace geom
  * Cross products of two directions
  */
    template<floating_point Real>
-   Real cross( const Direction<2,Real>&,
-               const Direction<2,Real>& );
+   Real cross( const Direction2<Real>&,
+               const Direction2<Real>& );
 
    template<floating_point Real>
-   Direction<3,Real> cross( const Direction<3,Real>&,
-                            const Direction<3,Real>& );
+   Direction3<Real> cross( const Direction3<Real>&,
+                           const Direction3<Real>& );
 
 /*
  * Orthogonal vector in 2D
  */
    template<floating_point Real>
-   Direction<2,Real> orthog( const Direction<2,Real>& );
+   Direction2<Real> orthog( const Direction2<Real>& );
 
 /*
  * coefficients of equation describing straight line y=ax+b
  */
    template<floating_point Real>
-   std::array<Real,2> line_coefficients( const Point<2,Real>& p, const Direction<2,Real>& d );
+   std::array<Real,2> line_coefficients( const Point2<Real>&     p,
+                                         const Direction2<Real>& d );
 
 /*
  * vertex centroid of a polygon is average of all vertices
@@ -147,14 +219,15 @@ namespace geom
    template<typename Pt0, typename... Pts>
       requires    is_Point_v<Pt0>
               && ((std::is_same_v<Pt0,Pts>)&&...)
-   Pt0 vertex_centroid( const Pt0& pt0,  const Pts&... pts );
+   Pt0 vertex_centroid( const Pt0&    pt0,
+                        const Pts&... pts );
 
 /*
  * mass centroid of a polygon is centre of mass
  */
    template<floating_point Real>
-   Point<2,Real> mass_centroid( const Point<2,Real>& p0, const Point<2,Real>& p1,
-                                const Point<2,Real>& p2, const Point<2,Real>& p3 );
+   Point2<Real> mass_centroid( const Point2<Real>& p0, const Point2<Real>& p1,
+                               const Point2<Real>& p2, const Point2<Real>& p3 );
 
 /*
  * Flip a direction to face the opposite way
@@ -176,33 +249,33 @@ namespace geom
  * Create a surface (one less dimension than the background space) from its corners
  */
    template<floating_point Real>
-   Surface<1,Real> surface( const Point<1,Real>& );
+   Surface1<Real> surface( const Point1<Real>& );
 
    template<floating_point Real>
-   Surface<2,Real> surface( const Point<2,Real>&,
-                            const Point<2,Real>& );
+   Surface2<Real> surface( const Point2<Real>&,
+                           const Point2<Real>& );
 
    template<floating_point Real>
-   Surface<3,Real> surface( const Point<3,Real>&,
-                            const Point<3,Real>&,
-                            const Point<3,Real>&,
-                            const Point<3,Real>& );
+   Surface3<Real> surface( const Point3<Real>&,
+                           const Point3<Real>&,
+                           const Point3<Real>&,
+                           const Point3<Real>& );
 
 
 /*
  * Create a volume (same number of dimensions as the background space) from its corners
  */
    template<floating_point Real>
-   Volume<1,Real> volume( const Point<1,Real>&, const Point<1,Real>& );
-
-   template<floating_point Real>
-   Volume<2,Real> volume( const Point<2,Real>&, const Point<2,Real>&,
-                          const Point<2,Real>&, const Point<2,Real>& );
-
-   template<floating_point Real>
-   Volume<3,Real> volume( const Point<3,Real>&, const Point<3,Real>&,
-                          const Point<3,Real>&, const Point<3,Real>&,
-                          const Point<3,Real>&, const Point<3,Real>& );
+   Volume1<Real> volume( const Point1<Real>&, const Point1<Real>& );
+                                                          
+   template<floating_point Real>                          
+   Volume2<Real> volume( const Point2<Real>&, const Point2<Real>&,
+                         const Point2<Real>&, const Point2<Real>& );
+                                                          
+   template<floating_point Real>                          
+   Volume3<Real> volume( const Point3<Real>&, const Point3<Real>&,
+                         const Point3<Real>&, const Point3<Real>&,
+                         const Point3<Real>&, const Point3<Real>& );
 
 
 }

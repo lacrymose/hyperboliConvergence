@@ -7,9 +7,9 @@
 namespace geom
 {
    template<floating_point Real>
-   Volume<1,Real> volume( const Point<1,Real>& p0, const Point<1,Real>& p1 )
+   Volume1<Real> volume( const Point1<Real>& p0, const Point1<Real>& p1 )
   {
-      const Direction<1,Real> dir=p1-p0;
+      const Direction1<Real> dir=p1-p0;
       return {.volume=length(dir),
               .centre=p0+0.5*dir};
   }
@@ -23,8 +23,8 @@ namespace geom
    //
 
    template<floating_point Real>
-   Volume<2,Real> volume( const Point<2,Real>& p0, const Point<2,Real>& p1,
-                          const Point<2,Real>& p2, const Point<2,Real>& p3 )
+   Volume2<Real> volume( const Point2<Real>& p0, const Point2<Real>& p1,
+                         const Point2<Real>& p2, const Point2<Real>& p3 )
   {
    // shape function and derivative
       constexpr Real zero=0.;
@@ -32,7 +32,7 @@ namespace geom
       const utils::matrix_2<Real,4,2> du = fem::dn2<Real>( {zero,zero} );
 
    // centre of mass
-      Point<2,Real> com{};
+      Point2<Real> com{};
       for( size_t i=0; i<2; ++i )
      {
          com[i]+= u[0]*p0[i];
@@ -42,7 +42,7 @@ namespace geom
      }
 
    // area of quadrilateral
-      std::array<Direction<2,Real>,2> tangent{};
+      std::array<Direction2<Real>,2> tangent{};
       for( size_t i=0; i<2; ++i )
      {
          for( size_t j=0; j<2; ++j )

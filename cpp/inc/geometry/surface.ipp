@@ -2,18 +2,18 @@
 namespace geom
 {
    template<floating_point Real>
-   Surface<1,Real> surface( const Point<1,Real>& p )
+   Surface1<Real> surface( const Point1<Real>& p )
   {
-      return Surface<1,Real>{.area   = Real(1.),
-                             .centre = p,
-                             .metric = Metric<1,Real>{Direction<1,Real>{Real(1.)}}};
+      return Surface1<Real>{.area   = Real(1.),
+                            .centre = p,
+                            .metric = Metric1<Real>{Direction1<Real>{Real(1.)}}};
   }
 
    template<floating_point Real>
-   Surface<2,Real> surface( const Point<2,Real>& p0, const Point<2,Real>& p1 )
+   Surface2<Real> surface( const Point2<Real>& p0, const Point2<Real>& p1 )
   {
-      using Mtrc = Metric<2,Real>;
-      using Dir  = Direction<2,Real>;
+      using Mtrc = Metric2<Real>;
+      using Dir  = Direction2<Real>;
 
       const Dir tangent0=p1-p0;
       const Dir tangent1=p0-p1;
