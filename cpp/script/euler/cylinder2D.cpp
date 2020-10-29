@@ -49,16 +49,16 @@
 
       const Real density  = sref.density();
       const Real pressure = sref.pressure();
-//    const Real velocity = std::sqrt( sref.velocity2() );
-      const Real velocity = 1.;
+      const Real velocity = std::sqrt( sref.velocity2() );
+//    const Real velocity = 1.;
       const Real sonic    = std::sqrt( sref.speedOfSound2() );
       const Real entropy  = sonic*sonic / ( gamma*pow(density,gamma-1) );
 
-      os << r/density  << " "
+      os << (r-density)/density  << " "
          << u/velocity << " "
          << v/velocity << " "
-         << p/pressure << " "
-         << s/entropy  << " "
+         << (p-pressure)/pressure << " "
+         << (s-entropy)/entropy  << " "
          << a/sonic    << "\n";
   }
 
@@ -86,22 +86,22 @@ using Real = double;
 //    rb is radius of boundary
 //    th is theta direction
 //    h is height of bump
-constexpr size_t nr  = 48;
-constexpr size_t nth = 48;
+constexpr size_t nr  = 128;
+constexpr size_t nth = 64;
 
 constexpr Real rc =  1.0;
-constexpr Real rb = 10.0;
+constexpr Real rb =  8.0;
 
 // time discretisation
-constexpr size_t nt = 104;
-constexpr Real  cfl = 0.4;
+constexpr size_t nt = 200'000;
+constexpr Real  cfl = 0.8;
 
 # ifdef _OPENMP
-constexpr int nthreads=4;
+constexpr int nthreads=16;
 # endif
 
 // flow conditions
-constexpr Real mach     = 0.5;
+constexpr Real mach     = 1.e-4;
 constexpr Real pressure = 1.;
 constexpr Real density  = 1.;
 
@@ -112,8 +112,13 @@ constexpr BasisT SolutionBasis = BasisT::Primitive;
 //using Flux = RoeFlux<Law>;
 //using Flux = RusanovFlux<Law>;
 
-using Flux = Slau<LowMachScaling::Convective,
-                  LowMachScaling::Acoustic>;
+using Flux = RoeUnprecWS;
+
+//using Flux = Slau<LowMachScaling::Convective,
+//                  LowMachScaling::Acoustic>;
+
+//using Flux = AusmPlusUP<LowMachScaling::Convective,
+//                        LowMachScaling::Convective>;
 
 //using Limiter = Limiters::VanAlbada2;
 //using Limiter = Limiters::MonotonizedCentral2;
@@ -166,13 +171,12 @@ using MeshT      = Mesh<nDim,Real>;
       const std::tuple boundaryConditions{make_ghostCell_BCond<Law,BCType::Riemann>(),
                                           make_ghostCell_BCond<Law,BCType::Entropy>(),
                                           make_flux_BCond<Law,BCType::InviscidWall>(),
+                                          make_fixed_BCond<Law>(),
                                           make_periodic_BCond<Law>()};
 
       for( SolField::VarField& qb : q.boundary ){ par::fill( qb, qref ); }
-//    par::fill( q.boundary[0], qref );
-//    par::fill( q.boundary[1], qref );
       q.bcTypes[0] = BCType::InviscidWall;
-      q.bcTypes[1] = BCType::Entropy;
+      q.bcTypes[1] = BCType::Fixed;
       q.bcTypes[2] = BCType::Periodic;
       q.bcTypes[3] = BCType::Periodic;
 

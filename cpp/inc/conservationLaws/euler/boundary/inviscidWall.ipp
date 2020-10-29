@@ -50,8 +50,8 @@
       using StateT  = State<LawType::Euler,nDim,Real>;
 
 //    const int direction = (celli.centre[1]>0.5) ? 1 : -1;
-      const int direction = 0;
-//    const int direction = -1;
+//    const int direction = 0;
+      const int direction = -1;
       const SolVarT qwall = qinterior + direction*dq;
       const StateT stateWall = set2State( species, qwall );
       const Real pressureWall = stateWall.pressure();

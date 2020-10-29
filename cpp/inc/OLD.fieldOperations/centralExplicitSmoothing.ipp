@@ -1,4 +1,7 @@
 
+/*
+ * This one is for CEIRS?
+ */
    template<typename T>
    void centralExplicitSmoothing( const Controls::GridControls1D&  grid,
                                   const Types::Real               alpha,

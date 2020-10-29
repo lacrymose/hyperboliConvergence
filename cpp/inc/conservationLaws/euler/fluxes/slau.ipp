@@ -1,18 +1,18 @@
 
 # include <conservationLaws/euler/fluxes/machSplittings.ipp>
 
-      template<LowMachScaling VFluxScaling,
-               LowMachScaling PFluxScaling>                       // struct template parameters
+   template<LowMachScaling VFluxScaling,
+            LowMachScaling PFluxScaling>                       // struct template parameters
 
-      template<EulerState StateT, int nDim, floating_point Real>  // member function template parameters
-         requires   SameDim<   StateT,dim_constant<nDim>>
-                 && SameFPType<StateT,Real>
+   template<EulerState StateT, int nDim, floating_point Real>  // member function template parameters
+      requires   SameDim<   StateT,dim_constant<nDim>>
+              && SameFPType<StateT,Real>
 
-      FluxResult<LawType::Euler,nDim,Real>    // return type
-               Slau<VFluxScaling,PFluxScaling>::flux( const Species<LawType::Euler,Real>& species,
-                                                      const geom::Surface<nDim,Real>&        face,
-                                                      const StateT&                            sl,
-                                                      const StateT&                            sr ) const
+   FluxResult<LawType::Euler,nDim,Real>    // return type
+            Slau<VFluxScaling,PFluxScaling>::flux( const Species<LawType::Euler,Real>& species,
+                                                   const geom::Surface<nDim,Real>&        face,
+                                                   const StateT&                            sl,
+                                                   const StateT&                            sr ) const
   {
 // average velocities
       const Real ua = sqrt( 0.5*( sl.velocity2() + sr.velocity2() ) );

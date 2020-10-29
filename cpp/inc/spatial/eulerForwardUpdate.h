@@ -15,25 +15,28 @@
 // overload with return value (must be used to construct vector to use RVO)
    template<LawType Law, int nDim, ImplementedVarSet SolVarT, floating_point Real>
       requires ConsistentTypes<Law,nDim,Real,SolVarT>
-   par::Array<SolVarT,nDim> eulerForwardUpdate( const par::DualArray<geom::Volume<nDim,Real>,nDim>& cells,
-                                                const Species<Law,Real>&                          species,
-                                                const Real                                             dt,
-                                                const par::DualArray<FluxResult<Law,nDim,Real>,nDim>&   r,
-                                                const par::DualArray<SolVarT,nDim>&                    q0 )
+   par::Array<SolVarT,nDim> eulerForwardUpdateGlobal( const par::DualArray<geom::Volume<nDim,Real>,nDim>& cells,
+                                                      const Species<Law,Real>&                          species,
+                                                      const Real                                             dt,
+                                                      const par::DualArray<FluxResult<Law,nDim,Real>,nDim>&   r,
+                                                      const par::DualArray<SolVarT,nDim>&                    q0 )
   {
       par::DualArray<SolVarT,nDim> q1(q0.shape());
-      eulerForwardUpdate( cells, species, dt, r, q0, q1 );
+      eulerForwardUpdateGlobal( cells, species, dt, r, q0, q1 );
       return q1;
   }
 
+/*
+ * One step of euler forward using residual vector r and a global timestep dt
+ */
    template<LawType Law, int nDim, ImplementedVarSet SolVarT, floating_point Real>
       requires ConsistentTypes<Law,nDim,Real,SolVarT>
-   void eulerForwardUpdate( const par::DualArray<geom::Volume<nDim,Real>,nDim>& cells,
-                            const Species<Law,Real>&                          species,
-                            const Real                                             dt,
-                            const par::DualArray<FluxResult<Law,nDim,Real>,nDim>&   r,
-                            const par::DualArray<SolVarT,nDim>&                    q0,
-                                  par::DualArray<SolVarT,nDim>&                    q1 )
+   void eulerForwardUpdateGlobal( const par::DualArray<geom::Volume<nDim,Real>,nDim>& cells,
+                                  const Species<Law,Real>&                          species,
+                                  const Real                                             dt,
+                                  const par::DualArray<FluxResult<Law,nDim,Real>,nDim>&   r,
+                                  const par::DualArray<SolVarT,nDim>&                    q0,
+                                        par::DualArray<SolVarT,nDim>&                    q1 )
   {
    // conserved variables/deltas needed for correct shock speeds
       constexpr BasisType<Law> ConservedBasis = BasisType<Law>::Conserved;
@@ -73,5 +76,70 @@
       par::transform( update,
                       q1,
                       q0, cells, r );
+      return;
+  }
+
+
+
+// overload with return value (must be used to construct vector to use RVO)
+   template<LawType Law, int nDim, ImplementedVarSet SolVarT, floating_point Real>
+      requires ConsistentTypes<Law,nDim,Real,SolVarT>
+   par::Array<SolVarT,nDim> eulerForwardUpdateLocal( const Species<Law,Real>&                          species,
+                                                     const Real                                            cfl,
+                                                     const par::DualArray<FluxResult<Law,nDim,Real>,nDim>&   r,
+                                                     const par::DualArray<SolVarT,nDim>&                    q0 )
+  {
+      par::DualArray<SolVarT,nDim> q1(q0.shape());
+      eulerForwardUpdateLocal( species, cfl, r, q0, q1 );
+      return q1;
+  }
+
+/*
+ * One step of euler forward using residual vector r and local timestepping timestep with cfl
+ */
+   template<LawType Law, int nDim, ImplementedVarSet SolVarT, floating_point Real>
+      requires ConsistentTypes<Law,nDim,Real,SolVarT>
+   void eulerForwardUpdateLocal( const Species<Law,Real>&                          species,
+                                 const Real                                            cfl,
+                                 const par::DualArray<FluxResult<Law,nDim,Real>,nDim>&   r,
+                                 const par::DualArray<SolVarT,nDim>&                    q0,
+                                       par::DualArray<SolVarT,nDim>&                    q1 )
+  {
+   // conserved variables/deltas needed for correct shock speeds
+      constexpr BasisType<Law> ConservedBasis = BasisType<Law>::Conserved;
+      using ConsVarT = VariableSet<  Law,nDim,ConservedBasis,Real>;
+      using ConsDelT = VariableDelta<Law,nDim,ConservedBasis,Real>;
+
+   // check mesh sizes match
+      assert( r.shape() == q1.shape() );
+      assert( r.shape() == q0.shape() );
+
+   // transformation to conservative variables
+      const auto consvar = [&species]
+                           ( const SolVarT& qs ) -> ConsVarT
+     {
+         return set2Set<ConsVarT>( species, qs );
+     };
+
+   // transformation to solution variables
+      const auto solvar = [&species]
+                          ( const ConsVarT& qc ) -> SolVarT
+     {
+         return set2Set<SolVarT>( species, qc );
+     };
+
+   // new = old + dt*residual/vol
+      // solv -> (consv + increment) -> solv
+      const auto update = [consvar, solvar, cfl]
+                          ( const SolVarT&                     v0,
+                            const FluxResult<Law,nDim,Real>&  res ) -> SolVarT
+     {
+         const ConsDelT dvc = res.flux*(cfl/res.lambda);
+         return solvar( consvar( v0 ) + dvc );
+     };
+
+      par::transform( update,
+                      q1,
+                      q0, r );
       return;
   }

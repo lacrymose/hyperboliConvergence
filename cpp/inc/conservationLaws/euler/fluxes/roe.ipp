@@ -6,7 +6,6 @@
   {
       State<LawType::Euler,nDim,Real> ravg;
 
-
    // left/right weighting functions
       const Real cr = sqrt( sr.density()/sl.density() );
       const Real wl = 1./( 1.+cr );

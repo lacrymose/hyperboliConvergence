@@ -27,18 +27,19 @@ CSCRIPT = test/test.cpp \
 	euler/shocktube.cpp \
 	euler/oneD.cpp \
 	euler/channelBump2D.cpp \
-	euler/cylinder2D.cpp
+	euler/cylinder2D.cpp \
+	euler/gresho2D.cpp
 
 # compiler
 CCMP = g++-8
 
 # debug/optimisation, warning and language standard flags
 #COPT = -Og -fno-exceptions -D_GLIBCXX_DEBUG -fsanitize=address -fno-omit-frame-pointer
-COPT = -O3 -fno-exceptions -ffast-math
+COPT = -O3 -fno-exceptions -ffast-math -fopenmp
 
 CWARN = -Wall -Wextra -Wpedantic -Wno-unused-parameter
 
-CSTD = -std=c++2a -fconcepts -fopenmp
+CSTD = -std=c++2a -fconcepts
 
 # external libraries, eg lapack, blas, openmp ...
 LIBS =

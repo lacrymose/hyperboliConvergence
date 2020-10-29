@@ -109,12 +109,12 @@
                                     resTotal );
 
          // integrate cell residuals forward by dt and average over cell volume
-            eulerForwardUpdate( mesh.cells,
-                                species,
-                                rungeKutta.beta[stg]*dt,
-                                resTotal,
-                                q0.interior,
-                                q2.interior );
+            eulerForwardUpdateGlobal( mesh.cells,
+                                      species,
+                                      rungeKutta.beta[stg]*dt,
+                                      resTotal,
+                                      q0.interior,
+                                      q2.interior );
             std::swap( q1,q2 );
         }
          copy( q0, q1 );
