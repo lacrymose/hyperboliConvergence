@@ -12,53 +12,59 @@
 # include <array>
 # include <cassert>
 
-   template<ImplementedVarSet VarSetT,
-            int                  nDim,
-            floating_point       Real>
+   template<par::execution_policy Policy,
+            ImplementedVarSet    VarSetT,
+            int                     nDim,
+            floating_point          Real>
       requires ConsistentTypes<law_of_v<VarSetT>,
                                nDim,
                                Real,
                                VarSetT>
-   par::DualArray<vardelta_t<VarSetT>,nDim> gradientCalc( const Mesh<nDim,Real>&          mesh,
+   par::DualArray<vardelta_t<VarSetT>,nDim> gradientCalc( const Policy                  policy,
+                                                          const Mesh<nDim,Real>&          mesh,
                                                           const SolutionField<VarSetT,nDim>& q )
   {
       par::DualArray<vardelta_t<VarSetT>,nDim> dq(q.shape());
-      gradientCalc( mesh,q, dq );
+      gradientCalc( policy, mesh,q, dq );
       return dq;
   }
 
-   template<ImplementedVarSet   VarSetT,
-            ImplementedVarDelta VarDelT,
-            int                    nDim,
-            size_t                    N,
-            floating_point         Real>
+   template<par::execution_policy Policy,
+            ImplementedVarSet    VarSetT,
+            ImplementedVarDelta  VarDelT,
+            int                     nDim,
+            size_t                     N,
+            floating_point          Real>
       requires ConsistentTypes<law_of_v<VarSetT>,
                                nDim,
                                Real,
                                VarSetT,
                                VarDelT>
                && N==nDim
-   void gradientCalc( const Mesh<nDim,Real>&                          mesh,
+   void gradientCalc( const Policy                                  policy,
+                      const Mesh<nDim,Real>&                          mesh,
                       const SolutionField<VarSetT,nDim>&                 q,
                             par::DualArray<std::array<VarDelT,N>,nDim>& dq )
   {
       par::fill( dq, std::array<VarDelT,N>{} );
-      interiorGradient( mesh,q, dq );
-      boundaryGradient( mesh,q, dq );
+      interiorGradient( policy, mesh,q, dq );
+      boundaryGradient( policy, mesh,q, dq );
   }
 
 /*
  * gradient calculation for interior of 1D domain
  */
-   template<ImplementedVarSet   VarSetT,
-            ImplementedVarDelta VarDelT,
-            floating_point         Real>
+   template<par::execution_policy Policy,
+            ImplementedVarSet    VarSetT,
+            ImplementedVarDelta  VarDelT,
+            floating_point          Real>
       requires ConsistentTypes<law_of_v<VarSetT>,
                                1,
                                Real,
                                VarSetT,
                                VarDelT>
-   void interiorGradient( const Mesh<1,Real>&                         mesh,
+   void interiorGradient( const Policy                              policy,
+                          const Mesh<1,Real>&                         mesh,
                           const SolutionField<VarSetT,1>&                q,
                                 par::DualArray1<std::array<VarDelT,1>>& dq )
   {
@@ -86,15 +92,17 @@
 /*
  * gradient calculation for interior of 2D domain
  */
-   template<ImplementedVarSet   VarSetT,
-            ImplementedVarDelta VarDelT,
-            floating_point         Real>
+   template<par::execution_policy Policy,
+            ImplementedVarSet    VarSetT,
+            ImplementedVarDelta  VarDelT,
+            floating_point          Real>
       requires ConsistentTypes<law_of_v<VarSetT>,
                                2,
                                Real,
                                VarSetT,
                                VarDelT>
-   void interiorGradient( const Mesh<2,Real>&                         mesh,
+   void interiorGradient( const Policy                              policy,
+                          const Mesh<2,Real>&                         mesh,
                           const SolutionField<VarSetT,2>&                q,
                                 par::DualArray2<std::array<VarDelT,2>>& dq )
   {
@@ -171,15 +179,17 @@
 /*
  * gradient calculation for boundary of 1D domain
  */
-   template<ImplementedVarSet   VarSetT,
-            ImplementedVarDelta VarDelT,
-            floating_point         Real>
+   template<par::execution_policy Policy,
+            ImplementedVarSet    VarSetT,
+            ImplementedVarDelta  VarDelT,
+            floating_point          Real>
       requires ConsistentTypes<law_of_v<VarSetT>,
                                1,
                                Real,
                                VarSetT,
                                VarDelT>
-   void boundaryGradient( const Mesh<1,Real>&                         mesh,
+   void boundaryGradient( const Policy                              policy,
+                          const Mesh<1,Real>&                         mesh,
                           const SolutionField<VarSetT,1>&                q,
                                 par::DualArray1<std::array<VarDelT,1>>& dq )
   {
@@ -211,15 +221,17 @@
 /*
  * gradient calculation for boundary of 2D domain
  */
-   template<ImplementedVarSet   VarSetT,
-            ImplementedVarDelta VarDelT,
-            floating_point         Real>
+   template<par::execution_policy Policy,
+            ImplementedVarSet    VarSetT,
+            ImplementedVarDelta  VarDelT,
+            floating_point          Real>
       requires ConsistentTypes<law_of_v<VarSetT>,
                                2,
                                Real,
                                VarSetT,
                                VarDelT>
-   void boundaryGradient( const Mesh<2,Real>&                         mesh,
+   void boundaryGradient( const Policy                              policy,
+                          const Mesh<2,Real>&                         mesh,
                           const SolutionField<VarSetT,2>&                q,
                                 par::DualArray2<std::array<VarDelT,2>>& dq )
   {
@@ -278,3 +290,4 @@
 
       return;
   }
+

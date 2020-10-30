@@ -16,15 +16,19 @@
 
 # include <cassert>
 
-   template<floating_point Real, int nDim, LawType Law>
+   template<par::execution_policy Policy,
+            floating_point          Real,
+            int                     nDim,
+            LawType                  Law>
       requires ImplementedLawType<Law>
-   Real spectralRadius( const par::DualArray<geom::Volume<  nDim,Real>,nDim>& cells,
+   Real spectralRadius( const Policy                                        policy,
+                        const par::DualArray<geom::Volume<  nDim,Real>,nDim>& cells,
                         const par::DualArray<FluxResult<Law,nDim,Real>,nDim>& resid )
   {
       assert( cells.shape() == resid.shape() );
 
    // max( (cell,resid)->spectral radius ... )
-      return par::transform_reduce(
+      return par::transform_reduce( policy,
                                  // transform one cell/resid pair to a spectral radius
                                     []( const geom::Volume<  nDim,Real>& cell,
                                         const FluxResult<Law,nDim,Real>& res ) -> Real

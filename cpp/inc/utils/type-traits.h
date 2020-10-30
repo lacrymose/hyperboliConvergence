@@ -34,7 +34,7 @@
 
    // helper
    template<typename T>
-   constexpr bool is_integer_v = is_integer<T>::value;
+   inline constexpr bool is_integer_v = is_integer<T>::value;
 
 // -------- remove const/volative qualifiers and references --------
 
@@ -55,12 +55,12 @@
 
    // helper
    template<template<typename...> typename T, template<typename...> typename U>
-   constexpr bool is_same_template_v = is_same_template<T,U>::value;
+   inline constexpr bool is_same_template_v = is_same_template<T,U>::value;
 
 // -------- test if value member is of bool type --------
 
    template<typename T>
-   constexpr bool has_bool_value_v = std::is_same_v<typename T::value_type,bool>;
+   inline constexpr bool has_bool_value_v = std::is_same_v<typename T::value_type,bool>;
 
 
 // -------- test pack size --------

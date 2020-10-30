@@ -25,7 +25,7 @@
 
 
    // helpers
-   template<typename T> constexpr BasisType<law_of_v<T>> basis_of_v = basis_of<T>::value;
+   template<typename T> inline constexpr BasisType<law_of_v<T>> basis_of_v = basis_of<T>::value;
    template<typename T> using basis_of_t = typename basis_of<T>::type;
 /*
  * returns whether a type has a basis or not
@@ -37,7 +37,7 @@
                                        std::true_type> {};
 
    // helper
-   template<typename T> constexpr bool has_basis_v = has_basis<T>::value;
+   template<typename T> inline constexpr bool has_basis_v = has_basis<T>::value;
 
 /*
  * returns whether multiple types have the same spatial dimension
@@ -48,7 +48,7 @@
 
    // helper
    template<typename T0, typename... Ts>
-   constexpr bool has_same_basis_v = has_same_basis<T0,Ts...>::value;
+   inline constexpr bool has_same_basis_v = has_same_basis<T0,Ts...>::value;
 
 /*
  * specialisations of basis_of to extract basis from variable types

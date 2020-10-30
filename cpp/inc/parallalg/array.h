@@ -1,39 +1,19 @@
 
 # pragma once
 
+# include <parallalg/parallalg.h>
+
 # include <utils/type-traits.h>
 
 # include <array>
 # include <vector>
 
-# include <cstddef>
-
 namespace par
 {
 
 /*
- * indicates type of grid that an array is defined over - primal or dual
- *    Primal is standard grid (should be default unless both primal and dual are needed)
- *    Dual grid used for cell based grids
+ * ---------------- index manipulation types for Array -----------------------------------------
  */
-   enum struct GridType { Primal, Dual };
-   constexpr GridType Primal = GridType::Primal;
-   constexpr GridType   Dual = GridType::Dual;
-
-/*
- * ---------------- Atomic types -----------------------------------------
- */
-
-/*
- * An NDIM-dimensional index into an NDIM-dimensional array
- */
-   template<int          NDIM,
-            GridType GRIDTYPE= Primal>
-   struct Idx
-  {
-      std::array<size_t,NDIM> idxs;
-      const size_t& operator[]( const unsigned int i ) const { return idxs[i]; }
-  };
 
 /*
  * An NDIM-dimensional increment an NDIM-dimensional index. Used for defining stencils
@@ -80,36 +60,8 @@ namespace par
 
 
 /*
- * ---------------- Convenience Atomic typedefs ---------------------
+ * ---------------- Convenience typedefs ---------------------
  */
-
-// Idx types
-
-   // grid type
-   template<int NDIM>
-   using PrimalIdx = Idx<NDIM,Primal>;
-
-   template<int NDIM>
-   using DualIdx = Idx<NDIM,Dual>;
-
-   // dimension
-   template<GridType GRIDTYPE>
-   using Idx1 = Idx<1,GRIDTYPE>;
-
-   template<GridType GRIDTYPE>
-   using Idx2 = Idx<2,GRIDTYPE>;
-
-   template<GridType GRIDTYPE>
-   using Idx3 = Idx<3,GRIDTYPE>;
-
-   // grid type and dimension
-   using PrimalIdx1 = Idx<1,Primal>;
-   using PrimalIdx2 = Idx<2,Primal>;
-   using PrimalIdx3 = Idx<3,Primal>;
-
-   using DualIdx1 = Idx<1,Dual>;
-   using DualIdx2 = Idx<2,Dual>;
-   using DualIdx3 = Idx<3,Dual>;
 
 // Offset types
 

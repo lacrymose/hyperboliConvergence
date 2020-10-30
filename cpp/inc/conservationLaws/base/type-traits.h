@@ -34,7 +34,7 @@
 
    // helper
    template<typename T>
-   constexpr bool is_Species_v = is_Species<T>::value;
+   inline constexpr bool is_Species_v = is_Species<T>::value;
 
 
 // State ----------
@@ -47,7 +47,7 @@
 
    // helper
    template<typename T>
-   constexpr bool is_State_v = is_State<T>::value;
+   inline constexpr bool is_State_v = is_State<T>::value;
 
 
 // FluxResult ----------
@@ -60,7 +60,7 @@
 
    // helper
    template<typename T>
-   constexpr bool is_FluxResult_v = is_FluxResult<T>::value;
+   inline constexpr bool is_FluxResult_v = is_FluxResult<T>::value;
 
 
 // VariableSet ----------
@@ -73,7 +73,7 @@
 
    // helper
    template<typename T>
-   constexpr bool is_VariableSet_v = is_VariableSet<T>::value;
+   inline constexpr bool is_VariableSet_v = is_VariableSet<T>::value;
 
 
 // VariableDelta ----------
@@ -86,7 +86,7 @@
 
    // helper
    template<typename T>
-   constexpr bool is_VariableDelta_v = is_VariableDelta<T>::value;
+   inline constexpr bool is_VariableDelta_v = is_VariableDelta<T>::value;
 
 
 // VariableSet with specific Law and Basis ----------
@@ -99,7 +99,7 @@
 
    // helper
    template<typename T, LawType Law, BasisType<Law> Basis>
-   constexpr bool is_specialised_VarSet_v = is_specialised_VarSet<T,Law,Basis>::value;
+   inline constexpr bool is_specialised_VarSet_v = is_specialised_VarSet<T,Law,Basis>::value;
 
 
 // VariableDelta with specific Law and Basis ----------
@@ -112,5 +112,5 @@
 
    // helper
    template<typename T, LawType Law, BasisType<Law> Basis>
-   constexpr bool is_specialised_VarDelta_v = is_specialised_VarDelta<T,Law,Basis>::value;
+   inline constexpr bool is_specialised_VarDelta_v = is_specialised_VarDelta<T,Law,Basis>::value;
 

@@ -39,7 +39,7 @@
                                           std::true_type> {};
 
    // helpers
-   template<typename T> constexpr bool has_fptype_v = has_fptype<T>::value;
+   template<typename T> inline constexpr bool has_fptype_v = has_fptype<T>::value;
 // template<typename T> using has_fptype_t = typename has_fptype<T>::type;
    
 
@@ -52,7 +52,7 @@
 
    // helpers
    template<typename T0, typename...Ts>
-   constexpr bool has_same_fptype_v = has_same_fptype<T0,Ts...>::value;
+   inline constexpr bool has_same_fptype_v = has_same_fptype<T0,Ts...>::value;
 
 
 /*

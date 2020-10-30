@@ -19,6 +19,7 @@
 
 # include <parallalg/algorithm.h>
 # include <parallalg/array.h>
+# include <parallalg/parallalg.h>
 
 # include <utils/maths/misc.h>
 
@@ -85,21 +86,24 @@ using Real = double;
 
 // ------- User Inputs -------
 
+# ifndef _OPENMP
+constexpr auto policy = par::execution::seq;
+# else
+constexpr auto policy = par::execution::omp;
+constexpr int nthreads=4;
+# endif
+
 // space discretisation
-constexpr size_t nx = 64;
+constexpr size_t nx = 256;
 
 constexpr Real h = 1.0;
 
 // time discretisation
-constexpr size_t nt = 200'000;
+constexpr size_t nt = 100;
 constexpr Real  cfl = 1.6;
 
-# ifdef _OPENMP
-constexpr int nthreads=12;
-# endif
-
 // variable flow conditions
-constexpr Real mach = 1.e-4;
+constexpr Real mach = 1.e-1;
 constexpr Real vel_inf = 0.1;
 
 // fixed flow conditions
@@ -214,7 +218,7 @@ using MeshT      = Mesh<nDim,Real>;
       const auto hoflux = make_muscl_flux<Law>( Limiter{}, Flux{} );
 
    // integrate forward in time
-      integrate( timeControls, rk,
+      integrate( policy, timeControls, rk,
                  hoflux, boundaryConditions,
                  species,
                  mesh, q );

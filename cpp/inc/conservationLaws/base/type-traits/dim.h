@@ -30,7 +30,7 @@
 
 
    // helpers
-   template<typename T> constexpr int  dim_of_v = dim_of<T>::value;
+   template<typename T> inline constexpr int  dim_of_v = dim_of<T>::value;
    template<typename T> using dim_of_t = typename dim_of<T>::type;
 
 
@@ -43,7 +43,7 @@
                                         std::true_type> {};
 
    // helper
-   template<typename T> constexpr bool has_dim_v = has_dim<T>::value;
+   template<typename T> inline constexpr bool has_dim_v = has_dim<T>::value;
    
 
 /*
@@ -55,7 +55,7 @@
 
    // helper
    template<typename T0, typename...Ts>
-   constexpr bool has_same_dim_v = has_same_dim<T0,Ts...>::value;
+   inline constexpr bool has_same_dim_v = has_same_dim<T0,Ts...>::value;
 
 
 /*
@@ -87,6 +87,6 @@
 
    // helper
    template<typename T>
-   constexpr bool has_valid_dim_v = has_valid_dim<T>::value;
+   inline constexpr bool has_valid_dim_v = has_valid_dim<T>::value;
 
 

@@ -5,6 +5,7 @@
 
 # include <parallalg/algorithm.h>
 # include <parallalg/array.h>
+# include <parallalg/parallalg.h>
 
    template<typename ElemT>
    auto makeBoundaryArray( const par::DualShape1& s )
@@ -90,28 +91,47 @@
   };
 
 
-   template<ImplementedVarSet VarSet,
-            int                 nDim>
-   void copy(       SolutionField<VarSet,nDim>& dst,
+   template<par::execution_policy Policy,
+            ImplementedVarSet     VarSet,
+            int                     nDim>
+   void copy( const Policy                   policy,
+                    SolutionField<VarSet,nDim>& dst,
               const SolutionField<VarSet,nDim>& src )
   {
       assert( dst.interior.shape() == src.interior.shape() );
 
-      par::copy( dst.interior, src.interior );
+      par::copy( policy, dst.interior, src.interior );
       for( unsigned int i=0; i<src.nBoundaries; i++ )
      {
-         par::copy( dst.boundary[i], src.boundary[i] );
+         par::copy( policy, dst.boundary[i], src.boundary[i] );
          dst.bcTypes[i] = src.bcTypes[i];
      }
   }
 
-   template<ImplementedVarSet VarSet,
-            int                 nDim>
-   SolutionField<VarSet,nDim> copy( const SolutionField<VarSet,nDim>& src )
+   template<par::execution_policy Policy,
+            ImplementedVarSet     VarSet,
+            int                     nDim>
+   SolutionField<VarSet,nDim> copy( const Policy                   policy,
+                                    const SolutionField<VarSet,nDim>& src )
   {
       SolutionField<VarSet,nDim> dst(src.interior.shape());
-      copy( dst,src );
+      copy( policy, dst,src );
       return dst;
+  }
+
+   template<ImplementedVarSet     VarSet,
+            int                     nDim>
+   void copy(       SolutionField<VarSet,nDim>& dst,
+              const SolutionField<VarSet,nDim>& src )
+  {
+      copy( par::execution::seq, dst, src );
+  }
+
+   template<ImplementedVarSet     VarSet,
+            int                     nDim>
+   SolutionField<VarSet,nDim> copy( const SolutionField<VarSet,nDim>& src )
+  {
+      return copy( par::execution::seq, src );
   }
 
 

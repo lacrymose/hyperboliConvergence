@@ -30,7 +30,7 @@
 
 
    // helpers
-   template<typename T> constexpr LawType law_of_v = law_of<T>::value;
+   template<typename T> inline constexpr LawType law_of_v = law_of<T>::value;
    template<typename T> using law_of_t = typename law_of<T>::type;
 
 
@@ -44,7 +44,7 @@
                                         std::true_type> {};
 
    // helpers
-   template<typename T> constexpr bool has_law_v = has_law<T>::value;
+   template<typename T> inline constexpr bool has_law_v = has_law<T>::value;
 // template<typename T> using has_law_t = typename has_law<T>::type;
    
 
@@ -57,7 +57,7 @@
 
    // helpers
    template<typename T0, typename...Ts>
-   constexpr bool has_same_law_v = has_same_law<T0,Ts...>::value;
+   inline constexpr bool has_same_law_v = has_same_law<T0,Ts...>::value;
 
 
 /*

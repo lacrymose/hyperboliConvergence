@@ -24,7 +24,8 @@
 /*
  * Accumulate cell residuals from fluxes over all cell faces
  */
-   template<LawType                   Law,
+   template<par::execution_policy  Policy,
+            LawType                   Law,
             int                      nDim,
             size_t                      N,
             ImplementedVarSet     SolVarT,
@@ -41,7 +42,8 @@
               && std::is_same_v<FluxRes,
                                 fluxresult_t<SolVarT>>
               && N==nDim
-   void residualCalc( const Mesh<nDim,Real>&                          mesh,
+   void residualCalc( const Policy                                  policy,
+                      const Mesh<nDim,Real>&                          mesh,
                       const HighOrderFlux&                          hoflux,
                       const std::tuple<BoundaryConds...>               bcs,
                       const Species<Law,Real>&                     species,
@@ -55,13 +57,13 @@
       assert( mesh.cells.shape() ==  dq.shape() );
       assert( mesh.cells.shape() ==  q.interior.shape() );
 
-      par::fill( res, FluxRes{} );
+      par::fill( policy, res, FluxRes{} );
 
    // accumulate cell residual contributions from interior faces
-      interiorResidual( mesh, hoflux, species, q,dq, res );
+      interiorResidual( policy, mesh, hoflux, species, q,dq, res );
 
    // accumulate cell residual contributions from boundary faces
-      boundaryResidual( mesh, hoflux, bcs, species, q,dq, res );
+      boundaryResidual( policy, mesh, hoflux, bcs, species, q,dq, res );
 
       return;
   }
@@ -69,7 +71,8 @@
 /*
  * Accumulate cell residual contributions from interior faces in 1D domain
  */
-   template<LawType                   Law,
+   template<par::execution_policy  Policy,
+            LawType                   Law,
             ImplementedVarSet     SolVarT,
             ImplementedVarDelta   SolDelT,
             typename              FluxRes,
@@ -82,7 +85,8 @@
                                  SolDelT>
               && std::is_same_v<FluxRes,
                                 fluxresult_t<SolVarT>>
-   void interiorResidual( const Mesh<1,Real>&                             mesh,
+   void interiorResidual( const Policy                                  policy,
+                          const Mesh<1,Real>&                             mesh,
                           const HighOrderFlux&                          hoflux,
                           const Species<Law,Real>&                     species,
                           const SolutionField<SolVarT,1>&                    q,
@@ -120,7 +124,8 @@
 /*
  * Accumulate cell residual contributions from interior faces in 2D domain
  */
-   template<LawType                   Law,
+   template<par::execution_policy  Policy,
+            LawType                   Law,
             ImplementedVarSet     SolVarT,
             ImplementedVarDelta   SolDelT,
             typename              FluxRes,
@@ -133,7 +138,8 @@
                                  SolDelT>
               && std::is_same_v<FluxRes,
                                 fluxresult_t<SolVarT>>
-   void interiorResidual( const Mesh<2,Real>&                          mesh,
+   void interiorResidual( const Policy                               policy,
+                          const Mesh<2,Real>&                          mesh,
                           const HighOrderFlux&                       hoflux,
                           const Species<Law,Real>&                  species,
                           const SolutionField<SolVarT,2>&                 q,
@@ -240,7 +246,8 @@
 /*
  * Accumulate cell residuals from fluxes over boundary cell faces
  */
-   template<LawType                   Law,
+   template<par::execution_policy  Policy,
+            LawType                   Law,
             int                      nDim,
             size_t                      N,
             ImplementedVarSet     SolVarT,
@@ -257,7 +264,8 @@
               && std::is_same_v<FluxRes,
                                 fluxresult_t<SolVarT>>
               && N==nDim
-   void boundaryResidual( const Mesh<nDim,Real>&                          mesh,
+   void boundaryResidual( const Policy                                  policy,
+                          const Mesh<nDim,Real>&                          mesh,
                           const HighOrderFlux&                          hoflux,
                           const std::tuple<BoundaryConds...>               bcs,
                           const Species<Law,Real>&                     species,

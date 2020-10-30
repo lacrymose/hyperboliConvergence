@@ -18,6 +18,7 @@
 
 # include <parallalg/algorithm.h>
 # include <parallalg/array.h>
+# include <parallalg/parallalg.h>
 
 # include <utils/utils.h>
 
@@ -31,13 +32,15 @@
 /*
  * integrates dq/dt = rhs forward in time using an explicit runge kutta scheme
  */
-   template<LawType                    Law,
+   template<par::execution_policy   Policy,
+            LawType                    Law,
             int                       nDim,
             floating_point            Real,
             ImplementedVarSet    SolVarSet,
             typename       SecondOrderFlux,
             typename...      BoundaryConds>
-   void integrate( const UnsteadyTimeControls<Real>&     timeControls,
+   void integrate( const Policy                                policy,
+                   const UnsteadyTimeControls<Real>&     timeControls,
                    const ODE::Explicit::RungeKutta<Real>&  rungeKutta,
                    const SecondOrderFlux&                       flux2,
                    const std::tuple<BoundaryConds...>   boundaryConds,
@@ -83,12 +86,14 @@
                             q1 );
 
          // calculate differences
-            gradientCalc( mesh,
+            gradientCalc( policy,
+                          mesh,
                           q1,
                           dq );
 
          // accumulate flux residual
-            residualCalc( mesh,
+            residualCalc( policy,
+                          mesh,
                           flux2,
                           boundaryConds,
                           species,
@@ -97,19 +102,21 @@
                           resStage[stg] );
 
          // calculate maximum stable timestep for this timestep
-            if( stg==0 ){ dt = timeControls.cfl/spectralRadius( mesh.cells, resStage[stg] ); }
+            if( stg==0 ){ dt = timeControls.cfl/spectralRadius( policy, mesh.cells, resStage[stg] ); }
 
          // accumulate stage residual
-            par::fill( resTotal, {} );
+            par::fill( policy, resTotal, {} );
 
          // runge-kutta accumulation closure
-            rungeKuttaAccumulation( rungeKutta,
+            rungeKuttaAccumulation( policy,
+                                    rungeKutta,
                                     stg,
                                     resStage,
                                     resTotal );
 
          // integrate cell residuals forward by dt and average over cell volume
-            eulerForwardUpdateGlobal( mesh.cells,
+            eulerForwardUpdateGlobal( policy,
+                                      mesh.cells,
                                       species,
                                       rungeKutta.beta[stg]*dt,
                                       resTotal,
@@ -117,7 +124,7 @@
                                       q2.interior );
             std::swap( q1,q2 );
         }
-         copy( q0, q1 );
+         copy( policy, q0, q1 );
          t+=dt;
      }
       std::cout << "physical time elapsed: " << t << "\n";
@@ -126,10 +133,12 @@
 /*
  * Accumulate the total residual for the current runge-kutta stage from the vector of stage residuals
  */
-   template<int              nDim,
-            typename      FluxRes,
-            floating_point   Real>
-   void rungeKuttaAccumulation( const ODE::Explicit::RungeKutta<Real>&         rungeKutta,
+   template<par::execution_policy Policy,
+            int                     nDim,
+            typename             FluxRes,
+            floating_point          Real>
+   void rungeKuttaAccumulation( const Policy                                       policy,
+                                const ODE::Explicit::RungeKutta<Real>&         rungeKutta,
                                 const size_t                                          stg,
                                 const std::vector<par::DualArray<FluxRes,nDim>>& resStage,
                                       par::DualArray<FluxRes,nDim>&              resTotal )
@@ -144,7 +153,8 @@
         }
          return;
      };
-      par::for_each_idx( rkacc, resTotal );
+
+      par::for_each_idx( policy, rkacc, resTotal );
 
       return;
   }
