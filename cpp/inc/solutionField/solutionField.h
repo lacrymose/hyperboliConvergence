@@ -91,6 +91,9 @@
   };
 
 
+/*
+ * Deep copy for SolutionField (needs to call par::copy for par::Arrays)
+ */
    template<par::execution_policy Policy,
             ImplementedVarSet     VarSet,
             int                     nDim>
@@ -101,6 +104,8 @@
       assert( dst.interior.shape() == src.interior.shape() );
 
       par::copy( policy, dst.interior, src.interior );
+
+   // copy boundaries
       for( unsigned int i=0; i<src.nBoundaries; i++ )
      {
          par::copy( policy, dst.boundary[i], src.boundary[i] );

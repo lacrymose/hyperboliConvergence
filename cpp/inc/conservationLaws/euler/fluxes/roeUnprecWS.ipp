@@ -54,10 +54,15 @@
       const ConsDel dqc =  state2Set<ConsSet>( species, sr )
                           -state2Set<ConsSet>( species, sl );
 
-      const Real nu_p = (1./(ra*uinf*uinf))*pow( minf, 1 );
-      const Real nu_u =                0.20*pow( minf, 0 );
-      const Real mu_p =                0.00*pow( minf, 1 );
-      const Real mu_u =           (ra*uinf)*pow( minf, 1 );
+      const int A11 = 1;
+      const int A12 = 0;
+      const int A21 = 1;
+      const int A22 = 1;
+
+      const Real nu_p = 1.00*(1./(ra*uinf*uinf))*pow( minf, A11 );
+      const Real nu_u = 0.05*                    pow( minf, A12 );
+      const Real mu_p = 0.02*                    pow( minf, A21 );
+      const Real mu_u = 0.10*          (ra*uinf)*pow( minf, A22 );
 
       // velocity perturbation deltaU*(rho,rhou,rhov,rhoh)
 //    const Real deltaU =  amu*dp*aa1*aa1/ra
@@ -96,7 +101,8 @@
       const FluxRes diffusive{ 0.5*( fabs(una)*dqc
                                     +   deltaU*ruvh
                                     +   deltaP*onu )*face.area,
-                               spectralRadius( face, ravg )*face.area};
+                               spectralRadius( face, ravg )*face.area
+                                                           *pow(minf,A11-1)};
 
       return FluxRes{ central.flux - diffusive.flux,
                       fmax( central.lambda, diffusive.lambda )};

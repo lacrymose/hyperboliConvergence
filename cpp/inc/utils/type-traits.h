@@ -106,4 +106,3 @@
    struct any<Cond0,Conds...> : std::conditional_t< Cond0::value,
                                                     std::true_type,
                                                     any<Conds...> > {};
-

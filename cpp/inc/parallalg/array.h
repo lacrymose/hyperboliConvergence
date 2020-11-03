@@ -353,7 +353,7 @@ namespace par
  *    utility function using emplace_back because Arrays cannot be copy constructed
  */
    template<typename       ElemT,
-              int           NDIM,
+            int           NDIM,
             GridType    GRIDTYPE= Primal,
             ArraySizing   SIZING= FixedSize>
    auto vec_of_Arrays( const size_t             narrays,

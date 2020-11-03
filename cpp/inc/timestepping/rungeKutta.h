@@ -10,6 +10,8 @@
 # include <conservationLaws/base/base.h>
 # include <solutionField/solutionField.h>
 
+# include <lsq/lsq.h>
+
 # include <mesh/mesh.h>
 
 # include <controls.h>
@@ -20,7 +22,7 @@
 # include <parallalg/array.h>
 # include <parallalg/parallalg.h>
 
-# include <utils/utils.h>
+# include <utils/timing.h>
 
 # include <tuple>
 # include <array>
@@ -65,14 +67,32 @@
       ResidualArray resTotal(q0.interior.shape());
       std::vector<ResidualArray> resStage = par::vec_of_Arrays<FluxRes,nDim>(rungeKutta.nstages,q0.interior.shape());
 
-   // gradient arrays
-      using SolVarDel = vardelta_t<SolVarSet>;
-      using SolVarGrad = std::array<SolVarDel,nDim>;
-      using GradientArray = par::DualArray<SolVarGrad,nDim>;
+   // least squares gradient arrays
+      using XMetric = lsq::XMetric<nDim,Real>;
+      using QMetric = lsq::QMetric<SolVarSet>;
 
-      GradientArray dq( q0.interior.shape(), SolVarGrad{} );
+      using XMetArray = par::DualArray<XMetric,nDim>;
+      using QMetArray = par::DualArray<QMetric,nDim>;
 
-      utils::Timer timer( "main loop time: " );
+   // calculate spatial metrics for least squares
+      const XMetric dxdx = xmetrics( policy, mesh.cells );
+      QMetric dqdx(mesh.cells.shape());
+
+   // timers
+      using FunctionTimer = utils::StopWatchTimer<std::chrono::steady_clock,
+                                                  std::chrono::nanoseconds,
+                                                  std::chrono::milliseconds>;
+
+      FunctionTimer bcupdate_timer( "bcupdate loop time: " );
+      FunctionTimer gradient_timer( "gradient loop time: " );
+      FunctionTimer residual_timer( "residual loop time: " );
+      FunctionTimer specrads_timer( "specrads loop time: " );
+      FunctionTimer rkaccums_timer( "rkaccums loop time: " );
+      FunctionTimer eulerfwd_timer( "eulerfwd loop time: " );
+      FunctionTimer copyswap_timer( "copyswap func time: " );
+
+      utils::LifetimeTimer timer( "main loop time: " );
+
       Real t=0;
       for( size_t tstep=0; tstep<timeControls.nTimesteps; tstep++ )
      {
@@ -80,41 +100,50 @@
          for( unsigned int stg=0; stg<rungeKutta.nstages; stg++ )
         {
          // update boundary conditions
+            bcupdate_timer.start();
             boundaryUpdate( mesh,
                             boundaryConds,
                             species,
                             q1 );
+            bcupdate_timer.pause();
 
          // calculate differences
-            gradientCalc( policy,
-                          mesh,
-                          q1,
-                          dq );
+            gradient_timer.start();
+            qmetrics( policy,
+                      mesh.cells,
+                      q1.interior,
+                      dqdx );
+            gradient_timer.pause();
 
          // accumulate flux residual
+            residual_timer.start();
             residualCalc( policy,
-                          mesh,
                           flux2,
                           boundaryConds,
                           species,
+                          mesh,
                           q1,
-                          dq,
+                          dxdx,
+                          dqdx,
                           resStage[stg] );
+            residual_timer.pause();
 
          // calculate maximum stable timestep for this timestep
+            specrads_timer.start();
             if( stg==0 ){ dt = timeControls.cfl/spectralRadius( policy, mesh.cells, resStage[stg] ); }
+            specrads_timer.pause();
 
          // accumulate stage residual
-            par::fill( policy, resTotal, {} );
-
-         // runge-kutta accumulation closure
+            rkaccums_timer.start();
             rungeKuttaAccumulation( policy,
                                     rungeKutta,
                                     stg,
                                     resStage,
                                     resTotal );
+            rkaccums_timer.pause();
 
          // integrate cell residuals forward by dt and average over cell volume
+            eulerfwd_timer.start();
             eulerForwardUpdateGlobal( policy,
                                       mesh.cells,
                                       species,
@@ -122,12 +151,19 @@
                                       resTotal,
                                       q0.interior,
                                       q2.interior );
+            eulerfwd_timer.pause();
+
+            copyswap_timer.start();
             std::swap( q1,q2 );
+            copyswap_timer.pause();
         }
+         copyswap_timer.start();
          copy( policy, q0, q1 );
+         copyswap_timer.pause();
          t+=dt;
      }
-      std::cout << "physical time elapsed: " << t << "\n";
+//    std::cout << "physical time elapsed: " << t << "\n";
+      std::cout << "\n";
   }
 
 /*
@@ -154,6 +190,7 @@
          return;
      };
 
+      par::fill( policy, resTotal, {} );
       par::for_each_idx( policy, rkacc, resTotal );
 
       return;

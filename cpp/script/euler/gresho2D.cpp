@@ -89,8 +89,8 @@ using Real = double;
 # ifndef _OPENMP
 constexpr auto policy = par::execution::seq;
 # else
-constexpr auto policy = par::execution::omp;
-constexpr int nthreads=4;
+constexpr auto policy = par::execution::seq;
+constexpr int nthreads=1;
 # endif
 
 // space discretisation
@@ -99,11 +99,11 @@ constexpr size_t nx = 256;
 constexpr Real h = 1.0;
 
 // time discretisation
-constexpr size_t nt = 100;
+constexpr size_t nt = 10;
 constexpr Real  cfl = 1.6;
 
 // variable flow conditions
-constexpr Real mach = 1.e-1;
+constexpr Real mach = 3.e-1;
 constexpr Real vel_inf = 0.1;
 
 // fixed flow conditions
@@ -112,10 +112,10 @@ constexpr Real density = 1.;
 constexpr BasisT SolutionBasis = BasisT::Primitive;
 
 //using Flux = RoeFlux<Law>;
-//using Flux = RusanovFlux<Law>;
+using Flux = RusanovFlux<Law>;
 //using Flux = CentralFlux<Law>;
 
-using Flux = RoeUnprecWS;
+//using Flux = RoeUnprecWS;
 
 //using Flux = Slau<LowMachScaling::Convective,
 //                  LowMachScaling::Acoustic>;
@@ -125,7 +125,7 @@ using Flux = RoeUnprecWS;
 
 //using Limiter = Limiters::Cada3;
 //using Limiter = Limiters::MonotonizedCentral2;
-using Limiter = Limiters::NoLimit2;
+using Limiter = Limiters::NoLimit3;
 
 
 // ------ typedefs -------------------
@@ -170,7 +170,7 @@ using MeshT      = Mesh<nDim,Real>;
       const Real zero{0};
       const SolVarSet qref = set2Set<SolVarSet>( species, PrimVarSet{zero,zero,density,pressure} );
 
-      std::cout << "speed of sound: " << sqrt( set2State( species, qref ).speedOfSound2() ) << "\n";
+//    std::cout << "speed of sound: " << sqrt( set2State( species, qref ).speedOfSound2() ) << "\n";
 
       const auto gresho_init = [&]( const MeshT::Cell& cell ) -> SolVarSet
      {

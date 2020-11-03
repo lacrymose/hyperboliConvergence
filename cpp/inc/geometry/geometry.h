@@ -188,6 +188,11 @@ namespace geom
    template<int nDim, floating_point Real>
    Real length(  const Direction<nDim,Real>& );
 
+/*
+ * Normalise direction to unit length
+ */
+   template<int nDim, floating_point Real>
+   Direction<nDim,Real> norm( const Direction<nDim,Real>& d )
 
 /*
  * Cross products of two directions

@@ -1,6 +1,12 @@
 
 # pragma once
 
+# ifdef __GNUC__
+   # define _PAR_ALWAYS_INLINE_ __attribute__((always_inline))
+# elif
+   # define _PAR_ALWAYS_INLINE_ __attribute__((always_inline))
+# endif 
+
 namespace par
 {
 

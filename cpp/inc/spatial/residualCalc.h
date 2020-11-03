@@ -42,28 +42,28 @@
               && std::is_same_v<FluxRes,
                                 fluxresult_t<SolVarT>>
               && N==nDim
-   void residualCalc( const Policy                                  policy,
-                      const Mesh<nDim,Real>&                          mesh,
-                      const HighOrderFlux&                          hoflux,
-                      const std::tuple<BoundaryConds...>               bcs,
-                      const Species<Law,Real>&                     species,
-                      const SolutionField<SolVarT,nDim>&                 q,
-                      const par::DualArray<std::array<SolDelT,N>,nDim>& dq,
-                            par::DualArray<FluxRes,nDim>&              res )
+   void residualCalc( const Policy                                       policy,
+                      const HighOrderFlux&                               hoflux,
+                      const std::tuple<BoundaryConds...>                    bcs,
+                      const Species<Law,Real>&                          species,
+                      const Mesh<nDim,Real>&                               mesh,
+                      const SolutionField<SolVarT,nDim>&                      q,
+                      const par::DualArray<lsq::XMetric<nDim,Real>,nDim>&  dxdx,
+                      const par::DualArray<lsq::QMetric<SolVarT>,  nDim>&  dqdx,
+                            par::DualArray<FluxRes,nDim>&                   res )
 
   {
    // check mesh sizes match
-      assert( mesh.cells.shape() == res.shape() );
-      assert( mesh.cells.shape() ==  dq.shape() );
-      assert( mesh.cells.shape() ==  q.interior.shape() );
+      assert( mesh.cells.shape() == q.interior.shape() );
+      assert( mesh.cells.shape() == dxdx.shape() );
+      assert( mesh.cells.shape() == dqdx.shape() );
+      assert( mesh.cells.shape() ==  res.shape() );
+      assert( mesh.cells.shape() ==   dq.shape() );
 
-      par::fill( policy, res, FluxRes{} );
+      par::fill( policy, res, FluxRes{0.} );
 
-   // accumulate cell residual contributions from interior faces
-      interiorResidual( policy, mesh, hoflux, species, q,dq, res );
-
-   // accumulate cell residual contributions from boundary faces
-      boundaryResidual( policy, mesh, hoflux, bcs, species, q,dq, res );
+      interiorResidual( policy, hoflux,      species, mesh, q, dxdx, dqdx, res );
+      boundaryResidual( policy, hoflux, bcs, species, mesh, q, dxdx, dqdx, res );
 
       return;
   }
@@ -86,17 +86,20 @@
               && std::is_same_v<FluxRes,
                                 fluxresult_t<SolVarT>>
    void interiorResidual( const Policy                                  policy,
-                          const Mesh<1,Real>&                             mesh,
                           const HighOrderFlux&                          hoflux,
                           const Species<Law,Real>&                     species,
+                          const Mesh<1,Real>&                             mesh,
                           const SolutionField<SolVarT,1>&                    q,
-                          const par::DualArray1<std::array<SolDelT,1>>&     dq,
+                          const par::DualArray<lsq::XMetric<1,Real>, 1>&  dxdx,
+                          const par::DualArray<lsq::QMetric<SolVarT>,1>&  dqdx,
                                 par::DualArray1<FluxRes>&                  res )
   {
    // check mesh sizes match
-      assert( mesh.cells.shape() == res.shape() );
-      assert( mesh.cells.shape() == dq.shape() );
       assert( mesh.cells.shape() == q.interior.shape() );
+      assert( mesh.cells.shape() == dxdx.shape() );
+      assert( mesh.cells.shape() == dqdx.shape() );
+      assert( mesh.cells.shape() ==  res.shape() );
+      assert( mesh.cells.shape() ==   dq.shape() );
 
       const size_t nc = mesh.cells.shape(0);
 
@@ -112,8 +115,10 @@
 
          const FluxRes fr = hoflux( species,
                                     surface( mesh.nodes(ip) ),
-                                    dq(il)[0],      dq(ir)[0],
-                                    q.interior(il), q.interior(ir) );
+                                    mesh.cells(il), mesh.cells(ir),
+                                    q.interior(il), q.interior(ir),
+                                          dxdx(il),       dxdx(ir),
+                                          dqdx(il),       dqdx(ir) );
          res(il)-=fr;
          res(ir)+=fr;
      }
@@ -138,17 +143,20 @@
                                  SolDelT>
               && std::is_same_v<FluxRes,
                                 fluxresult_t<SolVarT>>
-   void interiorResidual( const Policy                               policy,
-                          const Mesh<2,Real>&                          mesh,
-                          const HighOrderFlux&                       hoflux,
-                          const Species<Law,Real>&                  species,
-                          const SolutionField<SolVarT,2>&                 q,
-                          const par::DualArray2<std::array<SolDelT,2>>&  dq,
-                                par::DualArray2<FluxRes>&               res )
+   void interiorResidual( const Policy                                  policy,
+                          const HighOrderFlux&                          hoflux,
+                          const Species<Law,Real>&                     species,
+                          const Mesh<2,Real>&                             mesh,
+                          const SolutionField<SolVarT,2>&                    q,
+                          const par::DualArray<lsq::XMetric<2,Real>, 2>&  dxdx,
+                          const par::DualArray<lsq::QMetric<SolVarT>,2>&  dqdx,
+                                par::DualArray2<FluxRes>&                  res )
   {
+      assert( mesh.cells.shape() == q.interior.shape() );
+      assert( mesh.cells.shape() == dxdx.shape() );
+      assert( mesh.cells.shape() == dqdx.shape() );
       assert( mesh.cells.shape() == res.shape() );
       assert( mesh.cells.shape() == dq.shape() );
-      assert( mesh.cells.shape() == q.interior.shape() );
 
       const size_t ni = mesh.cells.shape(0);
       const size_t nj = mesh.cells.shape(1);
@@ -207,8 +215,10 @@
             const FluxRes fr = hoflux( species,
                                        surface( mesh.nodes(ip0),
                                                 mesh.nodes(ip1) ),
-                                       dq(icl)[0],      dq(icr)[0],
-                                       q.interior(icl), q.interior(icr) );
+                                       mesh.cells(icl), mesh.cells(icr),
+                                       q.interior(icl), q.interior(icr),
+                                             dxdx(icl),       dxdx(icr),
+                                             dqdx(icl),       dqdx(icr) );
             res(icl)-=fr;
             res(icr)+=fr;
         }
@@ -233,8 +243,10 @@
             const FluxRes fr = hoflux( species,
                                        surface( mesh.nodes(ip0),
                                                 mesh.nodes(ip1) ),
-                                       dq(icl)[1],      dq(icr)[1],
-                                       q.interior(icl), q.interior(icr) );
+                                       mesh.cells(icl), mesh.cells(icr),
+                                       q.interior(icl), q.interior(icr),
+                                             dxdx(icl),       dxdx(icr),
+                                             dqdx(icl),       dqdx(icr) );
             res(icl)-=fr;
             res(icr)+=fr;
         }
@@ -264,14 +276,15 @@
               && std::is_same_v<FluxRes,
                                 fluxresult_t<SolVarT>>
               && N==nDim
-   void boundaryResidual( const Policy                                  policy,
-                          const Mesh<nDim,Real>&                          mesh,
-                          const HighOrderFlux&                          hoflux,
-                          const std::tuple<BoundaryConds...>               bcs,
-                          const Species<Law,Real>&                     species,
-                          const SolutionField<SolVarT,nDim>&                 q,
-                          const par::DualArray<std::array<SolDelT,N>,nDim>& dq,
-                                par::DualArray<FluxRes,nDim>&              res )
+   void boundaryResidual( const Policy                                      policy,
+                          const HighOrderFlux&                              hoflux,
+                          const std::tuple<BoundaryConds...>                   bcs,
+                          const Species<Law,Real>&                         species,
+                          const Mesh<nDim,Real>&                              mesh,
+                          const SolutionField<SolVarT,nDim>&                     q,
+                          const par::DualArray<lsq::XMetric<nDim,Real>,nDim>& dxdx,
+                          const par::DualArray<lsq::QMetric<SolVarT>,  nDim>& dqdx,
+                                par::DualArray<FluxRes,nDim>&                  res )
   {
    // check mesh sizes match
       assert( mesh.cells.shape() == res.shape() );
@@ -288,7 +301,7 @@
       for( unsigned int boundaryId=0; boundaryId<q.nBoundaries; ++boundaryId )
      {
          selectBoundaryCondition( q.bcTypes[boundaryId], bcs, call_bc_resid,
-                                  boundaryId, mesh, hoflux, species, q, dq, res );
+                                  boundaryId, hoflux, species, mesh, q, dxdx, dqdx, res );
      }
       return;
   }

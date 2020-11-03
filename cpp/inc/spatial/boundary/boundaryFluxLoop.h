@@ -35,17 +35,20 @@
                                 fluxresult_t<SolVarT>>
    void boundaryResidual( const BoundaryCondition<Law,BCType,UpdateFunc,BCFluxFunc>& bc,
                           const size_t                                       boundaryId,
-                          const Mesh<1,Real>&                                      mesh,
                           const HighOrderFlux&                                   hoflux,
                           const Species<Law,Real>&                              species,
+                          const Mesh<1,Real>&                                      mesh,
                           const SolutionField<SolVarT,1>&                             q,
-                          const par::DualArray1<std::array<SolDelT,1>>&              dq,
+                          const par::DualArray<lsq::XMetric<1,Real>, 1>&           dxdx,
+                          const par::DualArray<lsq::QMetric<SolVarT>,1>&           dqdx,
                                 par::DualArray1<FluxRes>&                           res )
   {
    // check mesh sizes match
-      assert( mesh.cells.shape() == res.shape() );
-      assert( mesh.cells.shape() == dq.shape() );
       assert( mesh.cells.shape() == q.interior.shape() );
+      assert( mesh.cells.shape() == dxdx.shape() );
+      assert( mesh.cells.shape() == dqdx.shape() );
+      assert( mesh.cells.shape() ==  res.shape() );
+      assert( mesh.cells.shape() ==   dq.shape() );
 
    // boundary condition type selection was correct?
       assert( q.bcTypes[boundaryId] == BCType );
@@ -66,10 +69,11 @@
          const FluxRes fr = boundaryFlux( species,
                                           surface( mesh.nodes(ip) ),
                                           mesh.cells(ic),
-                                          dq(ic)[0],
                                           q.interior(ic),
                                           q.boundary[0](ib0),
-                                          q.boundary[0](ib1) );
+                                          q.boundary[0](ib1),
+                                          dxdx(ic),
+                                          dqdx(ic) );
          res(ic)+=fr;
      }
       else if( boundaryId==1 ) // right boundary
@@ -84,10 +88,11 @@
          const FluxRes fr = boundaryFlux( species,
                                           flip( surface( mesh.nodes(ip) ) ),
                                           mesh.cells(ic),
-                                          dq(ic)[0],
                                           q.interior(ic),
-                                          q.boundary[0](ib0),
-                                          q.boundary[0](ib1) );
+                                          q.boundary[1](ib0),
+                                          q.boundary[1](ib1),
+                                          dxdx(ic),
+                                          dqdx(ic) );
          res(ic)+=fr;
      }
       else{ assert( false && "invalid boundary id for 1D ghost cell flux, must be 0 or 1" ); }
@@ -120,13 +125,16 @@
                           const HighOrderFlux&                                   hoflux,
                           const Species<Law,Real>&                              species,
                           const SolutionField<SolVarT,2>&                             q,
-                          const par::DualArray2<std::array<SolDelT,2>>&              dq,
+                          const par::DualArray<lsq::XMetric<2,Real>, 2>&           dxdx,
+                          const par::DualArray<lsq::QMetric<SolVarT>,2>&           dqdx,
                                 par::DualArray2<FluxRes>&                           res )
   {
    // check mesh sizes match
-      assert( mesh.cells.shape() == res.shape() );
-      assert( mesh.cells.shape() == dq.shape() );
       assert( mesh.cells.shape() == q.interior.shape() );
+      assert( mesh.cells.shape() == dxdx.shape() );
+      assert( mesh.cells.shape() == dqdx.shape() );
+      assert( mesh.cells.shape() ==  res.shape() );
+      assert( mesh.cells.shape() ==   dq.shape() );
 
    // boundary condition type selection was correct?
       assert( q.bcTypes[boundaryId] == BCType );
@@ -159,10 +167,11 @@
                                              surface( mesh.nodes(ip0),
                                                       mesh.nodes(ip1) ),
                                              mesh.cells(ic),
-                                             dq(ic)[0],
                                              q.interior(ic),
                                              q.boundary[0](ib0),
-                                             q.boundary[0](ib1) );
+                                             q.boundary[0](ib1),
+                                             dxdx(ic),
+                                             dqdx(ic) );
             res(ic)+=fr;
         }
      }
@@ -186,10 +195,11 @@
                                              surface( mesh.nodes(ip0),
                                                       mesh.nodes(ip1) ),
                                              mesh.cells(ic),
-                                             dq(ic)[0],
                                              q.interior(ic),
                                              q.boundary[1](ib0),
-                                             q.boundary[1](ib1) );
+                                             q.boundary[1](ib1),
+                                             dxdx(ic),
+                                             dqdx(ic) );
             res(ic)+=fr;
         }
      }
@@ -213,10 +223,11 @@
                                              surface( mesh.nodes(ip0),
                                                       mesh.nodes(ip1) ),
                                              mesh.cells(ic),
-                                             dq(ic)[1],
                                              q.interior(ic),
                                              q.boundary[2](ib0),
-                                             q.boundary[2](ib1) );
+                                             q.boundary[2](ib1),
+                                             dxdx(ic),
+                                             dqdx(ic) );
             res(ic)+=fr;
         }
      }
@@ -240,10 +251,11 @@
                                              surface( mesh.nodes(ip0),
                                                       mesh.nodes(ip1) ),
                                              mesh.cells(ic),
-                                             dq(ic)[1],
                                              q.interior(ic),
                                              q.boundary[3](ib0),
-                                             q.boundary[3](ib1) );
+                                             q.boundary[3](ib1),
+                                             dxdx(ic),
+                                             dqdx(ic) );
             res(ic)+=fr;
         }
      }

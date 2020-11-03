@@ -6,6 +6,7 @@
 
 # include <mesh/mesh.h>
 
+# include <parallalg/neighbour_algorithm.h>
 # include <parallalg/algorithm.h>
 # include <parallalg/array.h>
 
@@ -46,7 +47,7 @@
                       const SolutionField<VarSetT,nDim>&                 q,
                             par::DualArray<std::array<VarDelT,N>,nDim>& dq )
   {
-      par::fill( dq, std::array<VarDelT,N>{} );
+      par::fill( policy, dq, std::array<VarDelT,N>{} );
       interiorGradient( policy, mesh,q, dq );
       boundaryGradient( policy, mesh,q, dq );
   }
@@ -68,7 +69,28 @@
                           const SolutionField<VarSetT,1>&                q,
                                 par::DualArray1<std::array<VarDelT,1>>& dq )
   {
+/*
+      const auto dq_calc = []( const VarSetT& ql,
+                               const VarSetT& qr ) -> VarDelT
+     {
+         return qr-ql;
+     };
 
+      const auto accumulator = []( const VarDelT& acc_old,
+                                   const VarDelT& dq_new ) -> VarDelT
+     {
+         VarDelT acc_new = acc_old+dq_new;
+         return acc_new;
+     };
+
+      par::neighbour_accumulation( policy,
+                                   dq_calc,
+                                   accumulator,
+                                   accumulator,
+                                   dq,
+                                   q.interior );
+*/
+  
       assert( mesh.cells.shape() == q.interior.shape() );
       assert( mesh.cells.shape() == dq.shape() );
       const size_t nc = mesh.cells.shape(0);
@@ -109,13 +131,6 @@
       assert( mesh.cells.shape() == dq.shape() );
       assert( mesh.cells.shape() == q.interior.shape() );
 
-      par::fill( dq, std::array<VarDelT,2>{} );
-
-      const size_t ni = mesh.cells.shape(0);
-      const size_t nj = mesh.cells.shape(1);
-
-      using CellIdx = typename SolutionField<VarSetT,2>::VarField::IdxType;
-
 /*
       const auto dq_calc = []( const VarSetT& ql,
                                const VarSetT& qr ) -> VarDelT
@@ -126,16 +141,22 @@
       const auto accumulator = []( const VarDelT& acc_old,
                                    const VarDelT& dq_new ) -> VarDelT
      {
-         return acc_old+=dq_new;
+         VarDelT acc_new = acc_old+dq_new;
+         return acc_new;
      };
 
-      par::accumulate_edge( parallel_schedule,
-                            dq_calc,
-                            accumulator,
-                            accumulator,
-                            dq,
-                            q.interior );
+      par::neighbour_accumulation( policy,
+                                   dq_calc,
+                                   accumulator,
+                                   accumulator,
+                                   dq,
+                                   q.interior );
 */
+
+      const size_t ni = mesh.cells.shape(0);
+      const size_t nj = mesh.cells.shape(1);
+
+      using CellIdx = typename SolutionField<VarSetT,2>::VarField::IdxType;
 
    // derivatives over i-normal faces
 # ifdef _OPENMP

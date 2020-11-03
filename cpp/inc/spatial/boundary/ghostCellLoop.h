@@ -33,24 +33,29 @@
               && std::is_same_v<FluxRes,
                                 fluxresult_t<SolVarT>>
    void boundaryResidual( const BoundaryCondition<Law,BCType,UpdateFunc>&,
-                          const size_t                           boundaryId,
-                          const Mesh<1,Real>&                          mesh,
-                          const HighOrderFlux&                       hoflux,
-                          const Species<Law,Real>&                  species,
-                          const SolutionField<SolVarT,1>&                 q,
-                          const par::DualArray1<std::array<SolDelT,1>>&  dq,
-                                par::DualArray1<FluxRes>&               res )
+                          const size_t                              boundaryId,
+                          const HighOrderFlux&                          hoflux,
+                          const Species<Law,Real>&                     species,
+                          const Mesh<1,Real>&                             mesh,
+                          const SolutionField<SolVarT,1>&                    q,
+                          const par::DualArray<lsq::XMetric<1,Real>, 1>&  dxdx,
+                          const par::DualArray<lsq::QMetric<SolVarT>,1>&  dqdx,
+                                par::DualArray1<FluxRes>&                  res )
   {
    // check mesh sizes match
-      assert( mesh.cells.shape() == res.shape() );
-      assert( mesh.cells.shape() == dq.shape() );
       assert( mesh.cells.shape() == q.interior.shape() );
+      assert( mesh.cells.shape() == dxdx.shape() );
+      assert( mesh.cells.shape() == dqdx.shape() );
+      assert( mesh.cells.shape() ==  res.shape() );
+      assert( mesh.cells.shape() ==   dq.shape() );
 
    // boundary condition type selection was correct?
       assert( q.bcTypes[boundaryId] == BCType );
 
       using CellIdx = typename SolutionField<SolVarT,1>::VarField::IdxType;
       using NodeIdx = typename Mesh<1,Real>::NodeArray::IdxType;
+
+      constexpr lsq::XMetric<1,Real> xm1{1.,0.,1.};
 
    // first order boundaries
       if( boundaryId==0 ) // left boundary

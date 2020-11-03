@@ -79,7 +79,7 @@
       requires   ConsistentTypes<Law,
                                  1,
                                  Real,
-                                 SolVarT >
+                                 SolVarT>
    void boundaryUpdate( const BoundaryCondition<Law,
                                                 BCType,
                                                 UpdateFunc,
@@ -143,7 +143,7 @@
       requires   ConsistentTypes<Law,
                                  2,
                                  Real,
-                                 SolVarT >
+                                 SolVarT>
    void boundaryUpdate( const BoundaryCondition<Law,
                                                 BCType,
                                                 UpdateFunc,
